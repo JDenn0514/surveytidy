@@ -7,6 +7,7 @@ description: >
   knowledge transfer, (4) Research and describe a system's design. Produces markdown
   documents with Mermaid diagrams and stable code references suitable for humans and
   AI agents.
+source: "https://github.com/posit-dev/skills (MIT License, © Posit, PBC)"
 ---
 
 # Describe Design

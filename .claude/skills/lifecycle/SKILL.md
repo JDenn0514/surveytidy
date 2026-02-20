@@ -8,6 +8,7 @@ description: >
   functions as experimental, (6) Understanding lifecycle stages (stable,
   experimental, deprecated, superseded), or (7) Writing deprecation helpers for
   complex scenarios.
+source: "https://github.com/posit-dev/skills (MIT License, © Posit, PBC)"
 ---
 
 # R Package Lifecycle Management

@@ -2,11 +2,20 @@
 name: testing-r-packages
 description: >
   Best practices for writing R package tests using testthat version 3+. Use when writing, organizing, or improving tests for R packages. Covers test structure, expectations, fixtures, snapshots, mocking, and modern testthat 3 patterns including self-sufficient tests, proper cleanup with withr, and snapshot testing.
+source: "https://github.com/posit-dev/skills (MIT License, © Posit, PBC)"
 ---
 
 # Testing R Packages with testthat
 
 Modern best practices for R package testing using testthat 3+.
+
+> **Surveyverse projects:** This skill covers generic testthat patterns.
+> Project decisions (flat `test_that()` only — no `describe()`, coverage
+> targets, `# nocov` policy, error testing patterns) are in
+> `.claude/rules/testing-standards.md`. Package-specific conventions
+> (`test_invariants()`, data generators, numerical tolerances) are in
+> `.claude/rules/testing-{package}.md`. Those rules take precedence over
+> generic guidance here.
 
 ## Initial Setup
 
