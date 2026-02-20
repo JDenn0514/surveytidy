@@ -21,7 +21,7 @@ description: >
 | Task                                           | Use                                                         |
 | ---------------------------------------------- | ----------------------------------------------------------- |
 | Run a full local check                         | `devtools::check()`                                         |
-| Run CRAN-style checks locally                  | `devtools::check(args = "--as-cran")`                       |
+| Run CRAN-style checks locally (Phase 3+ only)  | `devtools::check(args = "--as-cran")`                       |
 | Run the closest-to-CRAN check (tarball)        | `R CMD build` then `R CMD check --as-cran pkg_x.y.z.tar.gz` |
 | Tighten loop on docs/examples                  | `devtools::check_man()`                                     |
 | Confirm suggested packages for local checking  | `devtools::install_deps(dependencies = TRUE)`               |
@@ -32,7 +32,7 @@ description: >
 
 1. **Make `R CMD check` boring**
    - `devtools::check()` is clean.
-2. **Make it CRAN-like**
+2. **Make it CRAN-like** _(Phase 3 / active CRAN prep only — not routine development)_
    - Prefer a tarball check: `R CMD build` then `R CMD check --as-cran pkg_x.y.z.tar.gz`.
    - Use `devtools::check(args = "--as-cran")` for a faster iteration loop.
 3. **Cross-platform confidence**
