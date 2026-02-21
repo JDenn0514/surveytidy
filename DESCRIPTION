@@ -1,11 +1,28 @@
 Package: surveytidy
-Title: What the Package Does (One Line, Title Case)
+Title: Tidy dplyr/tidyr Verbs for Survey Design Objects
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R:
+    person("Jacob", "Dennen", , "jacob.dennen@example.com", role = c("aut", "cre"))
+Description: Provides dplyr and tidyr verbs (filter, select, mutate, rename,
+    group_by, arrange) for survey design objects created with the surveycore
+    package. filter() uses domain estimation to preserve variance estimation
+    validity; all other verbs preserve design variables and metadata
+    automatically.
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Config/testthat/edition: 3
+Depends:
+    R (>= 4.3.0)
+Imports:
+    cli (>= 3.6.0),
+    dplyr (>= 1.1.0),
+    rlang (>= 1.1.0),
+    S7 (>= 0.1.0),
+    surveycore,
+    tidyselect (>= 1.2.0)
+Suggests:
+    testthat (>= 3.0.0),
+    tibble,
+    tidyr
