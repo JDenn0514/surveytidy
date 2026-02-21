@@ -23,7 +23,42 @@
 
 # ── group_by() ────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' Group and ungroup a survey design object
+#'
+#' @description
+#' * `group_by()` stores grouping column names in `@groups`. Unlike dplyr,
+#'   **no `grouped_df` attribute** is attached to `@data` — grouping is kept on
+#'   the survey object itself. Phase 1 estimation functions and [mutate()] read
+#'   `@groups` to apply grouped calculations.
+#' * `ungroup()` with no arguments removes all groups. With column arguments it
+#'   performs a **partial ungroup**, removing only the named columns from
+#'   `@groups`.
+#'
+#' @param .data A survey design object.
+#' @param ... <[`data-masking`][rlang::args_data_masking]> Variables to group
+#'   by. Computed expressions (e.g., `cut(age, breaks)`) are supported.
+#' @param .add Logical. If `TRUE`, add to existing groups rather than
+#'   replacing them.
+#' @param .drop Passed to `dplyr::group_by_drop_default()`.
+#' @param x A survey design object (for `ungroup()`).
+#'
+#' @return The survey object with `@groups` updated.
+#'
+#' @examples
+#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
+#'                  region = sample(c("N","S","E","W"), 100, TRUE))
+#' d  <- surveycore::as_survey(df, weights = wt)
+#'
+#' # Group and then compute group means via mutate()
+#' d2 <- d |>
+#'   group_by(region) |>
+#'   mutate(region_mean = mean(y))
+#'
+#' # Partial ungroup
+#' d3 <- group_by(d, region)
+#' d4 <- ungroup(d3)          # remove all groups
+#'
+#' @family grouping
 group_by.survey_base <- function(
   .data,
   ...,
@@ -48,7 +83,7 @@ group_by.survey_base <- function(
 
 # ── ungroup() ─────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' @describeIn group_by.survey_base Remove grouping variables.
 ungroup.survey_base <- function(x, ...) {
   if (...length() == 0L) {
     # No arguments: remove ALL groups

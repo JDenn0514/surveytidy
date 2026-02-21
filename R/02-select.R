@@ -22,7 +22,57 @@
 
 # ── select() ──────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' Select, relocate, pull, and glimpse columns of a survey design object
+#'
+#' @description
+#' * `select()` chooses which columns to keep, **always retaining design
+#'   variables** (weights, strata, PSU, FPC, replicate weights) even when not
+#'   explicitly selected. The user's selection is recorded in
+#'   `@variables$visible_vars` so `print()` hides the design columns.
+#' * `relocate()` reorders `visible_vars` when set; reorders `@data` otherwise.
+#' * `pull()` extracts a column as a plain vector (terminal — result is not a
+#'   survey object).
+#' * `glimpse()` prints a concise column summary, respecting `visible_vars`.
+#'
+#' @param .data A survey design object.
+#' @param ... <[`tidy-select`][tidyselect::language]> Columns to select /
+#'   reorder. For `pull()`, the column to extract.
+#' @param .before,.after <[`tidy-select`][tidyselect::language]> Destination
+#'   of relocated columns (passed to `dplyr::relocate()`).
+#' @param var <[`data-masking`][rlang::args_data_masking]> Column to pull.
+#'   Defaults to the last column.
+#' @param name <[`data-masking`][rlang::args_data_masking]> Optional column
+#'   to use as names for the returned vector.
+#' @param x A survey design object (for `glimpse()`).
+#' @param width Width of the output, passed to `dplyr::glimpse()`.
+#'
+#' @return
+#' * `select()`, `relocate()`: the survey object with updated `@data` and/or
+#'   `@variables$visible_vars`.
+#' * `pull()`: a plain vector (not a survey object).
+#' * `glimpse()`: `x` invisibly.
+#'
+#' @examples
+#' df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
+#'                  wt = runif(50, 1, 5), g = sample(c("A","B"), 50, TRUE))
+#' d  <- surveycore::as_survey(df, weights = wt)
+#'
+#' # select() keeps design vars even though only y1, y2 are named
+#' d2 <- select(d, y1, y2)
+#' names(d2@data)               # includes wt (design var)
+#' d2@variables$visible_vars    # c("y1", "y2")
+#'
+#' # relocate() moves y2 before y1 in the visible columns
+#' d3 <- relocate(d2, y2, .before = y1)
+#'
+#' # pull() returns a plain numeric vector
+#' pull(d, y1)
+#'
+#' # glimpse() respects visible_vars
+#' glimpse(d2)
+#'
+#' @family selecting
+#' @seealso [mutate()] to add columns, [rename()] to rename them
 select.survey_base <- function(.data, ...) {
   # Step 1: resolve the user's column selection
   user_pos  <- tidyselect::eval_select(rlang::expr(c(...)), .data@data)
@@ -70,7 +120,7 @@ select.survey_base <- function(.data, ...) {
 
 # ── relocate() ────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' @describeIn select.survey_base Reorder columns.
 relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
   # Capture .before and .after as quosures to avoid evaluating NSE expressions
   # (e.g. .before = y1) in the wrong environment. rlang::inject() then inlines
@@ -115,7 +165,7 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 
 # pull() is a terminal operation — the result is a plain vector, not a survey
 # object. No invariant checks, @groups, or @metadata considerations apply.
-#' @noRd
+#' @describeIn select.survey_base Extract a column as a vector.
 pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
   dplyr::pull(.data@data, var = {{ var }}, name = {{ name }}, ...)
 }
@@ -123,7 +173,7 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 
 # ── glimpse() ─────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' @describeIn select.survey_base Print a concise column summary.
 glimpse.survey_base <- function(x, width = NULL, ...) {
   if (!is.null(x@variables$visible_vars)) {
     dplyr::glimpse(x@data[, x@variables$visible_vars, drop = FALSE], width, ...)

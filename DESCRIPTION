@@ -23,6 +23,8 @@ Imports:
     surveycore,
     tidyr (>= 1.3.0),
     tidyselect (>= 1.2.0)
+URL: https://jdenn0514.github.io/surveytidy/, https://github.com/JDenn0514/surveytidy
+BugReports: https://github.com/JDenn0514/surveytidy/issues
 Suggests:
     testthat (>= 3.0.0),
     tibble
