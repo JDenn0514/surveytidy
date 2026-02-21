@@ -44,7 +44,14 @@
       "Bash(git branch:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
-      "Bash(pandoc:*)"
+      "Bash(pandoc:*)",
+      "Bash(chmod:*)",
+      "Bash(cat:*)",
+      "Bash(R --quiet --vanilla -e:*)",
+      "Bash(R --quiet --vanilla:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo edit:*)"
     ]
   }
 }
