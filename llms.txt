@@ -1,0 +1,228 @@
+# surveytidy
+
+surveytidy provides dplyr and tidyr verbs for survey design objects
+created with the [surveycore](https://github.com/JDenn0514/surveycore)
+package. It makes survey analysis feel natural to tidyverse users:
+
+``` r
+library(surveycore)
+library(surveytidy)
+
+# Build a survey design
+d <- as_survey(nhanes, ids = sdmvpsu, strata = sdmvstra,
+               weights = wtmec2yr, nest = TRUE)
+
+# Use familiar dplyr verbs — survey design is preserved automatically
+adults <- d |>
+  filter(ridageyr >= 18) |>        # domain estimation, not row removal
+  select(ridageyr, bmxbmi, riagendr) |>
+  group_by(riagendr) |>
+  mutate(bmi_centered = bmxbmi - mean(bmxbmi, na.rm = TRUE))
+```
+
+## Key idea: `filter()` marks rows, never removes them
+
+The most important statistical feature of surveytidy is that
+[`filter()`](https://rdrr.io/r/stats/filter.html) uses **domain
+estimation** rather than physical subsetting:
+
+``` r
+# This keeps all 9,756 rows — variance estimation stays correct
+women <- d |> filter(riagendr == 2)
+nrow(women@data)  #> 9756
+
+# This physically removes rows — variance estimates for women would be wrong
+wrong <- subset(d, riagendr == 2)  # issues a warning
+```
+
+When you call [`filter()`](https://rdrr.io/r/stats/filter.html),
+surveytidy writes a logical column `..surveycore_domain..` to the data.
+Phase 1 estimation functions read this column to restrict calculations
+to the domain while retaining all rows for correct variance estimation.
+
+## Installation
+
+``` r
+# install.packages("pak")
+pak::pak("JDenn0514/surveycore")  # required first
+pak::pak("JDenn0514/surveytidy")
+```
+
+## Usage
+
+### Filtering (domain estimation)
+
+``` r
+# Single condition
+adults <- d |> filter(ridageyr >= 18)
+
+# Chained filters AND the conditions together
+adult_women <- d |>
+  filter(ridageyr >= 18) |>
+  filter(riagendr == 2)
+
+# Equivalent — both produce identical domain columns
+adult_women2 <- d |> filter(ridageyr >= 18, riagendr == 2)
+```
+
+### Selecting columns
+
+``` r
+# Design variables (weights, strata, PSU) are always kept in @data
+# even when not selected — they are required for variance estimation
+d2 <- select(d, ridageyr, bmxbmi, riagendr)
+
+# Design variables are hidden from print() but still present
+print(d2)     # shows ridageyr, bmxbmi, riagendr only
+d2@data$wt    # still accessible
+
+# Reorder visible columns
+d3 <- relocate(d2, riagendr, .before = ridageyr)
+```
+
+### Mutating
+
+``` r
+# Add new columns
+d |> mutate(bmi_kg_m2 = bmxbmi,
+            age_group  = cut(ridageyr, c(0, 18, 40, 65, Inf)))
+
+# Modifying a design variable warns you
+d |> mutate(wtmec2yr = wtmec2yr * 0.5)
+#> Warning: mutate() modified design variable(s): `wtmec2yr`
+
+# Grouped mutate via group_by()
+d |>
+  group_by(riagendr) |>
+  mutate(bmi_pctile = rank(bmxbmi) / n())
+```
+
+### Renaming
+
+``` r
+# @variables and @metadata stay in sync automatically
+d |> rename(age = ridageyr, bmi = bmxbmi)
+```
+
+### Sorting
+
+``` r
+# Rows sort; domain column moves with them
+d |>
+  filter(ridageyr >= 18) |>
+  arrange(bmxbmi)
+
+# Sort by group first, then by value
+d |>
+  group_by(riagendr) |>
+  arrange(bmxbmi, .by_group = TRUE)
+```
+
+### Grouping
+
+``` r
+d2 <- group_by(d, riagendr)         # set groups
+d3 <- group_by(d2, ridageyr, .add = TRUE)  # add to groups
+d4 <- ungroup(d3, riagendr)         # partial ungroup
+d5 <- ungroup(d3)                   # remove all groups
+```
+
+### Physical row operations (use sparingly)
+
+``` r
+# These physically remove rows and always issue a warning.
+# Use filter() instead for subpopulation analyses.
+slice_head(d, n = 100)    # first 100 rows
+drop_na(d, bmxbmi)        # remove rows with NA in bmxbmi
+```
+
+## Relationship to surveycore
+
+surveytidy is an add-on layer. surveycore provides:
+
+- S7 survey design classes (`survey_taylor`, `survey_replicate`,
+  `survey_twophase`)
+- Constructors
+  ([`as_survey()`](https://jdenn0514.github.io/surveycore/reference/as_survey.html),
+  [`as_survey_rep()`](https://jdenn0514.github.io/surveycore/reference/as_survey_rep.html),
+  [`as_survey_twophase()`](https://jdenn0514.github.io/surveycore/reference/as_survey_twophase.html))
+- Metadata system (variable labels, value labels, question prefaces)
+
+surveytidy provides the dplyr/tidyr interface on top of those classes.
+Phase 1 (in development) will add estimation functions (`get_mean()`,
+`get_total()`, etc.) that respect the domain column and `@groups` set by
+surveytidy verbs.
+
+## License
+
+GPL-3
+
+# Package index
+
+## Filtering and subsetting
+
+[`filter()`](https://rdrr.io/r/stats/filter.html) uses domain estimation
+— it marks rows as in-domain without removing them, preserving correct
+variance estimation. Physical row removal is available via
+[`subset()`](https://rdrr.io/r/base/subset.html), `slice_*()`, and
+`drop_na()` with appropriate warnings.
+
+- [`filter(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
+  [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
+  : Filter survey data using domain estimation
+
+## Column selection
+
+Select, reorder, extract, and inspect columns. Design variables
+(weights, strata, PSU, FPC) are always retained in `@data` even when not
+explicitly selected.
+
+- [`select(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
+  [`relocate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
+  [`pull(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
+  [`glimpse(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
+  : Select, relocate, pull, and glimpse columns of a survey design
+  object
+
+## Modifying columns
+
+Add or modify columns (`mutate()`) and rename them (`rename()`). Both
+verbs keep the survey design specification and metadata in sync.
+
+- [`mutate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
+  : Add or modify columns of a survey design object
+- [`rename(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.md)
+  : Rename columns of a survey design object
+
+## Row ordering and physical selection
+
+Sort rows with `arrange()`. The `slice_*()` family physically removes
+rows — use [`filter()`](https://rdrr.io/r/stats/filter.html) instead for
+subpopulation analyses.
+
+- [`arrange(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice_head(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice_tail(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice_min(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice_max(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  [`slice_sample(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  : Sort rows and physically select rows of a survey design object
+
+## Grouping
+
+Store grouping variables in `@groups` for use by estimation functions
+and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
+
+- [`group_by(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
+  [`ungroup(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
+  : Group and ungroup a survey design object
+
+## Missing value removal
+
+Physically remove rows with `NA` values. Issues a warning because
+physical removal can bias variance estimates.
+
+- [`drop_na(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
+  : Remove rows containing missing values from a survey design object
+
