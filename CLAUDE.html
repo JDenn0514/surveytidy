@@ -235,6 +235,20 @@
 </ul></div>
 </div>
 <div class="section level2">
+<h2 id="r-cmd-check-gotchas">R CMD Check Gotchas<a class="anchor" aria-label="anchor" href="#r-cmd-check-gotchas"></a></h2>
+<div class="section level3">
+<h3 id="examples-must-load-dplyrtidyr-explicitly">Examples must load dplyr/tidyr explicitly<a class="anchor" aria-label="anchor" href="#examples-must-load-dplyrtidyr-explicitly"></a></h3>
+<p>dplyr verbs (<code>filter</code>, <code>select</code>, <code>arrange</code>, etc.) are in <strong>Imports</strong> but are <strong>not re-exported</strong>. R CMD check runs examples in a fresh session with only <code><a href="https://jdenn0514.github.io/surveytidy/">library(surveytidy)</a></code> loaded — the dplyr functions are not on the search path. Every <code>@examples</code> block that calls a dplyr or tidyr verb must begin with an explicit <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> call:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' @examples</span></span>
+<span><span class="co">#' library(dplyr)        # required — dplyr verbs not re-exported by surveytidy</span></span>
+<span><span class="co">#' df &lt;- data.frame(...)</span></span>
+<span><span class="co">#' d  &lt;- surveycore::as_survey(df, weights = wt)</span></span>
+<span><span class="co">#' arrange(d, y)</span></span></code></pre></div>
+<p>Use <code><a href="https://tidyr.tidyverse.org" class="external-link">library(tidyr)</a></code> instead for <code>drop_na()</code> and other tidyr verbs.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="working-with-this-codebase">Working With This Codebase<a class="anchor" aria-label="anchor" href="#working-with-this-codebase"></a></h2>
 <ol style="list-style-type: decimal"><li>
 <strong>Follow established patterns</strong> — consistency with surveycore matters</li>
