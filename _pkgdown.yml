@@ -1,0 +1,79 @@
+url: https://jdenn0514.github.io/surveytidy/
+
+template:
+  bootstrap: 5
+  bslib:
+    font_scale: 1.0
+    base_font: {google: "Roboto"}
+    code_font: {google: "Inter"}
+    heading_font: {google: "Roboto"}
+    bg: "#fcfbf9"
+    fg: "#000000"
+    primary: "#14A2FCFF"
+    navbar-bg: "#e5f3f7"
+    navbar-light-hover-color: "#14A2FCFF"
+
+home:
+  title: "surveytidy — Tidy dplyr/tidyr Verbs for Survey Design Objects"
+  description: >
+    dplyr and tidyr verbs for surveycore survey design objects.
+    filter() uses domain estimation so variance estimates stay correct.
+
+navbar:
+  type: "light"
+  bg: "#e5f3f7"
+  structure:
+    left:  [intro, reference, news]
+    right: [github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/JDenn0514/surveytidy
+
+reference:
+  - title: "Filtering and subsetting"
+    desc: >
+      `filter()` uses domain estimation — it marks rows as in-domain without
+      removing them, preserving correct variance estimation. Physical row
+      removal is available via `subset()`, `slice_*()`, and `drop_na()` with
+      appropriate warnings.
+    contents:
+      - filter.survey_base
+      - subset.survey_base
+
+  - title: "Column selection"
+    desc: >
+      Select, reorder, extract, and inspect columns. Design variables
+      (weights, strata, PSU, FPC) are always retained in `@data` even
+      when not explicitly selected.
+    contents:
+      - select.survey_base
+
+  - title: "Modifying columns"
+    desc: >
+      Add or modify columns (`mutate()`) and rename them (`rename()`).
+      Both verbs keep the survey design specification and metadata in sync.
+    contents:
+      - mutate.survey_base
+      - rename.survey_base
+
+  - title: "Row ordering and physical selection"
+    desc: >
+      Sort rows with `arrange()`. The `slice_*()` family physically removes
+      rows — use `filter()` instead for subpopulation analyses.
+    contents:
+      - arrange.survey_base
+
+  - title: "Grouping"
+    desc: >
+      Store grouping variables in `@groups` for use by estimation functions
+      and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
+    contents:
+      - group_by.survey_base
+
+  - title: "Missing value removal"
+    desc: >
+      Physically remove rows with `NA` values. Issues a warning because
+      physical removal can bias variance estimates.
+    contents:
+      - drop_na.survey_base

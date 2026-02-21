@@ -38,6 +38,15 @@ for the subset. Use only when you understand the statistical implications.
 }
 }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://jdenn0514.github.io/surveytidy/}
+  \item \url{https://github.com/JDenn0514/surveytidy}
+  \item Report bugs at \url{https://github.com/JDenn0514/surveytidy/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Jacob Dennen \email{jacob.dennen@example.com}
 

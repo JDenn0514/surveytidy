@@ -18,7 +18,55 @@
 
 # ── mutate() ──────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' Add or modify columns of a survey design object
+#'
+#' @description
+#' Delegates to `dplyr::mutate()` on `@data`, then:
+#'
+#' * Re-attaches any design variables dropped by `.keep = "none"` or
+#'   `.keep = "used"`.
+#' * Appends newly created columns to `@variables$visible_vars` when it is set.
+#' * Records the transformation expression for new columns in
+#'   `@metadata@transformations`.
+#' * Respects `@groups` set by [group_by()] — pass `.by = NULL` (the default)
+#'   and grouping from `group_by()` is applied automatically.
+#'
+#' @param .data A survey design object.
+#' @param ... <[`data-masking`][rlang::args_data_masking]> Name-value pairs.
+#'   The name gives the new column name; the value is an expression evaluated
+#'   against `@data`.
+#' @param .by Not used directly — use [group_by()] instead. If `@groups` is
+#'   set and `.by` is `NULL`, `@groups` is used as the effective grouping.
+#' @param .keep Which columns to retain. One of `"all"` (default), `"used"`,
+#'   `"unused"`, or `"none"`. Design variables are always re-attached
+#'   regardless of `.keep`.
+#' @param .before,.after <[`tidy-select`][tidyselect::language]> Optionally
+#'   position new columns before or after an existing one.
+#'
+#' @return The survey object with updated `@data`, `@variables$visible_vars`,
+#'   and `@metadata@transformations`.
+#'
+#' @section Detecting design variable modification:
+#' If the left-hand side of a mutation names a design variable (e.g.,
+#' `mutate(d, wt = wt * 2)`), a `surveytidy_warning_mutate_design_var` warning
+#' is issued. Detection is name-based — `across()` calls that happen to
+#' modify design variables will **not** trigger the warning.
+#'
+#' @examples
+#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
+#'                  g = sample(c("A","B"), 100, TRUE))
+#' d  <- surveycore::as_survey(df, weights = wt)
+#'
+#' # Add a new column
+#' d2 <- mutate(d, y_sq = y^2)
+#'
+#' # Grouped mutate
+#' d3 <- d |>
+#'   group_by(g) |>
+#'   mutate(g_mean = mean(y))
+#'
+#' @family modification
+#' @seealso [rename()] to rename columns, [select()] to drop columns
 mutate.survey_base <- function(
   .data,
   ...,

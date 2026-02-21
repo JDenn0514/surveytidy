@@ -18,7 +18,43 @@
 
 # ── rename() ──────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' Rename columns of a survey design object
+#'
+#' @description
+#' Renames columns in `@data` and automatically keeps the survey design in
+#' sync:
+#'
+#' * `@variables` — design variable column names (weights, strata, PSU, FPC,
+#'   replicate weights) are updated to the new names.
+#' * `@metadata` — variable labels, value labels, question prefaces, notes,
+#'   and transformation records are re-keyed.
+#' * `@variables$visible_vars` — any occurrence of the old name is replaced
+#'   with the new name.
+#'
+#' Renaming a design variable is allowed and issues
+#' `surveytidy_warning_rename_design_var` to confirm the design was updated.
+#'
+#' @param .data A survey design object.
+#' @param ... <[`tidy-select`][tidyselect::language]> Use `new_name = old_name`
+#'   pairs to rename columns.
+#'
+#' @return The survey object with updated column names, `@variables`, and
+#'   `@metadata`.
+#'
+#' @examples
+#' df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
+#'                  wt = runif(50, 1, 5))
+#' d  <- surveycore::as_survey(df, weights = wt)
+#'
+#' # Rename an outcome column
+#' d2 <- rename(d, outcome = y1)
+#'
+#' # Rename a design variable (warns and updates @variables$weights)
+#' d3 <- rename(d, weight = wt)
+#' d3@variables$weights  # "weight"
+#'
+#' @family modification
+#' @seealso [mutate()] to add columns, [select()] to drop columns
 rename.survey_base <- function(.data, ...) {
   # Step 1: resolve the rename map via tidyselect
   # map: named integer vector, names = new names, values = column positions

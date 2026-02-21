@@ -31,7 +31,44 @@ utils::globalVariables("check_fn")
 
 # ── arrange() ─────────────────────────────────────────────────────────────────
 
-#' @noRd
+#' Sort rows and physically select rows of a survey design object
+#'
+#' @description
+#' * `arrange()` sorts rows in `@data`. The domain column moves with the rows —
+#'   no update to `@variables$domain` is needed. Supports `.by_group = TRUE`
+#'   using `@groups` set by [group_by()].
+#' * `slice()`, `slice_head()`, `slice_tail()`, `slice_min()`, `slice_max()`,
+#'   and `slice_sample()` **physically remove rows** and always issue
+#'   `surveycore_warning_physical_subset`. They error if the result would have
+#'   0 rows. Prefer [filter()] for subpopulation analyses.
+#' * `slice_sample(weight_by = )` additionally warns with
+#'   `surveytidy_warning_slice_sample_weight_by` because the `weight_by`
+#'   column is independent of the survey design weights.
+#'
+#' @param .data A survey design object.
+#' @param ... For `arrange()`: <[`data-masking`][rlang::args_data_masking]>
+#'   variables or expressions to sort by. For `slice_*()`: passed to the
+#'   corresponding `dplyr::slice_*()` function.
+#' @param .by_group Logical. If `TRUE` and `@groups` is set, rows are sorted
+#'   by the grouping variables first, then by `...`.
+#'
+#' @return The survey object with rows reordered (`arrange()`) or a physical
+#'   subset of rows (`slice_*()`).
+#'
+#' @examples
+#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
+#'                  g = sample(c("A","B"), 100, TRUE))
+#' d  <- surveycore::as_survey(df, weights = wt)
+#'
+#' # Sort rows
+#' d2 <- arrange(d, y)
+#' d3 <- arrange(d, desc(y))
+#'
+#' # Physical row selection (issues warning)
+#' d4 <- suppressWarnings(slice_head(d, n = 20))
+#'
+#' @family row operations
+#' @seealso [filter()] for domain-aware row marking (preferred)
 arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
   # When .by_group = TRUE and @groups is non-empty, prepend the group columns
   # to the sort order. dplyr's native .by_group = TRUE would silently do
@@ -109,27 +146,27 @@ arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
   }
 }
 
-#' @noRd
+#' @describeIn arrange.survey_base Select rows by position.
 slice.survey_base <- .make_slice_method(
   "slice", dplyr::slice
 )
-#' @noRd
+#' @describeIn arrange.survey_base Select first `n` rows.
 slice_head.survey_base <- .make_slice_method(
   "slice_head", dplyr::slice_head
 )
-#' @noRd
+#' @describeIn arrange.survey_base Select last `n` rows.
 slice_tail.survey_base <- .make_slice_method(
   "slice_tail", dplyr::slice_tail
 )
-#' @noRd
+#' @describeIn arrange.survey_base Select rows with the smallest values.
 slice_min.survey_base <- .make_slice_method(
   "slice_min", dplyr::slice_min
 )
-#' @noRd
+#' @describeIn arrange.survey_base Select rows with the largest values.
 slice_max.survey_base <- .make_slice_method(
   "slice_max", dplyr::slice_max
 )
-#' @noRd
+#' @describeIn arrange.survey_base Randomly sample rows.
 slice_sample.survey_base <- .make_slice_method(
   "slice_sample", dplyr::slice_sample,
   check_fn = .check_slice_sample_weight_by
