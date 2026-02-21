@@ -178,6 +178,24 @@ tests/testthat/
 - Always issues `surveycore_warning_physical_subset`
 - Registered via NAMESPACE (base R generic, not dplyr)
 
+## R CMD Check Gotchas
+
+### Examples must load dplyr/tidyr explicitly
+dplyr verbs (`filter`, `select`, `arrange`, etc.) are in **Imports** but are **not re-exported**.
+R CMD check runs examples in a fresh session with only `library(surveytidy)` loaded — the dplyr
+functions are not on the search path. Every `@examples` block that calls a dplyr or tidyr verb
+must begin with an explicit `library()` call:
+
+```r
+#' @examples
+#' library(dplyr)        # required — dplyr verbs not re-exported by surveytidy
+#' df <- data.frame(...)
+#' d  <- surveycore::as_survey(df, weights = wt)
+#' arrange(d, y)
+```
+
+Use `library(tidyr)` instead for `drop_na()` and other tidyr verbs.
+
 ## Working With This Codebase
 
 1. **Follow established patterns** — consistency with surveycore matters
