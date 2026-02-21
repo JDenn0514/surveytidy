@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg)](https://codecov.io/gh/JDenn0514/surveytidy)
 <!-- badges: end -->
 
 surveytidy provides dplyr and tidyr verbs for survey design objects

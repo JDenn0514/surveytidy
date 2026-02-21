@@ -42,6 +42,7 @@ performs a \strong{partial ungroup}, removing only the named columns from
 
 }}
 \examples{
+library(dplyr)
 df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
                  region = sample(c("N","S","E","W"), 100, TRUE))
 d  <- surveycore::as_survey(df, weights = wt)

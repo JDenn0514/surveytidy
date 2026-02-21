@@ -31,6 +31,7 @@
 #'   removed.
 #'
 #' @examples
+#' library(tidyr)
 #' df <- data.frame(y = c(rnorm(99), NA), wt = runif(100, 1, 5))
 #' d  <- surveycore::as_survey(df, weights = wt)
 #'

@@ -2,3 +2,13 @@
 ^\.Rproj\.user$
 ^\.github$
 ^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^CLAUDE\.md$
+^plans$
+^changelog$
+^\.claude$
+^README\.html$
+^codecov\.yml$
+^LICENSE\.md$
+^CODE_OF_CONDUCT\.md$

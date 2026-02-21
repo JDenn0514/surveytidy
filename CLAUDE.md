@@ -31,7 +31,7 @@ surveytidy makes survey analysis feel natural to tidyverse users by:
 
 ## Key Design Decisions (Finalized)
 
-- **dplyr verbs map to survey concepts** — filter = domain, select = visible columns, mutate = add variables
+- **dplyr verbs map to survey concepts** — filter = domain, select = simplify data (remove non-design cols), mutate = add variables
 - **Metadata travels with data** — All verbs update `@variables` and `@metadata` keys
 - **Filter preserves all rows** — Uses domain column internally; never removes rows
 - **No formula syntax** — Always `filter(design, age > 65)`, never `filter(design, ~age > 65)`
@@ -96,8 +96,11 @@ tests/testthat/
 
 #### visible_vars
 - Key in `@variables$visible_vars`
-- Set by `select()` to control which columns `print()` shows
-- NULL means all columns are visible (default)
+- Set by `select()` to the user's explicit column selection
+- Controls which columns `print()` shows (hides design vars from display)
+- NULL means all columns in `@data` are shown (default)
+- After `select()`, `@data` only contains design vars + user-selected cols;
+  `visible_vars` tracks the user's selection so design vars are hidden from print
 
 #### @groups
 - Reserved for Phase 0.5 (now used by `group_by()`)
@@ -149,14 +152,21 @@ tests/testthat/
 - `.by` argument not supported; raises `surveycore_error_filter_by_unsupported`
 
 ### select() Specifics
-- Updates `@variables$visible_vars` (vector of column names to show in print)
-- Keeps all columns in `@data` (doesn't physically remove; just hides)
-- If design variable is selected, it still prints even if not in visible_vars
+- **Physically removes** non-selected, non-design columns from `@data`
+- **Always keeps** all design variables in `@data` (weights, strata, PSU, FPC,
+  repweights, domain column) — they are required for variance estimation
+- Sets `@variables$visible_vars` to the user's selection — this hides design
+  vars from print output (they're in `@data` but not in the user's selection)
+- Normalises `visible_vars` to `NULL` when result is empty (e.g. user selects
+  only design variables) — `NULL` means "show all columns in @data"
+- Deletes `@metadata` entries for physically removed columns only
+- `select()` is irreversible within a pipeline: removed columns are gone
 
 ### rename() Specifics
 - Uses `surveycore:::.update_design_var_names()` to update @variables keys
 - Uses `surveycore:::.rename_metadata_keys()` to update @metadata keys
-- Errors if user tries to rename a design variable (strata, ids, etc.)
+- **Warns** (does not error) if user renames a design variable; updates
+  `@variables` to track the new column name (`surveytidy_warning_rename_design_var`)
 
 ### dplyr_reconstruct()
 - Called by dplyr for complex operations (joins, across(), slice, etc.)

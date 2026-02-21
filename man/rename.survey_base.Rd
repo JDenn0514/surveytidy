@@ -32,6 +32,7 @@ Renaming a design variable is allowed and issues
 \code{surveytidy_warning_rename_design_var} to confirm the design was updated.
 }
 \examples{
+library(dplyr)
 df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
                  wt = runif(50, 1, 5))
 d  <- surveycore::as_survey(df, weights = wt)

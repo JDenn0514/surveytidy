@@ -62,6 +62,7 @@
 #' <https://notstatschat.rbind.io/2021/07/22/subsets-and-subpopulations-in-survey-inference>
 #'
 #' @examples
+#' library(dplyr)
 #' df <- data.frame(y = rnorm(100), x = runif(100),
 #'                  wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
 #' d  <- surveycore::as_survey(df, weights = wt)
