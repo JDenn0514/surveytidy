@@ -26,6 +26,7 @@ Prefer \code{\link[dplyr:filter]{dplyr::filter()}} with \code{!is.na(col)} for s
 all rows and gives correct variance estimates.
 }
 \examples{
+library(tidyr)
 df <- data.frame(y = c(rnorm(99), NA), wt = runif(100, 1, 5))
 d  <- surveycore::as_survey(df, weights = wt)
 
