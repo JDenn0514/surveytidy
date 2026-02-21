@@ -37,7 +37,6 @@
 #' @importFrom dplyr filter select mutate rename relocate arrange
 #' @importFrom dplyr group_by ungroup pull glimpse dplyr_reconstruct
 #' @importFrom dplyr slice slice_head slice_tail slice_min slice_max slice_sample
-#' @importFrom S7 S7_inherits validate
 #' @importFrom tidyselect eval_select
 #' @importFrom tidyr drop_na
 "_PACKAGE"
