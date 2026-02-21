@@ -2,6 +2,32 @@
 #
 # Internal shared helpers used by 2+ verb files.
 # Single-use helpers live at the top of their own source file.
+#
+# Functions defined here:
+#   .protected_cols()               — columns that must never leave @data
+#   .warn_physical_subset()         — standard warning for row-removal verbs
+#   dplyr_reconstruct.survey_base() — class preservation in complex pipelines
+#                                     (moved from R/01-filter.R on feature/select)
+
+
+# ── surveycore internal wrappers ─────────────────────────────────────────────
+
+# Wrappers around surveycore internal functions used by rename().
+# Using get() + asNamespace() rather than surveycore::: avoids the
+# "Unexported objects imported by ':::' calls" R CMD check NOTE.
+#
+# These wrappers are defined once here (R/utils.R) to avoid duplicating the
+# get() calls in R/04-rename.R.
+
+.sc_update_design_var_names <- function(variables, rename_map) {
+  fn <- get(".update_design_var_names", envir = asNamespace("surveycore"))
+  fn(variables, rename_map)
+}
+
+.sc_rename_metadata_keys <- function(metadata, rename_map) {
+  fn <- get(".rename_metadata_keys", envir = asNamespace("surveycore"))
+  fn(metadata, rename_map)
+}
 
 
 # ── Column protection ─────────────────────────────────────────────────────────
@@ -18,6 +44,39 @@
     surveycore::.get_design_vars_flat(design),
     surveycore::SURVEYCORE_DOMAIN_COL
   )
+}
+
+
+# ── dplyr_reconstruct() ───────────────────────────────────────────────────────
+
+# dplyr 1.1.0+ calls dplyr_reconstruct(new_data, template) after many verbs
+# (joins, across(), slice, etc.) to rebuild the output class. Without this,
+# pipelines silently return a tibble instead of a survey object.
+#
+# Also cleans up visible_vars when dplyr internally removes non-design columns
+# (e.g., via .keep = "none" mutations routed through dplyr's machinery).
+# Registered in .onLoad() — see R/00-zzz.R.
+#' @noRd
+dplyr_reconstruct.survey_base <- function(data, template) {
+  design_vars  <- surveycore::.get_design_vars_flat(template)
+  missing_vars <- setdiff(design_vars, names(data))
+  if (length(missing_vars) > 0L) {
+    cli::cli_abort(
+      c(
+        "x" = "Required design variable(s) removed: {.field {missing_vars}}.",
+        "i" = "Design variables cannot be removed from a survey object.",
+        "v" = "Use {.fn select} to hide columns without removing them."
+      ),
+      class = "surveycore_error_design_var_removed"
+    )
+  }
+  # Clean up visible_vars if dplyr removed any referenced non-design columns
+  if (!is.null(template@variables$visible_vars)) {
+    vv <- intersect(template@variables$visible_vars, names(data))
+    template@variables$visible_vars <- if (length(vv) == 0L) NULL else vv
+  }
+  template@data <- data
+  template
 }
 
 

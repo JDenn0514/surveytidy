@@ -21,34 +21,11 @@
 # See R/00-zzz.R for the registration.
 #
 # Functions defined here:
-#   filter.survey_base()             — domain estimation (all verbs route here)
-#   dplyr_reconstruct.survey_base()  — preserve class in complex pipelines
-#   subset.survey_base()             — physical row removal (with warning)
-
-
-# ── dplyr_reconstruct() ───────────────────────────────────────────────────────
-
-# dplyr 1.1.0+ calls dplyr_reconstruct(new_data, template) after many verbs
-# (joins, across(), slice, etc.) to rebuild the output class. Without this,
-# pipelines silently return a tibble instead of a survey object.
-# Registered in .onLoad() — see R/00-zzz.R.
-#' @noRd
-dplyr_reconstruct.survey_base <- function(data, template) {
-  design_vars  <- surveycore::.get_design_vars_flat(template)
-  missing_vars <- setdiff(design_vars, names(data))
-  if (length(missing_vars) > 0L) {
-    cli::cli_abort(
-      c(
-        "x" = "Required design variable(s) removed: {.field {missing_vars}}.",
-        "i" = "Design variables cannot be removed from a survey object.",
-        "v" = "Use {.fn select} to hide columns without removing them."
-      ),
-      class = "surveycore_error_design_var_removed"
-    )
-  }
-  template@data <- data
-  template
-}
+#   filter.survey_base()   — domain estimation (all verbs route here)
+#   subset.survey_base()   — physical row removal (with warning)
+#
+# Note: dplyr_reconstruct.survey_base() was moved to R/utils.R on
+# feature/select so it is co-located with the other multi-verb helpers.
 
 
 # ── filter() ─────────────────────────────────────────────────────────────────
