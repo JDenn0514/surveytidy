@@ -8,7 +8,7 @@
 test_that("arrange() returns the same survey class for all design types", {
   designs <- make_all_designs()
   for (nm in names(designs)) {
-    d      <- designs[[nm]]
+    d <- designs[[nm]]
     result <- arrange(d, y1)
     expect_true(
       inherits(result, class(d)[[1L]]),
@@ -19,29 +19,29 @@ test_that("arrange() returns the same survey class for all design types", {
 })
 
 test_that("arrange() sorts rows by the given column", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- arrange(d, y1)
   expect_true(all(diff(result@data$y1) >= 0))
   test_invariants(result)
 })
 
 test_that("arrange() descending order works", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- arrange(d, desc(y1))
   expect_true(all(diff(result@data$y1) <= 0))
   test_invariants(result)
 })
 
 test_that("arrange() passes @groups through unchanged", {
-  d      <- make_all_designs()$taylor
-  d2     <- group_by(d, group)
+  d <- make_all_designs()$taylor
+  d2 <- group_by(d, group)
   result <- arrange(d2, y1)
   expect_identical(result@groups, d2@groups)
   test_invariants(result)
 })
 
 test_that("arrange() passes visible_vars through unchanged", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- select(d, y1, y2)
   d3 <- arrange(d2, y1)
   expect_identical(d3@variables$visible_vars, d2@variables$visible_vars)
@@ -51,12 +51,12 @@ test_that("arrange() passes visible_vars through unchanged", {
 # ── arrange() — exact row-association with domain column (spec Section 3.8) ──
 
 test_that("arrange() keeps domain column row-associated with data rows", {
-  d          <- make_all_designs()$taylor
-  d2         <- filter(d, y1 > mean(d@data$y1))
+  d <- make_all_designs()$taylor
+  d2 <- filter(d, y1 > mean(d@data$y1))
   domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
 
   original_domain <- d2@data[[domain_col]]
-  original_y1     <- d2@data[["y1"]]
+  original_y1 <- d2@data[["y1"]]
 
   d3 <- arrange(d2, y1)
 
@@ -68,15 +68,17 @@ test_that("arrange() keeps domain column row-associated with data rows", {
 # ── arrange() — .by_group ─────────────────────────────────────────────────────
 
 test_that("arrange(.by_group = TRUE) sorts by @groups first", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- group_by(d, group)
   d3 <- arrange(d2, y1, .by_group = TRUE)
 
   # Rows within each group should be sorted by y1
   for (g in unique(d3@data$group)) {
     rows <- d3@data[d3@data$group == g, ]
-    expect_true(all(diff(rows$y1) >= 0),
-                label = paste0("group '", g, "' sorted by y1"))
+    expect_true(
+      all(diff(rows$y1) >= 0),
+      label = paste0("group '", g, "' sorted by y1")
+    )
   }
   test_invariants(d3)
 })
@@ -207,7 +209,7 @@ test_that("slice_tail(n=0) errors with surveytidy_error_subset_empty_result", {
 test_that("slice_head() works for all design types", {
   designs <- make_all_designs()
   for (nm in names(designs)) {
-    d      <- designs[[nm]]
+    d <- designs[[nm]]
     result <- suppressWarnings(slice_head(d, n = 5L))
     expect_equal(nrow(result@data), 5L)
     test_invariants(result)

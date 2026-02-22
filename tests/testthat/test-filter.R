@@ -6,7 +6,6 @@
 # test-wiring.R covers dispatch only (does dplyr route to our method?).
 # This file covers what the methods actually do.
 
-
 # ── filter() — happy path ─────────────────────────────────────────────────────
 
 test_that("filter() passes test_invariants() for all design types", {
@@ -29,7 +28,7 @@ test_that("filter() does not remove any rows from @data for all design types", {
 
 test_that("filter() sets domain column to values matching the condition", {
   skip_if_not_installed("dplyr")
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- dplyr::filter(d, y1 > 0)
   expect_identical(
     result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
@@ -39,7 +38,7 @@ test_that("filter() sets domain column to values matching the condition", {
 
 test_that("filter() with no conditions sets all rows in-domain", {
   skip_if_not_installed("dplyr")
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- dplyr::filter(d)
   domain <- result@data[[surveycore::SURVEYCORE_DOMAIN_COL]]
   expect_true(all(domain))
@@ -47,8 +46,8 @@ test_that("filter() with no conditions sets all rows in-domain", {
 
 test_that("filter() with multiple conditions applies logical AND within one call", {
   skip_if_not_installed("dplyr")
-  d        <- make_all_designs()$taylor
-  result   <- dplyr::filter(d, y1 > 0, y2 > 0)
+  d <- make_all_designs()$taylor
+  result <- dplyr::filter(d, y1 > 0, y2 > 0)
   expected <- d@data$y1 > 0 & d@data$y2 > 0
   expect_identical(
     result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
@@ -58,8 +57,8 @@ test_that("filter() with multiple conditions applies logical AND within one call
 
 test_that("chained filter() calls AND the domain columns correctly", {
   skip_if_not_installed("dplyr")
-  d        <- make_all_designs()$taylor
-  chained  <- d |> dplyr::filter(y1 > 0) |> dplyr::filter(y2 > 0)
+  d <- make_all_designs()$taylor
+  chained <- d |> dplyr::filter(y1 > 0) |> dplyr::filter(y2 > 0)
   combined <- dplyr::filter(d, y1 > 0, y2 > 0)
   expect_identical(
     chained@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
@@ -69,24 +68,24 @@ test_that("chained filter() calls AND the domain columns correctly", {
 
 test_that("chained filter() calls accumulate all conditions in @variables$domain", {
   skip_if_not_installed("dplyr")
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- d |> dplyr::filter(y1 > 0) |> dplyr::filter(y2 > 0)
   expect_length(result@variables$domain, 2L)
 })
 
 test_that("filter() maps NA conditions to FALSE (outside domain)", {
   skip_if_not_installed("dplyr")
-  d           <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d@data$y1[1] <- NA_real_
-  result      <- dplyr::filter(d, y1 > 0)
+  result <- dplyr::filter(d, y1 > 0)
   expect_false(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]][[1L]])
 })
 
 test_that("filter() preserves @groups", {
   skip_if_not_installed("dplyr")
-  d        <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d@groups <- c("group")
-  result   <- dplyr::filter(d, y1 > 0)
+  result <- dplyr::filter(d, y1 > 0)
   expect_identical(result@groups, c("group"))
 })
 
@@ -95,7 +94,10 @@ test_that("filter() preserves @metadata variable labels", {
   d <- make_all_designs()$taylor
   d@metadata@variable_labels[["y1"]] <- "Outcome variable 1"
   result <- dplyr::filter(d, y1 > 0)
-  expect_identical(result@metadata@variable_labels[["y1"]], "Outcome variable 1")
+  expect_identical(
+    result@metadata@variable_labels[["y1"]],
+    "Outcome variable 1"
+  )
 })
 
 
@@ -160,9 +162,9 @@ test_that("dplyr_reconstruct() preserves survey class for all design types", {
 
 test_that("dplyr_reconstruct() errors when a design variable is removed", {
   skip_if_not_installed("dplyr")
-  d             <- make_all_designs()$taylor
-  wt_col        <- d@variables$weights
-  data_no_wt    <- d@data[, setdiff(names(d@data), wt_col), drop = FALSE]
+  d <- make_all_designs()$taylor
+  wt_col <- d@variables$weights
+  data_no_wt <- d@data[, setdiff(names(d@data), wt_col), drop = FALSE]
   expect_error(
     dplyr::dplyr_reconstruct(data_no_wt, d),
     class = "surveycore_error_design_var_removed"
@@ -194,16 +196,16 @@ test_that("subset() warning snapshot matches expected message", {
 })
 
 test_that("subset() physically removes non-matching rows from @data", {
-  d             <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   expected_rows <- sum(d@data$y1 > 0)
-  result        <- suppressWarnings(subset(d, y1 > 0))
+  result <- suppressWarnings(subset(d, y1 > 0))
   expect_equal(nrow(result@data), expected_rows)
 })
 
 test_that("subset() preserves all design variables in @data", {
-  d           <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   design_vars <- surveycore::.get_design_vars_flat(d)
-  result      <- suppressWarnings(subset(d, y1 > 0))
+  result <- suppressWarnings(subset(d, y1 > 0))
   for (v in design_vars) {
     expect_true(v %in% names(result@data), label = paste0("'", v, "' in @data"))
   }

@@ -15,7 +15,6 @@
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/00-zzz.R for the registration calls.
 
-
 # ── mutate() ──────────────────────────────────────────────────────────────────
 
 #' Add or modify columns of a survey design object
@@ -71,10 +70,10 @@
 mutate.survey_base <- function(
   .data,
   ...,
-  .by    = NULL,
-  .keep  = c("all", "used", "unused", "none"),
+  .by = NULL,
+  .keep = c("all", "used", "unused", "none"),
   .before = NULL,
-  .after  = NULL
+  .after = NULL
 ) {
   .keep <- match.arg(.keep)
 
@@ -94,9 +93,9 @@ mutate.survey_base <- function(
   # Only explicitly-named LHS expressions (e.g., mutate(d, wt = wt * 2)) are
   # detected. across() and other multi-output expressions are NOT detected —
   # this limitation is known and accepted for Phase 0.5.
-  mutations      <- rlang::quos(...)
-  mutated_names  <- names(mutations)
-  protected      <- intersect(.protected_cols(.data), names(.data@data))
+  mutations <- rlang::quos(...)
+  mutated_names <- names(mutations)
+  protected <- intersect(.protected_cols(.data), names(.data@data))
   changed_design <- intersect(mutated_names, protected)
 
   if (length(changed_design) > 0L) {
@@ -120,20 +119,20 @@ mutate.survey_base <- function(
   # Also: dplyr 1.2.0 errors when .before AND .after are both passed explicitly
   # (even as NULL), and tidyselect warns when effective_by = NULL is passed as
   # an external variable. Only include each argument when actually needed.
-  before_quo  <- rlang::enquo(.before)
-  after_quo   <- rlang::enquo(.after)
-  has_before  <- !rlang::quo_is_null(before_quo)
-  has_after   <- !rlang::quo_is_null(after_quo)
-  has_by      <- !is.null(effective_by)
+  before_quo <- rlang::enquo(.before)
+  after_quo <- rlang::enquo(.after)
+  has_before <- !rlang::quo_is_null(before_quo)
+  has_after <- !rlang::quo_is_null(after_quo)
+  has_by <- !is.null(effective_by)
 
   new_data <- rlang::inject(
     dplyr::mutate(
       .data@data,
       ...,
-      !!!if (has_by)     list(.by    = effective_by)  else list(),
+      !!!if (has_by) list(.by = effective_by) else list(),
       .keep = .keep,
-      !!!if (has_before) list(.before = !!before_quo)  else list(),
-      !!!if (has_after)  list(.after  = !!after_quo)   else list()
+      !!!if (has_before) list(.before = !!before_quo) else list(),
+      !!!if (has_after) list(.after = !!after_quo) else list()
     )
   )
 
@@ -149,8 +148,8 @@ mutate.survey_base <- function(
   new_cols <- setdiff(names(new_data), names(.data@data))
   if (!is.null(.data@variables$visible_vars)) {
     vv <- .data@variables$visible_vars
-    vv <- intersect(vv, names(new_data))  # remove any .keep-dropped visible cols
-    vv <- c(vv, new_cols)                  # append newly created columns
+    vv <- intersect(vv, names(new_data)) # remove any .keep-dropped visible cols
+    vv <- c(vv, new_cols) # append newly created columns
     .data@variables$visible_vars <- if (length(vv) == 0L) NULL else vv
   }
   # If visible_vars is NULL, it stays NULL (all cols shown, new cols included)

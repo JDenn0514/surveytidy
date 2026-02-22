@@ -19,7 +19,6 @@
 #   pull.survey_base()     — extract a column as a vector
 #   glimpse.survey_base()  — print a concise column summary
 
-
 # ── select() ──────────────────────────────────────────────────────────────────
 
 #' Select, relocate, pull, and glimpse columns of a survey design object
@@ -76,7 +75,7 @@
 #' @seealso [mutate()] to add columns, [rename()] to rename them
 select.survey_base <- function(.data, ...) {
   # Step 1: resolve the user's column selection
-  user_pos  <- tidyselect::eval_select(rlang::expr(c(...)), .data@data)
+  user_pos <- tidyselect::eval_select(rlang::expr(c(...)), .data@data)
   user_cols <- names(user_pos)
 
   # Step 2: protected columns that are already present in @data
@@ -101,11 +100,11 @@ select.survey_base <- function(.data, ...) {
   # Step 7: delete @metadata entries for physically removed columns
   # surveycore:::.delete_metadata_col() does not exist; delete manually.
   for (col in dropped) {
-    .data@metadata@variable_labels[[col]]   <- NULL
-    .data@metadata@value_labels[[col]]      <- NULL
+    .data@metadata@variable_labels[[col]] <- NULL
+    .data@metadata@value_labels[[col]] <- NULL
     .data@metadata@question_prefaces[[col]] <- NULL
-    .data@metadata@notes[[col]]             <- NULL
-    .data@metadata@transformations[[col]]   <- NULL
+    .data@metadata@notes[[col]] <- NULL
+    .data@metadata@transformations[[col]] <- NULL
   }
 
   # Step 8: normalise visible_vars
@@ -113,7 +112,11 @@ select.survey_base <- function(.data, ...) {
   # is empty OR when the user selected every column in @data (e.g. everything())
   .data@variables$visible_vars <- if (
     length(visible) == 0L || setequal(visible, final_cols)
-  ) NULL else visible
+  ) {
+    NULL
+  } else {
+    visible
+  }
 
   .data
 }
@@ -130,9 +133,9 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
   # Also: dplyr 1.2.0 errors when BOTH .before and .after are explicit (even
   # NULL), so only pass the ones that are actually provided.
   before_quo <- rlang::enquo(.before)
-  after_quo  <- rlang::enquo(.after)
+  after_quo <- rlang::enquo(.after)
   has_before <- !rlang::quo_is_null(before_quo)
-  has_after  <- !rlang::quo_is_null(after_quo)
+  has_after <- !rlang::quo_is_null(after_quo)
 
   .do_relocate <- function(df) {
     if (has_before && has_after) {
@@ -151,7 +154,7 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
   if (!is.null(.data@variables$visible_vars)) {
     # When visible_vars is set, relocate applies to the visible columns only.
     # @data column order has no display meaning — only visible_vars does.
-    vv_df   <- .data@data[, .data@variables$visible_vars, drop = FALSE]
+    vv_df <- .data@data[, .data@variables$visible_vars, drop = FALSE]
     ordered <- .do_relocate(vv_df)
     .data@variables$visible_vars <- names(ordered)
   } else {

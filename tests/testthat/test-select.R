@@ -11,7 +11,7 @@
 # For use in tests that need a design with a label set
 .make_labeled_design <- function(seed = 42L) {
   designs <- make_all_designs(seed)
-  d       <- designs$taylor
+  d <- designs$taylor
   surveycore::set_var_label(d, y1, "Outcome variable 1")
 }
 
@@ -20,7 +20,7 @@
 test_that("select() returns the same survey class for all design types", {
   designs <- make_all_designs()
   for (nm in names(designs)) {
-    d      <- designs[[nm]]
+    d <- designs[[nm]]
     result <- select(d, y1, y2)
     expect_true(
       inherits(result, class(d)[[1L]]),
@@ -31,7 +31,7 @@ test_that("select() returns the same survey class for all design types", {
 })
 
 test_that("select() retains user-selected outcome columns in @data", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- select(d, y1, y2)
   expect_true("y1" %in% names(result@data))
   expect_true("y2" %in% names(result@data))
@@ -40,18 +40,20 @@ test_that("select() retains user-selected outcome columns in @data", {
 })
 
 test_that("select() always preserves design variables in @data", {
-  d       <- make_all_designs()$taylor
-  result  <- select(d, y1)
-  dv      <- surveycore::.get_design_vars_flat(d)
+  d <- make_all_designs()$taylor
+  result <- select(d, y1)
+  dv <- surveycore::.get_design_vars_flat(d)
   for (v in dv) {
-    expect_true(v %in% names(result@data),
-                label = paste0("design var '", v, "' present after select"))
+    expect_true(
+      v %in% names(result@data),
+      label = paste0("design var '", v, "' present after select")
+    )
   }
   test_invariants(result)
 })
 
 test_that("select() sets visible_vars to user selection, excluding hidden design vars", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- select(d, y1, y2)
   expect_identical(result@variables$visible_vars, c("y1", "y2"))
   # Weight col is not visible (user didn't select it)
@@ -60,7 +62,7 @@ test_that("select() sets visible_vars to user selection, excluding hidden design
 })
 
 test_that("select() normalises visible_vars to NULL for everything()", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- select(d, everything())
   expect_null(result@variables$visible_vars)
   test_invariants(result)
@@ -68,16 +70,16 @@ test_that("select() normalises visible_vars to NULL for everything()", {
 
 test_that("select() normalises visible_vars to NULL when user selects all final cols", {
   # When user selects all columns (including design vars), visible = final_cols
-  d         <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   all_names <- names(d@data)
-  result    <- select(d, all_of(all_names))
+  result <- select(d, all_of(all_names))
   expect_null(result@variables$visible_vars)
   test_invariants(result)
 })
 
 test_that("select() passes @groups through unchanged", {
-  d      <- make_all_designs()$taylor
-  d2     <- group_by(d, group)
+  d <- make_all_designs()$taylor
+  d2 <- group_by(d, group)
   result <- select(d2, y1)
   expect_identical(result@groups, d2@groups)
   test_invariants(result)
@@ -86,7 +88,7 @@ test_that("select() passes @groups through unchanged", {
 # ── select() — domain column survival (three-part assertion) ──────────────────
 
 test_that("select() domain column survives: present in @data, values unchanged, not in visible_vars", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- filter(d, y1 > 0)
   d3 <- select(d2, y1, y2)
 
@@ -106,7 +108,7 @@ test_that("select() domain column survives: present in @data, values unchanged, 
 })
 
 test_that("select() before any filter() — domain col not yet in data", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- select(d, y1, y2)
   # No domain col should be added
   expect_false(surveycore::SURVEYCORE_DOMAIN_COL %in% names(result@data))
@@ -116,7 +118,7 @@ test_that("select() before any filter() — domain col not yet in data", {
 # ── select() — metadata ───────────────────────────────────────────────────────
 
 test_that("select() preserves @metadata for retained columns", {
-  d      <- .make_labeled_design()
+  d <- .make_labeled_design()
   result <- select(d, y1, y2)
   expect_identical(
     surveycore::extract_var_label(result, y1),
@@ -126,9 +128,9 @@ test_that("select() preserves @metadata for retained columns", {
 })
 
 test_that("select() deletes @metadata entries for dropped columns", {
-  d      <- .make_labeled_design()
+  d <- .make_labeled_design()
   # Set a label on y3, then drop it
-  d      <- surveycore::set_var_label(d, y3, "Binary outcome")
+  d <- surveycore::set_var_label(d, y3, "Binary outcome")
   result <- select(d, y1, y2)
   expect_null(result@metadata@variable_labels[["y3"]])
   test_invariants(result)
@@ -137,7 +139,7 @@ test_that("select() deletes @metadata entries for dropped columns", {
 # ── select() — edge cases ─────────────────────────────────────────────────────
 
 test_that("select() with negative selection removes the right column", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- select(d, -y3)
   expect_false("y3" %in% names(result@data))
   expect_true("y1" %in% names(result@data))
@@ -146,7 +148,7 @@ test_that("select() with negative selection removes the right column", {
 })
 
 test_that("select() with only design variables keeps visible_vars as those design vars", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   # Select only the weight column (a design var)
   result <- select(d, wt)
   # visible = c("wt"), final_cols = all design vars; setequal is FALSE
@@ -158,7 +160,7 @@ test_that("select() with only design variables keeps visible_vars as those desig
 test_that("select() works for all three design types", {
   designs <- make_all_designs()
   for (nm in names(designs)) {
-    d      <- designs[[nm]]
+    d <- designs[[nm]]
     result <- select(d, y1)
     expect_true("y1" %in% names(result@data))
     test_invariants(result)
@@ -168,8 +170,8 @@ test_that("select() works for all three design types", {
 # ── dplyr_reconstruct() ───────────────────────────────────────────────────────
 
 test_that("dplyr_reconstruct() errors when a design variable is removed", {
-  d    <- make_all_designs()$taylor
-  bad  <- d@data[, setdiff(names(d@data), d@variables$weights), drop = FALSE]
+  d <- make_all_designs()$taylor
+  bad <- d@data[, setdiff(names(d@data), d@variables$weights), drop = FALSE]
   expect_error(
     dplyr_reconstruct(bad, d),
     class = "surveycore_error_design_var_removed"
@@ -178,18 +180,18 @@ test_that("dplyr_reconstruct() errors when a design variable is removed", {
 })
 
 test_that("dplyr_reconstruct() cleans up visible_vars for columns removed by dplyr", {
-  d  <- make_all_designs()$taylor
-  d2 <- select(d, y1, y2)  # visible_vars = c("y1", "y2")
+  d <- make_all_designs()$taylor
+  d2 <- select(d, y1, y2) # visible_vars = c("y1", "y2")
   # Simulate dplyr removing y2 from the data (e.g., inside an operation)
   smaller_data <- d2@data[, setdiff(names(d2@data), "y2"), drop = FALSE]
-  result       <- dplyr_reconstruct(smaller_data, d2)
+  result <- dplyr_reconstruct(smaller_data, d2)
   # visible_vars should drop y2 since it no longer exists
   expect_false("y2" %in% (result@variables$visible_vars %||% character(0)))
   test_invariants(result)
 })
 
 test_that("dplyr_reconstruct() preserves all design variables and class", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- dplyr_reconstruct(d@data, d)
   expect_true(inherits(result, class(d)[[1L]]))
   test_invariants(result)
@@ -198,8 +200,8 @@ test_that("dplyr_reconstruct() preserves all design variables and class", {
 # ── relocate() ────────────────────────────────────────────────────────────────
 
 test_that("relocate() with visible_vars reorders visible_vars, not @data columns", {
-  d  <- make_all_designs()$taylor
-  d2 <- select(d, y1, y2, y3)         # visible_vars = c("y1", "y2", "y3")
+  d <- make_all_designs()$taylor
+  d2 <- select(d, y1, y2, y3) # visible_vars = c("y1", "y2", "y3")
   d3 <- relocate(d2, y3, .before = y1)
 
   # visible_vars reordered
@@ -212,22 +214,22 @@ test_that("relocate() with visible_vars reorders visible_vars, not @data columns
 })
 
 test_that("relocate() without visible_vars reorders @data directly", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   # No select() call: visible_vars is NULL
   expect_null(d@variables$visible_vars)
   d2 <- relocate(d, y3, .before = y1)
   # @data was reordered
   y3_pos_before <- which(names(d@data) == "y3")
   y1_pos_before <- which(names(d@data) == "y1")
-  y3_pos_after  <- which(names(d2@data) == "y3")
-  y1_pos_after  <- which(names(d2@data) == "y1")
+  y3_pos_after <- which(names(d2@data) == "y3")
+  y1_pos_after <- which(names(d2@data) == "y1")
   expect_lt(y3_pos_after, y1_pos_after)
   test_invariants(d2)
 })
 
 test_that("relocate() passes @groups through unchanged", {
-  d      <- make_all_designs()$taylor
-  d2     <- group_by(d, group)
+  d <- make_all_designs()$taylor
+  d2 <- group_by(d, group)
   result <- relocate(d2, y3, .before = y1)
   expect_identical(result@groups, d2@groups)
 })
@@ -235,20 +237,20 @@ test_that("relocate() passes @groups through unchanged", {
 # ── pull() ────────────────────────────────────────────────────────────────────
 
 test_that("pull() returns a plain vector, not a survey object", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- pull(d, y1)
   expect_true(is.numeric(result))
   expect_false(inherits(result, "S7_object"))
 })
 
 test_that("pull() on a design variable returns the weight vector", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- pull(d, wt)
   expect_identical(result, d@data$wt)
 })
 
 test_that("pull() with name = argument returns a named vector", {
-  d      <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   result <- pull(d, y1, name = group)
   expect_named(result)
 })
@@ -269,7 +271,7 @@ test_that("glimpse() with visible_vars NULL shows all columns and returns invisi
 })
 
 test_that("glimpse() after select() shows only user-selected columns", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- select(d, y1, y2)
   # Capture glimpse output and check it only shows y1 and y2
   out <- capture.output(glimpse(d2))

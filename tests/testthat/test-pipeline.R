@@ -15,7 +15,7 @@
 # ── Test 1: domain survival through select() ─────────────────────────────────
 
 test_that("pipeline 1: domain column survives filter() |> select()", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- filter(d, y1 > 0)
   d3 <- select(d2, y1, y2)
 
@@ -36,10 +36,10 @@ test_that("pipeline 1: domain column survives filter() |> select()", {
 # ── Test 2: visible_vars propagation ─────────────────────────────────────────
 
 test_that("pipeline 2: visible_vars propagates through select() |> mutate() |> rename()", {
-  d  <- make_all_designs()$taylor
-  d2 <- select(d, y1, y2)                  # visible_vars = c("y1", "y2")
-  d3 <- mutate(d2, y3_new = y2 * 2)        # visible_vars = c("y1", "y2", "y3_new")
-  d4 <- rename(d3, outcome1 = y1)          # visible_vars = c("outcome1", "y2", "y3_new")
+  d <- make_all_designs()$taylor
+  d2 <- select(d, y1, y2) # visible_vars = c("y1", "y2")
+  d3 <- mutate(d2, y3_new = y2 * 2) # visible_vars = c("y1", "y2", "y3_new")
+  d4 <- rename(d3, outcome1 = y1) # visible_vars = c("outcome1", "y2", "y3_new")
 
   test_invariants(d4)
   expect_identical(d4@variables$visible_vars, c("outcome1", "y2", "y3_new"))
@@ -48,7 +48,7 @@ test_that("pipeline 2: visible_vars propagates through select() |> mutate() |> r
 # ── Test 3: @groups survival through multiple verbs ───────────────────────────
 
 test_that("pipeline 3: @groups survives filter() |> select() |> mutate() |> arrange()", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- group_by(d, group)
   d3 <- d2 |>
     filter(y1 > 0) |>
@@ -63,11 +63,11 @@ test_that("pipeline 3: @groups survives filter() |> select() |> mutate() |> arra
 # ── Test 4: filter chaining equals single filter ──────────────────────────────
 
 test_that("pipeline 4: filter(A) |> filter(B) equals filter(A, B) for domain values", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   mn <- mean(d@data$y1)
 
   d_chained <- d |> filter(y1 > mn) |> filter(y2 > 0)
-  d_single  <- d  |> filter(y1 > mn, y2 > 0)
+  d_single <- d |> filter(y1 > mn, y2 > 0)
 
   test_invariants(d_chained)
   test_invariants(d_single)
@@ -82,8 +82,8 @@ test_that("pipeline 4: filter(A) |> filter(B) equals filter(A, B) for domain val
 # ── Test 5: @metadata through pipeline ───────────────────────────────────────
 
 test_that("pipeline 5: variable label persists through select() |> rename() |> mutate()", {
-  d  <- make_all_designs()$taylor
-  d  <- surveycore::set_var_label(d, y1, "Outcome variable 1")
+  d <- make_all_designs()$taylor
+  d <- surveycore::set_var_label(d, y1, "Outcome variable 1")
 
   d2 <- select(d, y1, y2)
   d3 <- rename(d2, outcome1 = y1)
@@ -99,7 +99,7 @@ test_that("pipeline 5: variable label persists through select() |> rename() |> m
 # ── Test 6: full Phase 1 prep pipeline ───────────────────────────────────────
 
 test_that("pipeline 6: full prep pipeline has correct class, invariants, @groups, and domain", {
-  d  <- make_all_designs()$taylor
+  d <- make_all_designs()$taylor
   d2 <- d |>
     filter(y1 > 0) |>
     select(y1, y2, group) |>

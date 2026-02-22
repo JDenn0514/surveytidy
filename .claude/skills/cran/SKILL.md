@@ -1,13 +1,15 @@
 ---
 name: cran
 description: >
-  Full-arc CRAN submission workflow for R packages: preparation through
-  post-acceptance. Use when: (1) Preparing a package for first CRAN submission,
-  (2) Preparing a resubmission after rejection, (3) Running and interpreting
-  R CMD check --as-cran output, (4) Writing or updating cran-comments.md,
-  (5) Responding to CRAN reviewer feedback point-by-point, (6) Triaging
-  ERRORs, WARNINGs, and NOTEs from R CMD check, (7) Verifying DESCRIPTION
-  metadata, documentation, and URL compliance before submission.
+  Use when user asks for "Run CRAN checklist". Full-arc CRAN submission 
+  workflow for R packages: preparation through post-acceptance. Use when: 
+  (1) Preparing a package for first CRAN submission,
+  (2) Preparing a resubmission after rejection, 
+  (3) Running and interpreting R CMD check --as-cran output, 
+  (4) Writing or updating cran-comments.md,
+  (5) Responding to CRAN reviewer feedback point-by-point, 
+  (6) Triaging ERRORs, WARNINGs, and NOTEs from R CMD check, 
+  (7) Verifying DESCRIPTION metadata, documentation, and URL compliance before submission.
 ---
 
 # CRAN Submission

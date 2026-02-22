@@ -22,7 +22,6 @@
 #   slice_max.survey_base()      — n rows with highest values of a variable
 #   slice_sample.survey_base()   — random sample of rows
 
-
 # `check_fn` is a free variable in functions created by .make_slice_method().
 # R CMD check cannot determine from static analysis that it is always defined
 # in the enclosing environment via the factory — suppress the note here.
@@ -130,7 +129,9 @@ arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
   force(check_fn)
   function(.data, ...) {
     .warn_physical_subset(fn_name)
-    if (!is.null(check_fn)) check_fn(...)
+    if (!is.null(check_fn)) {
+      check_fn(...)
+    }
     new_data <- dplyr_fn(.data@data, ...)
     if (nrow(new_data) == 0L) {
       cli::cli_abort(
@@ -149,26 +150,32 @@ arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
 
 #' @describeIn arrange.survey_base Select rows by position.
 slice.survey_base <- .make_slice_method(
-  "slice", dplyr::slice
+  "slice",
+  dplyr::slice
 )
 #' @describeIn arrange.survey_base Select first `n` rows.
 slice_head.survey_base <- .make_slice_method(
-  "slice_head", dplyr::slice_head
+  "slice_head",
+  dplyr::slice_head
 )
 #' @describeIn arrange.survey_base Select last `n` rows.
 slice_tail.survey_base <- .make_slice_method(
-  "slice_tail", dplyr::slice_tail
+  "slice_tail",
+  dplyr::slice_tail
 )
 #' @describeIn arrange.survey_base Select rows with the smallest values.
 slice_min.survey_base <- .make_slice_method(
-  "slice_min", dplyr::slice_min
+  "slice_min",
+  dplyr::slice_min
 )
 #' @describeIn arrange.survey_base Select rows with the largest values.
 slice_max.survey_base <- .make_slice_method(
-  "slice_max", dplyr::slice_max
+  "slice_max",
+  dplyr::slice_max
 )
 #' @describeIn arrange.survey_base Randomly sample rows.
 slice_sample.survey_base <- .make_slice_method(
-  "slice_sample", dplyr::slice_sample,
+  "slice_sample",
+  dplyr::slice_sample,
   check_fn = .check_slice_sample_weight_by
 )

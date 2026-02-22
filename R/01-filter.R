@@ -27,7 +27,6 @@
 # Note: dplyr_reconstruct.survey_base() was moved to R/utils.R on
 # feature/select so it is co-located with the other multi-verb helpers.
 
-
 # ── filter() ─────────────────────────────────────────────────────────────────
 
 #' Filter survey data using domain estimation
@@ -101,7 +100,7 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   } else {
     evaluated <- vector("list", length(conditions))
     for (i in seq_along(conditions)) {
-      q      <- conditions[[i]]
+      q <- conditions[[i]]
       result <- rlang::eval_tidy(q, data = .data@data)
       if (!is.logical(result)) {
         the_class <- class(result)[[1L]]
@@ -142,8 +141,8 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   }
 
   # Store domain column in @data; accumulate condition quosures in @variables
-  .data@data[[domain_col]]  <- domain_mask
-  .data@variables$domain    <- c(.data@variables$domain, conditions)
+  .data@data[[domain_col]] <- domain_mask
+  .data@variables$domain <- c(.data@variables$domain, conditions)
   .data
 }
 
@@ -172,7 +171,7 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 subset.survey_base <- function(x, condition, ...) {
   .warn_physical_subset("subset")
 
-  cond_quo  <- rlang::enquo(condition)
+  cond_quo <- rlang::enquo(condition)
   keep_mask <- rlang::eval_tidy(cond_quo, data = x@data)
   keep_mask[is.na(keep_mask)] <- FALSE
 

@@ -9,7 +9,6 @@
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/00-zzz.R for the registration calls.
 
-
 # ── drop_na() ─────────────────────────────────────────────────────────────────
 
 #' Remove rows containing missing values from a survey design object
@@ -49,7 +48,7 @@ drop_na.survey_base <- function(data, ...) {
     # No column spec: any NA in any column triggers removal
     target_cols <- names(data@data)
   } else {
-    pos         <- tidyselect::eval_select(rlang::expr(c(...)), data@data)
+    pos <- tidyselect::eval_select(rlang::expr(c(...)), data@data)
     target_cols <- names(pos)
   }
 
