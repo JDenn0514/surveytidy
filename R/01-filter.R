@@ -87,7 +87,7 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
         "x" = "{.arg .by} is not supported for survey design objects.",
         "i" = "Use {.fn group_by} to add grouping to a survey design."
       ),
-      class = "surveycore_error_filter_by_unsupported"
+      class = "surveytidy_error_filter_by_unsupported"
     )
   }
 
