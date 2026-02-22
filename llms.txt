@@ -6,45 +6,66 @@ package. It makes survey analysis feel natural to tidyverse users:
 
 ``` r
 library(surveycore)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
 library(surveytidy)
 
-# Build a survey design
-d <- as_survey(nhanes, ids = sdmvpsu, strata = sdmvstra,
-               weights = wtmec2yr, nest = TRUE)
+# Build a survey design from the 2025 Pew NPORS survey
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Use familiar dplyr verbs — survey design is preserved automatically
-adults <- d |>
-  filter(ridageyr >= 18) |>        # domain estimation, not row removal
-  select(ridageyr, bmxbmi, riagendr) |>
-  group_by(riagendr) |>
-  mutate(bmi_centered = bmxbmi - mean(bmxbmi, na.rm = TRUE))
+young_adults <- d |>
+  # use filter to perform domain estimation (18–29 year olds)
+  filter(agecat == 1) |>
+  # keep only the columns of interest
+  select(agecat, gender, partysum, fin_sit) |>
+  # group by gender
+  group_by(gender) |>
+  # flag respondents reporting financial difficulty
+  mutate(struggling = as.integer(fin_sit >= 3))
 ```
 
 ## Key idea: `filter()` marks rows, never removes them
 
 The most important statistical feature of surveytidy is that
-[`filter()`](https://rdrr.io/r/stats/filter.html) uses **domain
-estimation** rather than physical subsetting:
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) uses
+**domain estimation** rather than physical subsetting:
 
 ``` r
-# This keeps all 9,756 rows — variance estimation stays correct
-women <- d |> filter(riagendr == 2)
-nrow(women@data)  #> 9756
+# This keeps all 5,022 rows — variance estimation stays correct
+republicans <- d |> filter(partysum == 1)
+nrow(republicans@data) #> 5022
+#> [1] 5022
 
-# This physically removes rows — variance estimates for women would be wrong
-wrong <- subset(d, riagendr == 2)  # issues a warning
+# This physically removes rows — variance estimates would be wrong
+wrong <- subset(d, partysum == 1) # issues a warning
+#> Warning: ! `subset()` physically removes rows from the survey data.
+#> ℹ This is different from `filter()`, which preserves all rows for correct
+#>   variance estimation.
+#> ✔ Use `filter()` for subpopulation analyses instead.
 ```
 
-When you call [`filter()`](https://rdrr.io/r/stats/filter.html),
+When you call
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
 surveytidy writes a logical column `..surveycore_domain..` to the data.
 Phase 1 estimation functions read this column to restrict calculations
 to the domain while retaining all rows for correct variance estimation.
+Simply put, this calculates the variance for subpopulations correctly.
 
 ## Installation
 
 ``` r
 # install.packages("pak")
-pak::pak("JDenn0514/surveycore")  # required first
+# install surveycore first, to create surveycore style survey objects
+pak::pak("JDenn0514/surveycore")
+# install surveytidy
 pak::pak("JDenn0514/surveytidy")
 ```
 
@@ -54,54 +75,184 @@ pak::pak("JDenn0514/surveytidy")
 
 ``` r
 # Single condition
-adults <- d |> filter(ridageyr >= 18)
+republicans <- d |> filter(partysum == 1)
 
 # Chained filters AND the conditions together
-adult_women <- d |>
-  filter(ridageyr >= 18) |>
-  filter(riagendr == 2)
+rep_women <- d |>
+  filter(partysum == 1) |>
+  filter(gender == 2)
 
 # Equivalent — both produce identical domain columns
-adult_women2 <- d |> filter(ridageyr >= 18, riagendr == 2)
+rep_women2 <- d |> filter(partysum == 1, gender == 2)
 ```
 
 ### Selecting columns
 
 ``` r
-# Design variables (weights, strata, PSU) are always kept in @data
+# Design variables (weights, strata) are always kept in @data
 # even when not selected — they are required for variance estimation
-d2 <- select(d, ridageyr, bmxbmi, riagendr)
+d2 <- select(d, party, gender, agecat, cregion)
 
-# Design variables are hidden from print() but still present
-print(d2)     # shows ridageyr, bmxbmi, riagendr only
-d2@data$wt    # still accessible
-
-# Reorder visible columns
-d3 <- relocate(d2, riagendr, .before = ridageyr)
+# Design variables are hidden from print() but still present in @data
+print(d2)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 4
+#>    party gender agecat cregion
+#>    <dbl>  <dbl>  <dbl>   <dbl>
+#>  1     3      2      4       4
+#>  2     2      1      4       4
+#>  3     1      2      4       4
+#>  4     1      1      2       2
+#>  5     1      1      4       1
+#>  6     1      1      4       2
+#>  7     3      1      3       3
+#>  8     3      2      4       4
+#>  9     3      2      3       3
+#> 10     2      2      2       4
+#> # ℹ 5,012 more rows
+#> 
+#> ℹ Design variables preserved but hidden: weight and stratum.
+#> ℹ Use `print(x, full = TRUE)` to show all variables.
 ```
 
 ### Mutating
 
 ``` r
 # Add new columns
-d |> mutate(bmi_kg_m2 = bmxbmi,
-            age_group  = cut(ridageyr, c(0, 18, 40, 65, Inf)))
+d |>
+  mutate(
+    economy_poor = as.integer(econ1mod >= 3),
+    south = as.integer(cregion == 3)
+  )
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 67
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 60 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
 # Modifying a design variable warns you
-d |> mutate(wtmec2yr = wtmec2yr * 0.5)
-#> Warning: mutate() modified design variable(s): `wtmec2yr`
+d |> mutate(weight = weight * 0.5)
+#> Warning: ! mutate() modified design variable(s): weight.
+#> ℹ The survey design has been updated to reflect the new values.
+#> ✔ Use `update_design()` if you intend to modify design variables. Modifying
+#>   them via `mutate()` may produce unexpected variance estimates.
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 65
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+#> Warning: mutate() modified design variable(s): `weight`
 
 # Grouped mutate via group_by()
 d |>
-  group_by(riagendr) |>
-  mutate(bmi_pctile = rank(bmxbmi) / n())
+  group_by(partysum) |>
+  mutate(econ_rank = rank(econ1mod) / n())
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> Groups: partysum
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 ```
 
 ### Renaming
 
 ``` r
 # @variables and @metadata stay in sync automatically
-d |> rename(age = ridageyr, bmi = bmxbmi)
+d |>
+  rename(
+    party_affiliation = partysum,
+    age_group = agecat
+  )
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 65
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 ```
 
 ### Sorting
@@ -109,22 +260,72 @@ d |> rename(age = ridageyr, bmi = bmxbmi)
 ``` r
 # Rows sort; domain column moves with them
 d |>
-  filter(ridageyr >= 18) |>
-  arrange(bmxbmi)
+  filter(partysum == 1) |>
+  arrange(agecat)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1  13673     1        1               9      10 2025-03-02      2025-03-02   
+#>  2   9247     1        1               9       7 2025-03-03      2025-03-03   
+#>  3  14402     1        1               9      10 2025-03-09      2025-03-09   
+#>  4   2820     1        1               9       9 2025-02-24      2025-02-24   
+#>  5  12802     1        1               9       6 2025-02-24      2025-02-24   
+#>  6   7003     1        1               9       7 2025-02-25      2025-02-25   
+#>  7   8391     1        2              10       7 2025-03-14      2025-03-14   
+#>  8   2499     1        1               9      10 2025-02-25      2025-02-25   
+#>  9     80     1        1               9       1 2025-03-12      2025-03-12   
+#> 10   5357     1        1               9      10 2025-03-15      2025-03-15   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Sort by group first, then by value
+# Sort by group first, then by value within group
 d |>
-  group_by(riagendr) |>
-  arrange(bmxbmi, .by_group = TRUE)
+  group_by(partysum) |>
+  arrange(agecat, .by_group = TRUE)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> Groups: partysum
+#> 
+#> # A tibble: 5,022 × 65
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1  14402     1        1               9      10 2025-03-09      2025-03-09   
+#>  2   8391     1        2              10       7 2025-03-14      2025-03-14   
+#>  3   2499     1        1               9      10 2025-02-25      2025-02-25   
+#>  4     80     1        1               9       1 2025-03-12      2025-03-12   
+#>  5   5357     1        1               9      10 2025-03-15      2025-03-15   
+#>  6  10841     1        1               9       5 2025-03-25      2025-03-25   
+#>  7   8646     1        2               9       8 2025-02-28      2025-02-28   
+#>  8   5576     1        1               9      10 2025-02-27      2025-02-27   
+#>  9  11753     2        1              NA       5 2025-05-01      2025-05-01   
+#> 10  17387     2        1              NA       7 2025-05-27      2025-05-27   
+#> # ℹ 5,012 more rows
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 ```
 
 ### Grouping
 
 ``` r
-d2 <- group_by(d, riagendr)         # set groups
-d3 <- group_by(d2, ridageyr, .add = TRUE)  # add to groups
-d4 <- ungroup(d3, riagendr)         # partial ungroup
-d5 <- ungroup(d3)                   # remove all groups
+d2 <- group_by(d, partysum) # set groups
+d3 <- group_by(d2, gender, .add = TRUE) # add to groups
+d4 <- ungroup(d3) # remove all groups
 ```
 
 ### Physical row operations (use sparingly)
@@ -132,8 +333,66 @@ d5 <- ungroup(d3)                   # remove all groups
 ``` r
 # These physically remove rows and always issue a warning.
 # Use filter() instead for subpopulation analyses.
-slice_head(d, n = 100)    # first 100 rows
-drop_na(d, bmxbmi)        # remove rows with NA in bmxbmi
+slice_head(d, n = 100) # first 100 rows
+#> Warning: ! `slice_head()` physically removes rows from the survey data.
+#> ℹ This is different from `filter()`, which preserves all rows for correct
+#>   variance estimation.
+#> ✔ Use `filter()` for subpopulation analyses instead.
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 100
+#> 
+#> # A tibble: 100 × 65
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 90 more rows
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+subset(d, !is.na(fin_sit)) # remove rows with NA in fin_sit
+#> Warning: ! `subset()` physically removes rows from the survey data.
+#> ℹ This is different from `filter()`, which preserves all rows for correct
+#>   variance estimation.
+#> ✔ Use `filter()` for subpopulation analyses instead.
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 65
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 ```
 
 ## Relationship to surveycore
@@ -161,11 +420,11 @@ GPL-3
 
 ## Filtering and subsetting
 
-[`filter()`](https://rdrr.io/r/stats/filter.html) uses domain estimation
-— it marks rows as in-domain without removing them, preserving correct
-variance estimation. Physical row removal is available via
-[`subset()`](https://rdrr.io/r/base/subset.html), `slice_*()`, and
-`drop_na()` with appropriate warnings.
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) uses
+domain estimation — it marks rows as in-domain without removing them,
+preserving correct variance estimation. Physical row removal is
+available via [`subset()`](https://rdrr.io/r/base/subset.html),
+`slice_*()`, and `drop_na()` with appropriate warnings.
 
 - [`filter(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
   [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
@@ -186,7 +445,10 @@ explicitly selected.
 
 ## Modifying columns
 
-Add or modify columns (`mutate()`) and rename them (`rename()`). Both
+Add or modify columns
+([`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)) and
+rename them
+([`rename()`](https://dplyr.tidyverse.org/reference/rename.html)). Both
 verbs keep the survey design specification and metadata in sync.
 
 - [`mutate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
@@ -196,9 +458,11 @@ verbs keep the survey design specification and metadata in sync.
 
 ## Row ordering and physical selection
 
-Sort rows with `arrange()`. The `slice_*()` family physically removes
-rows — use [`filter()`](https://rdrr.io/r/stats/filter.html) instead for
-subpopulation analyses.
+Sort rows with
+[`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html). The
+`slice_*()` family physically removes rows — use
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) instead
+for subpopulation analyses.
 
 - [`arrange(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
   [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
@@ -212,7 +476,9 @@ subpopulation analyses.
 ## Grouping
 
 Store grouping variables in `@groups` for use by estimation functions
-and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
+and grouped
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html). No
+`grouped_df` attribute is added to `@data`.
 
 - [`group_by(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
   [`ungroup(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)

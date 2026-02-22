@@ -2,11 +2,11 @@
 
 ## Filtering and subsetting
 
-[`filter()`](https://rdrr.io/r/stats/filter.html) uses domain estimation
-— it marks rows as in-domain without removing them, preserving correct
-variance estimation. Physical row removal is available via
-[`subset()`](https://rdrr.io/r/base/subset.html), `slice_*()`, and
-`drop_na()` with appropriate warnings.
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) uses
+domain estimation — it marks rows as in-domain without removing them,
+preserving correct variance estimation. Physical row removal is
+available via [`subset()`](https://rdrr.io/r/base/subset.html),
+`slice_*()`, and `drop_na()` with appropriate warnings.
 
 - [`filter(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
   [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
@@ -27,7 +27,10 @@ explicitly selected.
 
 ## Modifying columns
 
-Add or modify columns (`mutate()`) and rename them (`rename()`). Both
+Add or modify columns
+([`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)) and
+rename them
+([`rename()`](https://dplyr.tidyverse.org/reference/rename.html)). Both
 verbs keep the survey design specification and metadata in sync.
 
 - [`mutate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
@@ -37,9 +40,11 @@ verbs keep the survey design specification and metadata in sync.
 
 ## Row ordering and physical selection
 
-Sort rows with `arrange()`. The `slice_*()` family physically removes
-rows — use [`filter()`](https://rdrr.io/r/stats/filter.html) instead for
-subpopulation analyses.
+Sort rows with
+[`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html). The
+`slice_*()` family physically removes rows — use
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) instead
+for subpopulation analyses.
 
 - [`arrange(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
   [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
@@ -53,7 +58,9 @@ subpopulation analyses.
 ## Grouping
 
 Store grouping variables in `@groups` for use by estimation functions
-and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
+and grouped
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html). No
+`grouped_df` attribute is added to `@data`.
 
 - [`group_by(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
   [`ungroup(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)

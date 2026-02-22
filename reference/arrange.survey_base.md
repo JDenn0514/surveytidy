@@ -1,14 +1,20 @@
 # Sort rows and physically select rows of a survey design object
 
-- `arrange()` sorts rows in `@data`. The domain column moves with the
-  rows — no update to `@variables$domain` is needed. Supports
-  `.by_group = TRUE` using `@groups` set by
+- [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)
+  sorts rows in `@data`. The domain column moves with the rows — no
+  update to `@variables$domain` is needed. Supports `.by_group = TRUE`
+  using `@groups` set by
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
 
-- `slice()`, `slice_head()`, `slice_tail()`, `slice_min()`,
-  `slice_max()`, and `slice_sample()` **physically remove rows** and
-  always issue `surveycore_warning_physical_subset`. They error if the
-  result would have 0 rows. Prefer
+- [`slice()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html), and
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html)
+  **physically remove rows** and always issue
+  `surveycore_warning_physical_subset`. They error if the result would
+  have 0 rows. Prefer
   [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
   for subpopulation analyses.
 

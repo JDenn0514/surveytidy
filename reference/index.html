@@ -32,7 +32,7 @@
     <div class="section level2">
       <h2 id="filtering-and-subsetting">Filtering and subsetting<a class="anchor" aria-label="anchor" href="#filtering-and-subsetting"></a></h2>
 
-      <div class="section-desc"><p><code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code> uses domain estimation — it marks rows as in-domain without removing them, preserving correct variance estimation. Physical row removal is available via <code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>, and <code>drop_na()</code> with appropriate warnings.</p></div>
+      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> uses domain estimation — it marks rows as in-domain without removing them, preserving correct variance estimation. Physical row removal is available via <code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>, and <code>drop_na()</code> with appropriate warnings.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -64,7 +64,7 @@
       </dl></div><div class="section level2">
       <h2 id="modifying-columns">Modifying columns<a class="anchor" aria-label="anchor" href="#modifying-columns"></a></h2>
 
-      <div class="section-desc"><p>Add or modify columns (<code>mutate()</code>) and rename them (<code>rename()</code>). Both verbs keep the survey design specification and metadata in sync.</p></div>
+      <div class="section-desc"><p>Add or modify columns (<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>) and rename them (<code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code>). Both verbs keep the survey design specification and metadata in sync.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -87,7 +87,7 @@
       </dl></div><div class="section level2">
       <h2 id="row-ordering-and-physical-selection">Row ordering and physical selection<a class="anchor" aria-label="anchor" href="#row-ordering-and-physical-selection"></a></h2>
 
-      <div class="section-desc"><p>Sort rows with <code>arrange()</code>. The <code>slice_*()</code> family physically removes rows — use <code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code> instead for subpopulation analyses.</p></div>
+      <div class="section-desc"><p>Sort rows with <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code>. The <code>slice_*()</code> family physically removes rows — use <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> instead for subpopulation analyses.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -103,7 +103,7 @@
       </dl></div><div class="section level2">
       <h2 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a></h2>
 
-      <div class="section-desc"><p>Store grouping variables in <code>@groups</code> for use by estimation functions and grouped <code>mutate()</code>. No <code>grouped_df</code> attribute is added to <code>@data</code>.</p></div>
+      <div class="section-desc"><p>Store grouping variables in <code>@groups</code> for use by estimation functions and grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. No <code>grouped_df</code> attribute is added to <code>@data</code>.</p></div>
 
       <dl></dl></div><div class="section level2">
 

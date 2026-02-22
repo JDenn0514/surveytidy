@@ -59,11 +59,11 @@ column is independent of the survey design weights.
 
     <div class="ref-description section level2">
 
-<ul><li><p><code>arrange()</code> sorts rows in <code>@data</code>. The domain column moves with the rows —
+<ul><li><p><code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code> sorts rows in <code>@data</code>. The domain column moves with the rows —
 no update to <code>@variables$domain</code> is needed. Supports <code>.by_group = TRUE</code>
 using <code>@groups</code> set by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>.</p></li>
-<li><p><code>slice()</code>, <code>slice_head()</code>, <code>slice_tail()</code>, <code>slice_min()</code>, <code>slice_max()</code>,
-and <code>slice_sample()</code> <strong>physically remove rows</strong> and always issue
+<li><p><code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_min()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max()</a></code>,
+and <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample()</a></code> <strong>physically remove rows</strong> and always issue
 <code>surveycore_warning_physical_subset</code>. They error if the result would have
 0 rows. Prefer <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code> for subpopulation analyses.</p></li>
 <li><p><code>slice_sample(weight_by = )</code> additionally warns with
@@ -74,25 +74,25 @@ column is independent of the survey design weights.</p></li>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">arrange</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .by_group <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .by_group <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice_head</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice_tail</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice_min</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_min</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice_max</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">slice_sample</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
