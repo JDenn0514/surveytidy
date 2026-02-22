@@ -1,4 +1,4 @@
-# R/00-zzz.R
+# R/zzz.R
 #
 # Package startup hook.
 #
@@ -160,7 +160,7 @@
     envir = asNamespace("dplyr")
   )
 
-  # ── feature/tidyr ─────────────────────────────────────────────────────────
+  # ── feature/drop-na ───────────────────────────────────────────────────────
 
   registerS3method(
     "drop_na",

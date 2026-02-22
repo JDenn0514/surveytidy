@@ -1,4 +1,4 @@
-# R/06-group-by.R
+# R/group-by.R
 #
 # group_by() and ungroup() for survey design objects.
 #
@@ -18,7 +18,7 @@
 # dplyr semantics exactly.
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
-# See R/00-zzz.R for the registration calls.
+# See R/zzz.R for the registration calls.
 
 # ── group_by() ────────────────────────────────────────────────────────────────
 
