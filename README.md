@@ -339,7 +339,6 @@ d4 <- ungroup(d3) # remove all groups
 ### Physical row operations (use sparingly)
 
 ``` r
-library(tidyr)
 # These physically remove rows and always issue a warning.
 # Use filter() instead for subpopulation analyses.
 slice_head(d, n = 100) # first 100 rows
@@ -372,8 +371,8 @@ slice_head(d, n = 100) # first 100 rows
 #> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
-drop_na(d, fin_sit) # remove rows with NA in fin_sit
-#> Warning: ! `drop_na()` physically removes rows from the survey data.
+subset(d, !is.na(fin_sit)) # remove rows with NA in fin_sit
+#> Warning: ! `subset()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct
 #>   variance estimation.
 #> ✔ Use `filter()` for subpopulation analyses instead.

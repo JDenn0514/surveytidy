@@ -158,11 +158,10 @@ d4 <- ungroup(d3) # remove all groups
 ### Physical row operations (use sparingly)
 
 ```{r}
-library(tidyr)
 # These physically remove rows and always issue a warning.
 # Use filter() instead for subpopulation analyses.
 slice_head(d, n = 100) # first 100 rows
-drop_na(d, fin_sit) # remove rows with NA in fin_sit
+subset(d, !is.na(fin_sit)) # remove rows with NA in fin_sit
 ```
 
 ## Relationship to surveycore
