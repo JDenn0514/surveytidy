@@ -54,7 +54,7 @@ survey_taylor <- S7::new_class(
 ```
 
 ### Line length
-**80 characters** maximum. Enforced by `air` and `lintr`.
+**80 characters** maximum. Enforced by `air`.
 
 For long function signatures, break after the opening `(` and align arguments:
 ```r
@@ -96,7 +96,7 @@ pak::pak("posit-dev/air")
 Do not manually adjust spacing after running `air`. If `air` output looks wrong, there's a syntax problem — don't work around it.
 
 ### Pipe operator
-**Native `|>` only.** `%>%` is never used. Enforced by `lintr::pipe_consistency_linter("native")`.
+**Native `|>` only.** `%>%` is never used.
 
 ```r
 # Correct
@@ -432,15 +432,11 @@ When a single-use inline helper grows a second call site, promote it to `07-util
 
 ## 5. Tooling Configuration
 
-### `.lintr` (in package root)
-```yaml
-linters: linters_with_defaults(
-  line_length_linter(80),
-  pipe_consistency_linter("native"),
-  object_name_linter("snake_case"),
-  assignment_linter()
-)
-exclusions: list("data-raw")
+### `air.toml` (in package root)
+```toml
+[format]
+line-width = 80
+indent-width = 2
 ```
 
 ### `.editorconfig` (in package root)
@@ -460,12 +456,12 @@ indent_size = 2
 ```
 
 ### `air` setup
-```r
+```bash
 # Format the entire package
-air::format_package()
+air format .
 
-# Format a single file (or use the RStudio/Positron addin)
-air::format_file("R/03-constructors.R")
+# Format a single file
+air format R/03-constructors.R
 ```
 
-Run `air::format_package()` before opening a PR. Do not commit `air`-reformatted files in the same commit as functional changes — reformat first, then make the change.
+Run `air format .` before opening a PR. Do not commit `air`-reformatted files in the same commit as functional changes — reformat first, then make the change.
