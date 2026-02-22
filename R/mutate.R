@@ -1,4 +1,4 @@
-# R/03-mutate.R
+# R/mutate.R
 #
 # mutate() for survey design objects.
 #
@@ -13,7 +13,7 @@
 # is documented and accepted for Phase 0.5.
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
-# See R/00-zzz.R for the registration calls.
+# See R/zzz.R for the registration calls.
 
 # ── mutate() ──────────────────────────────────────────────────────────────────
 

@@ -7,7 +7,7 @@
 #   .protected_cols()               — columns that must never leave @data
 #   .warn_physical_subset()         — standard warning for row-removal verbs
 #   dplyr_reconstruct.survey_base() — class preservation in complex pipelines
-#                                     (moved from R/01-filter.R on feature/select)
+#                                     (moved from R/filter.R on feature/select)
 
 # ── surveycore internal wrappers ─────────────────────────────────────────────
 
@@ -82,8 +82,8 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # ── Physical subset warning ───────────────────────────────────────────────────
 
 # Issues the standard warning for operations that physically remove rows.
-# Used by subset.survey_base() (R/01-filter.R) and slice_*.survey_base()
-# (R/05-arrange.R) and drop_na.survey_base() (R/07-tidyr.R).
+# Used by subset.survey_base() (R/filter.R) and slice_*.survey_base()
+# (R/slice.R) and drop_na.survey_base() (R/drop-na.R).
 #
 # fn_name: the function name shown in the warning message, e.g. "slice_head"
 .warn_physical_subset <- function(fn_name) {

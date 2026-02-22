@@ -1,4 +1,4 @@
-# R/02-select.R
+# R/select.R
 #
 # Column-selection verbs for survey design objects.
 #
@@ -11,7 +11,7 @@
 # pull() and glimpse() are thin wrappers around dplyr internals.
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
-# See R/00-zzz.R for the registration calls.
+# See R/zzz.R for the registration calls.
 #
 # Functions defined here:
 #   select.survey_base()   — column selection with design-var preservation

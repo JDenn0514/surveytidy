@@ -1,13 +1,13 @@
-# R/07-tidyr.R
+# R/drop-na.R
 #
-# tidyr verbs for survey design objects.
+# drop_na() for survey design objects.
 #
 # drop_na() physically removes rows where specified columns contain NA.
 # Like slice_*(), it always warns (surveycore_warning_physical_subset) and
 # errors on 0-row results (surveytidy_error_subset_empty_result).
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
-# See R/00-zzz.R for the registration calls.
+# See R/zzz.R for the registration calls.
 
 # ── drop_na() ─────────────────────────────────────────────────────────────────
 

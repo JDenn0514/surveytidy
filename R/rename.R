@@ -1,4 +1,4 @@
-# R/04-rename.R
+# R/rename.R
 #
 # rename() for survey design objects.
 #
@@ -13,7 +13,7 @@
 # is automatically kept in sync — this is a normal, valid operation.
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
-# See R/00-zzz.R for the registration calls.
+# See R/zzz.R for the registration calls.
 
 # ── rename() ──────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-# R/01-filter.R
+# R/filter.R
 #
 # Domain-aware filter() for survey design objects.
 #
@@ -18,7 +18,7 @@
 # registerS3method() with the namespaced class string
 # "surveycore::survey_base". S3 dispatch finds them because the class
 # vector for S7 objects includes "surveycore::survey_base".
-# See R/00-zzz.R for the registration.
+# See R/zzz.R for the registration.
 #
 # Functions defined here:
 #   filter.survey_base()   — domain estimation (all verbs route here)
