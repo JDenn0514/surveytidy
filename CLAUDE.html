@@ -89,23 +89,25 @@
 <span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"dplyr"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This registers the S3 method with dplyr’s environment so dispatch works.</p>
-<p>See <code>R/00-zzz.R</code> for full setup.</p>
+<p>See <code>R/zzz.R</code> for full setup.</p>
 </div>
 <div class="section level2">
 <h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a></h2>
 <div class="section level3">
 <h3 id="file-organization-r">File Organization (R/)<a class="anchor" aria-label="anchor" href="#file-organization-r"></a></h3>
 <pre><code>R/
-├── 00-zzz.R                # .onLoad(): S3 method registration + S7::methods_register()
-├── 01-filter.R             # filter.survey_base, dplyr_reconstruct.survey_base
-├── 02-select.R             # select.survey_base, pull.survey_base, glimpse.survey_base
-├── 03-mutate.R             # mutate.survey_base (warns on weight column modification)
-├── 04-rename.R             # rename.survey_base (auto-updates @variables + @metadata keys)
-├── 05-arrange.R            # arrange.survey_base, slice_*.survey_base
-├── 06-group-by.R           # group_by.survey_base, ungroup.survey_base
-├── 07-tidyr.R              # drop_na(), separate_*(), unite() (stretch goals)
-├── 08-joins.R              # *_join() (stretch goals)
-└── surveytidy-package.R    # Package-level documentation + @importFrom dplyr</code></pre>
+├── arrange.R              # arrange.survey_base (row sorting)
+├── filter.R               # filter.survey_base + subset.survey_base
+├── group-by.R             # group_by.survey_base + ungroup.survey_base
+├── joins.R                # *_join() (stretch goals)
+├── mutate.R               # mutate.survey_base (warns on weight column modification)
+├── rename.R               # rename.survey_base (auto-updates @variables + @metadata keys)
+├── select.R               # select + relocate + pull + glimpse
+├── slice.R                # all slice_*.survey_base via factory
+├── surveytidy-package.R   # Package-level documentation
+├── drop-na.R              # drop_na.survey_base
+├── utils.R                # shared helpers (.protected_cols, dplyr_reconstruct, etc.)
+└── zzz.R                  # .onLoad(): S3 method registration + S7::methods_register()</code></pre>
 </div>
 <div class="section level3">
 <h3 id="test-organization-teststestthat">Test Organization (tests/testthat/)<a class="anchor" aria-label="anchor" href="#test-organization-teststestthat"></a></h3>

@@ -69,23 +69,25 @@ registerS3method(
 
 This registers the S3 method with dplyr’s environment so dispatch works.
 
-See `R/00-zzz.R` for full setup.
+See `R/zzz.R` for full setup.
 
 ## Architecture
 
 ### File Organization (R/)
 
     R/
-    ├── 00-zzz.R                # .onLoad(): S3 method registration + S7::methods_register()
-    ├── 01-filter.R             # filter.survey_base, dplyr_reconstruct.survey_base
-    ├── 02-select.R             # select.survey_base, pull.survey_base, glimpse.survey_base
-    ├── 03-mutate.R             # mutate.survey_base (warns on weight column modification)
-    ├── 04-rename.R             # rename.survey_base (auto-updates @variables + @metadata keys)
-    ├── 05-arrange.R            # arrange.survey_base, slice_*.survey_base
-    ├── 06-group-by.R           # group_by.survey_base, ungroup.survey_base
-    ├── 07-tidyr.R              # drop_na(), separate_*(), unite() (stretch goals)
-    ├── 08-joins.R              # *_join() (stretch goals)
-    └── surveytidy-package.R    # Package-level documentation + @importFrom dplyr
+    ├── arrange.R              # arrange.survey_base (row sorting)
+    ├── filter.R               # filter.survey_base + subset.survey_base
+    ├── group-by.R             # group_by.survey_base + ungroup.survey_base
+    ├── joins.R                # *_join() (stretch goals)
+    ├── mutate.R               # mutate.survey_base (warns on weight column modification)
+    ├── rename.R               # rename.survey_base (auto-updates @variables + @metadata keys)
+    ├── select.R               # select + relocate + pull + glimpse
+    ├── slice.R                # all slice_*.survey_base via factory
+    ├── surveytidy-package.R   # Package-level documentation
+    ├── drop-na.R              # drop_na.survey_base
+    ├── utils.R                # shared helpers (.protected_cols, dplyr_reconstruct, etc.)
+    └── zzz.R                  # .onLoad(): S3 method registration + S7::methods_register()
 
 ### Test Organization (tests/testthat/)
 
