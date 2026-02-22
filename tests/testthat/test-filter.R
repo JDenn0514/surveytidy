@@ -106,7 +106,7 @@ test_that("filter() rejects .by argument with typed error", {
   d <- make_all_designs()$taylor
   expect_error(
     dplyr::filter(d, y1 > 0, .by = "group"),
-    class = "surveycore_error_filter_by_unsupported"
+    class = "surveytidy_error_filter_by_unsupported"
   )
   expect_snapshot(
     error = TRUE,
