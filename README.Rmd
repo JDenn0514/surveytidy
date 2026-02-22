@@ -24,20 +24,24 @@ surveytidy provides dplyr and tidyr verbs for survey design objects created
 with the [surveycore](https://github.com/JDenn0514/surveycore) package.
 It makes survey analysis feel natural to tidyverse users:
 
-```r
+```{r}
 library(surveycore)
+library(dplyr)
 library(surveytidy)
 
-# Build a survey design
-d <- as_survey(nhanes, ids = sdmvpsu, strata = sdmvstra,
-               weights = wtmec2yr, nest = TRUE)
+# Build a survey design from the 2025 Pew NPORS survey
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Use familiar dplyr verbs — survey design is preserved automatically
-adults <- d |>
-  filter(ridageyr >= 18) |>        # domain estimation, not row removal
-  select(ridageyr, bmxbmi, riagendr) |>
-  group_by(riagendr) |>
-  mutate(bmi_centered = bmxbmi - mean(bmxbmi, na.rm = TRUE))
+young_adults <- d |>
+  # use filter to perform domain estimation (18–29 year olds)
+  filter(agecat == 1) |>
+  # keep only the columns of interest
+  select(agecat, gender, partysum, fin_sit) |>
+  # group by gender
+  group_by(gender) |>
+  # flag respondents reporting financial difficulty
+  mutate(struggling = as.integer(fin_sit >= 3))
 ```
 
 ## Key idea: `filter()` marks rows, never removes them
@@ -45,25 +49,28 @@ adults <- d |>
 The most important statistical feature of surveytidy is that `filter()` uses
 **domain estimation** rather than physical subsetting:
 
-```r
-# This keeps all 9,756 rows — variance estimation stays correct
-women <- d |> filter(riagendr == 2)
-nrow(women@data)  #> 9756
+```{r}
+# This keeps all 5,022 rows — variance estimation stays correct
+republicans <- d |> filter(partysum == 1)
+nrow(republicans@data) #> 5022
 
-# This physically removes rows — variance estimates for women would be wrong
-wrong <- subset(d, riagendr == 2)  # issues a warning
+# This physically removes rows — variance estimates would be wrong
+wrong <- subset(d, partysum == 1) # issues a warning
 ```
 
 When you call `filter()`, surveytidy writes a logical column
 `..surveycore_domain..` to the data. Phase 1 estimation functions read this
 column to restrict calculations to the domain while retaining all rows for
-correct variance estimation.
+correct variance estimation. Simply put, this calculates the variance for
+subpopulations correctly.
 
 ## Installation
 
-```r
+```{r, eval = FALSE}
 # install.packages("pak")
-pak::pak("JDenn0514/surveycore")  # required first
+# install surveycore first, to create surveycore style survey objects
+pak::pak("JDenn0514/surveycore")
+# install surveytidy
 pak::pak("JDenn0514/surveytidy")
 ```
 
@@ -71,88 +78,91 @@ pak::pak("JDenn0514/surveytidy")
 
 ### Filtering (domain estimation)
 
-```r
+```{r}
 # Single condition
-adults <- d |> filter(ridageyr >= 18)
+republicans <- d |> filter(partysum == 1)
 
 # Chained filters AND the conditions together
-adult_women <- d |>
-  filter(ridageyr >= 18) |>
-  filter(riagendr == 2)
+rep_women <- d |>
+  filter(partysum == 1) |>
+  filter(gender == 2)
 
 # Equivalent — both produce identical domain columns
-adult_women2 <- d |> filter(ridageyr >= 18, riagendr == 2)
+rep_women2 <- d |> filter(partysum == 1, gender == 2)
 ```
 
 ### Selecting columns
 
-```r
-# Design variables (weights, strata, PSU) are always kept in @data
+```{r}
+# Design variables (weights, strata) are always kept in @data
 # even when not selected — they are required for variance estimation
-d2 <- select(d, ridageyr, bmxbmi, riagendr)
+d2 <- select(d, party, gender, agecat, cregion)
 
-# Design variables are hidden from print() but still present
-print(d2)     # shows ridageyr, bmxbmi, riagendr only
-d2@data$wt    # still accessible
-
-# Reorder visible columns
-d3 <- relocate(d2, riagendr, .before = ridageyr)
+# Design variables are hidden from print() but still present in @data
+print(d2)
 ```
 
 ### Mutating
 
-```r
+```{r}
 # Add new columns
-d |> mutate(bmi_kg_m2 = bmxbmi,
-            age_group  = cut(ridageyr, c(0, 18, 40, 65, Inf)))
+d |>
+  mutate(
+    economy_poor = as.integer(econ1mod >= 3),
+    south = as.integer(cregion == 3)
+  )
 
 # Modifying a design variable warns you
-d |> mutate(wtmec2yr = wtmec2yr * 0.5)
-#> Warning: mutate() modified design variable(s): `wtmec2yr`
+d |> mutate(weight = weight * 0.5)
+#> Warning: mutate() modified design variable(s): `weight`
 
 # Grouped mutate via group_by()
 d |>
-  group_by(riagendr) |>
-  mutate(bmi_pctile = rank(bmxbmi) / n())
+  group_by(partysum) |>
+  mutate(econ_rank = rank(econ1mod) / n())
 ```
 
 ### Renaming
 
-```r
+```{r}
 # @variables and @metadata stay in sync automatically
-d |> rename(age = ridageyr, bmi = bmxbmi)
+d |>
+  rename(
+    party_affiliation = partysum,
+    age_group = agecat
+  )
 ```
 
 ### Sorting
 
-```r
+```{r}
 # Rows sort; domain column moves with them
 d |>
-  filter(ridageyr >= 18) |>
-  arrange(bmxbmi)
+  filter(partysum == 1) |>
+  arrange(agecat)
 
-# Sort by group first, then by value
+# Sort by group first, then by value within group
 d |>
-  group_by(riagendr) |>
-  arrange(bmxbmi, .by_group = TRUE)
+  group_by(partysum) |>
+  arrange(agecat, .by_group = TRUE)
 ```
 
 ### Grouping
 
-```r
-d2 <- group_by(d, riagendr)         # set groups
-d3 <- group_by(d2, ridageyr, .add = TRUE)  # add to groups
-d4 <- ungroup(d3, riagendr)         # partial ungroup
-d5 <- ungroup(d3)                   # remove all groups
+```{r}
+d2 <- group_by(d, partysum) # set groups
+d3 <- group_by(d2, gender, .add = TRUE) # add to groups
+d4 <- ungroup(d3) # remove all groups
 ```
 
 ### Physical row operations (use sparingly)
 
-```r
+```{r}
+library(tidyr)
 # These physically remove rows and always issue a warning.
 # Use filter() instead for subpopulation analyses.
-slice_head(d, n = 100)    # first 100 rows
-drop_na(d, bmxbmi)        # remove rows with NA in bmxbmi
+slice_head(d, n = 100) # first 100 rows
+drop_na(d, fin_sit) # remove rows with NA in fin_sit
 ```
 
 ## Relationship to surveycore
