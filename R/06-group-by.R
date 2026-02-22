@@ -20,7 +20,6 @@
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/00-zzz.R for the registration calls.
 
-
 # ── group_by() ────────────────────────────────────────────────────────────────
 
 #' Group and ungroup a survey design object
@@ -63,13 +62,13 @@
 group_by.survey_base <- function(
   .data,
   ...,
-  .add  = FALSE,
+  .add = FALSE,
   .drop = dplyr::group_by_drop_default(.data)
 ) {
   # Delegate to dplyr to resolve column names — handles bare names, computed
   # expressions (e.g., cut(age, breaks)), tidy-select helpers, and any future
   # dplyr group_by() extensions. The grouped_df is used only to extract names.
-  grouped     <- dplyr::group_by(.data@data, ...)
+  grouped <- dplyr::group_by(.data@data, ...)
   group_names <- dplyr::group_vars(grouped)
 
   if (isTRUE(.add)) {
@@ -91,9 +90,9 @@ ungroup.survey_base <- function(x, ...) {
     x@groups <- character(0)
   } else {
     # Column arguments: partial ungroup — remove only the specified columns
-    pos       <- tidyselect::eval_select(rlang::expr(c(...)), x@data)
+    pos <- tidyselect::eval_select(rlang::expr(c(...)), x@data)
     to_remove <- names(pos)
-    x@groups  <- setdiff(x@groups, to_remove)
+    x@groups <- setdiff(x@groups, to_remove)
   }
   x
 }

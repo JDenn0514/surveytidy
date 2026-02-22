@@ -9,7 +9,6 @@
 #   dplyr_reconstruct.survey_base() — class preservation in complex pipelines
 #                                     (moved from R/01-filter.R on feature/select)
 
-
 # ── surveycore internal wrappers ─────────────────────────────────────────────
 
 # Wrappers around surveycore internal functions used by rename().
@@ -58,7 +57,7 @@
 # Registered in .onLoad() — see R/00-zzz.R.
 #' @noRd
 dplyr_reconstruct.survey_base <- function(data, template) {
-  design_vars  <- surveycore::.get_design_vars_flat(template)
+  design_vars <- surveycore::.get_design_vars_flat(template)
   missing_vars <- setdiff(design_vars, names(data))
   if (length(missing_vars) > 0L) {
     cli::cli_abort(

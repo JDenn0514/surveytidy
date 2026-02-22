@@ -15,7 +15,6 @@
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/00-zzz.R for the registration calls.
 
-
 # ── rename() ──────────────────────────────────────────────────────────────────
 
 #' Rename columns of a survey design object
@@ -59,7 +58,7 @@
 rename.survey_base <- function(.data, ...) {
   # Step 1: resolve the rename map via tidyselect
   # map: named integer vector, names = new names, values = column positions
-  map       <- tidyselect::eval_rename(rlang::expr(c(...)), .data@data)
+  map <- tidyselect::eval_rename(rlang::expr(c(...)), .data@data)
   new_names <- names(map)
   old_names <- names(.data@data)[map]
 
@@ -69,7 +68,7 @@ rename.survey_base <- function(.data, ...) {
   rename_map <- stats::setNames(new_names, old_names)
 
   # Step 2: warn if any design variable is being renamed
-  protected     <- intersect(.protected_cols(.data), names(.data@data))
+  protected <- intersect(.protected_cols(.data), names(.data@data))
   is_design_var <- old_names %in% protected
   if (any(is_design_var)) {
     cli::cli_warn(
