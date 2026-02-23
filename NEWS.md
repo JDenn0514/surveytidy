@@ -48,8 +48,11 @@ design objects created with the `surveycore` package.
 * `ungroup()` — remove all groups (no arguments) or remove specific columns
   from `@groups` (partial ungroup).
 
-* `drop_na()` — physical row removal for rows with `NA` in specified columns
-  (or any column). Issues `surveycore_warning_physical_subset`.
+* `drop_na()` — domain-aware NA handling. Marks rows with `NA` in specified
+  columns (or any column) as out-of-domain without removing them. Equivalent
+  to `filter(!is.na(col1), !is.na(col2), ...)` and gives correct variance
+  estimates for downstream analyses. Successive `drop_na()` calls AND their
+  conditions together.
 
 * `subset()` — physical row removal with `surveycore_warning_physical_subset`.
   Prefer `filter()` for subpopulation analyses.
