@@ -7,10 +7,10 @@ template:
     base_font: {google: "Roboto"}
     code_font: {google: "Inter"}
     heading_font: {google: "Roboto"}
-    bg: "#fcfbf9"
-    fg: "#000000"
-    primary: "#14A2FCFF"
-    navbar-bg: "#e5f3f7"
+    bg: "#fcfbf9"         # lighten springwood background
+    fg: "#000000"         # contrast ratio: 15.76 for text
+    primary: "#14A2FCFF"  # light blue link text
+    navbar-bg: "#e5f3f7"  # change nav bar background
     navbar-light-hover-color: "#14A2FCFF"
 
 home:
@@ -21,7 +21,8 @@ home:
 
 navbar:
   type: "light"
-  bg: "#e5f3f7"
+  bg: "#e5f3f7"  # apparently this plus navbar-bg needs to be set to same color?
+  pill-active: "#000000"
   structure:
     left:  [intro, reference, news]
     right: [github]
@@ -41,13 +42,16 @@ reference:
       - filter.survey_base
       - subset.survey_base
 
-  - title: "Column selection"
+  - title: "Column selection and inspection"
     desc: >
       Select, reorder, extract, and inspect columns. Design variables
       (weights, strata, PSU, FPC) are always retained in `@data` even
       when not explicitly selected.
     contents:
       - select.survey_base
+      - relocate.survey_base
+      - pull.survey_base
+      - glimpse.survey_base
 
   - title: "Modifying columns"
     desc: >
@@ -63,6 +67,7 @@ reference:
       rows — use `filter()` instead for subpopulation analyses.
     contents:
       - arrange.survey_base
+      - slice.survey_base
 
   - title: "Grouping"
     desc: >
@@ -70,6 +75,7 @@ reference:
       and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
     contents:
       - group_by.survey_base
+      - ungroup.survey_base
 
   - title: "Missing value removal"
     desc: >

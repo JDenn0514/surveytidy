@@ -8,11 +8,13 @@
 [![R-CMD-check](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg)](https://codecov.io/gh/JDenn0514/surveytidy)
+[![pkgdown](https://github.com/JDenn0514/surveytidy/actions/workflows/pkgdown.yaml/badge.svg)](https://jdenn0514.github.io/surveytidy/)
 <!-- badges: end -->
 
 surveytidy provides dplyr and tidyr verbs for survey design objects
 created with the [surveycore](https://github.com/JDenn0514/surveycore)
-package. It makes survey analysis feel natural to tidyverse users:
+package. It makes survey analysis feel natural to tidyverse users. Full
+documentation is at <https://jdenn0514.github.io/surveytidy/>.
 
 ``` r
 library(surveycore)
