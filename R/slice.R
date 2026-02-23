@@ -87,30 +87,56 @@ utils::globalVariables("check_fn")
 #'
 #' @description
 #' `slice()`, `slice_head()`, `slice_tail()`, `slice_min()`, `slice_max()`,
-#' and `slice_sample()` **physically remove rows** and always issue
-#' `surveycore_warning_physical_subset`. They error if the result would have
-#' 0 rows. Prefer [filter()] for subpopulation analyses.
+#' and `slice_sample()` **physically remove rows** from a survey design
+#' object. For subpopulation analyses, use [filter()] instead — it marks
+#' rows as out-of-domain without removing them, preserving valid variance
+#' estimation.
 #'
-#' `slice_sample(weight_by = )` additionally warns with
-#' `surveytidy_warning_slice_sample_weight_by` because the `weight_by`
-#' column is independent of the survey design weights.
+#' All slice functions always issue `surveycore_warning_physical_subset`
+#' and error if the result would have 0 rows.
 #'
-#' @param .data A survey design object.
+#' @details
+#' ## Physical subsetting
+#' Unlike [filter()], slice functions actually remove rows. This changes
+#' the survey design — unless the design was explicitly built for the
+#' subset population, variance estimates may be incorrect.
+#'
+#' ## `slice_sample()` and survey weights
+#' `slice_sample(weight_by = )` samples rows proportional to a column's
+#' values, independently of the survey design weights. A
+#' `surveytidy_warning_slice_sample_weight_by` warning is issued as a
+#' reminder. If you intend probability-proportional sampling, use the
+#' design weights directly.
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... Passed to the corresponding `dplyr::slice_*()` function.
 #'
-#' @return A physical subset of the survey object's rows.
+#' @return
+#' An object of the same type as `.data` with the following properties:
+#'
+#' * A subset of rows is retained; unselected rows are permanently removed.
+#' * Columns and survey design attributes are unchanged.
+#' * Always issues `surveycore_warning_physical_subset`.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
-#' # Physical row selection (issues warning)
-#' d2 <- suppressWarnings(slice_head(d, n = 20))
+#' # First 10 rows (issues a physical subset warning)
+#' slice_head(d, n = 10)
+#'
+#' # Rows with the 5 lowest ages
+#' slice_min(d, order_by = ridageyr, n = 5)
+#'
+#' # Random sample of 50 rows
+#' slice_sample(d, n = 50)
 #'
 #' @family row operations
-#' @seealso [filter()] for domain-aware row marking (preferred),
-#'   [arrange()] for row sorting
+#' @seealso [filter()] for domain-aware row marking (preferred for
+#'   subpopulation analyses), [arrange()] for row sorting
 slice.survey_base <- .make_slice_method(
   "slice",
   dplyr::slice

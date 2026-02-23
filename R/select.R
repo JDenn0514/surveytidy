@@ -134,35 +134,56 @@ select.survey_base <- function(.data, ...) {
 #' Change column order in a survey design object
 #'
 #' @description
-#' Move columns to a new position. When `@variables$visible_vars` is set
-#' (i.e. after a `select()` call), only the visible columns are reordered —
-#' design variables keep their position in `@data`. When `visible_vars` is
-#' `NULL`, the full `@data` column order is updated.
+#' `relocate()` moves columns to a new position using the same
+#' [tidyselect mini-language][tidyselect::language] as [select()]. Design
+#' variables (weights, strata, PSUs) are not moved — only analysis columns
+#' change position.
 #'
-#' @param .data A survey design object.
+#' @details
+#' ## Design variable positions
+#' Design variables are always preserved at their current position in the
+#' underlying data. When you call `relocate()`, only non-design columns are
+#' affected by the reordering.
+#'
+#' ## After `select()`
+#' When [select()] has been called, `relocate()` reorders the visible columns
+#' (those shown when you print the object). This has no effect on the physical
+#' column order in the underlying data.
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... <[`tidy-select`][tidyselect::language]> Columns to move.
-#' @param .before,.after <[`tidy-select`][tidyselect::language]> Destination
-#'   for the selected columns. At most one of `.before` and `.after` may be
-#'   supplied.
+#' @param .before,.after <[`tidy-select`][tidyselect::language]> A destination
+#'   column. Columns in `...` are placed immediately before or after it.
+#'   Specify at most one of `.before` and `.after`.
 #'
-#' @return The survey object with `@variables$visible_vars` or `@data` column
-#'   order updated.
+#' @return
+#' An object of the same type as `.data` with the following properties:
+#'
+#' * Rows are not modified.
+#' * All columns are present; only their order changes.
+#' * Design variables are not moved.
+#' * Groups and survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y1 = rnorm(50), y2 = rnorm(50), y3 = rnorm(50),
-#'                  wt = runif(50, 1, 5))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
-#' # Move y3 before y1
-#' d2 <- relocate(d, y3, .before = y1)
+#' # Move ridageyr before riagendr
+#' relocate(d, ridageyr, .before = riagendr)
 #'
-#' # Works on visible_vars too (after a select())
-#' d3 <- select(d, y1, y2, y3) |> relocate(y2, .after = y3)
-#' d3@variables$visible_vars    # c("y1", "y3", "y2")
+#' # Move all blood pressure columns to the front
+#' relocate(d, dplyr::starts_with("bpx"))
+#'
+#' # After select(), relocate reorders the visible columns
+#' d |>
+#'   select(ridageyr, riagendr, bpxsy1) |>
+#'   relocate(bpxsy1, .before = ridageyr)
 #'
 #' @family selecting
-#' @seealso [select()] to keep or drop columns
+#' @seealso [select()] to keep or drop columns, [rename()] to rename them
 relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
   # Capture .before and .after as quosures to avoid evaluating NSE expressions
   # (e.g. .before = y1) in the wrong environment. rlang::inject() then inlines
@@ -214,22 +235,29 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 #' This is a terminal operation — the result is not a survey object and cannot
 #' be piped back into survey verbs.
 #'
-#' @param .data A survey design object.
-#' @param var <[`data-masking`][rlang::args_data_masking]> Column to extract.
-#'   Defaults to the last column.
-#' @param name <[`data-masking`][rlang::args_data_masking]> Optional column
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param var <[`data-masking`][rlang::args_data_masking]> The column to
+#'   extract. Accepts a bare name, a positive integer (counting from the
+#'   left), or a negative integer (counting from the right). Defaults to the
+#'   last column.
+#' @param name <[`data-masking`][rlang::args_data_masking]> An optional column
 #'   whose values are used as names for the returned vector.
 #' @param ... Passed to `dplyr::pull()`.
 #'
-#' @return A plain vector (not a survey object).
+#' @return A vector the same length as the number of rows in `.data`.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y1 = rnorm(50), wt = runif(50, 1, 5))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
-#' # Extract y1 as a numeric vector
-#' pull(d, y1)
+#' # Extract a column by name
+#' pull(d, ridageyr)
+#'
+#' # Named vector — values of ridageyr named by seqn
+#' pull(d, ridageyr, name = seqn)
 #'
 #' @family selecting
 #' @seealso [select()] to keep columns in the survey object
@@ -243,28 +271,31 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 #' Get a glimpse of a survey design object
 #'
 #' @description
-#' Print a transposed, condensed summary of the survey object's columns and
-#' their types. Respects `@variables$visible_vars` — if set (i.e. after a
-#' `select()` call), only the user-selected columns are shown, not the
-#' design variables.
+#' Print a transposed summary of the survey object's columns — column names
+#' run down the left, data types and values run across. Respects [select()]:
+#' if columns have been selected, only those columns are shown; design
+#' variables are hidden from the display.
 #'
-#' @param x A survey design object.
+#' @param x A [`survey_base`][surveycore::survey_base] object.
 #' @param width Width of the output. Defaults to the console width.
 #' @param ... Passed to `dplyr::glimpse()`.
 #'
 #' @return `x` invisibly.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-#'                  wt = runif(50, 1, 5), g = sample(c("A","B"), 50, TRUE))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
-#' # Shows all columns
+#' # Glimpse all columns
 #' glimpse(d)
 #'
-#' # After select(), shows only visible columns
-#' glimpse(select(d, y1, y2))
+#' # After select(), shows only the selected columns
+#' d |>
+#'   select(ridageyr, riagendr, bpxsy1) |>
+#'   glimpse()
 #'
 #' @family selecting
 #' @seealso [select()] to control which columns are visible

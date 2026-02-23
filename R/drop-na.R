@@ -11,33 +11,53 @@
 
 # ── drop_na() ─────────────────────────────────────────────────────────────────
 
-#' Mark rows with missing values as out-of-domain in a survey design object
+#' Mark rows with missing values as out-of-domain
 #'
 #' @description
-#' Marks rows where the specified columns contain `NA` as out-of-domain,
-#' without removing them. If no columns are specified, any `NA` in any column
-#' marks the row out-of-domain.
+#' `drop_na()` marks rows where specified columns contain `NA` as
+#' out-of-domain, without removing them. If no columns are specified, any
+#' `NA` in any column marks the row out-of-domain.
 #'
-#' This is equivalent to `filter(!is.na(col1), !is.na(col2), ...)` and gives
-#' correct variance estimates for downstream analyses. Successive `drop_na()`
-#' calls AND their conditions together.
+#' This is the domain-aware equivalent of tidyr's `drop_na()`: rather than
+#' physically dropping rows, it applies [filter()] with `!is.na()` conditions,
+#' preserving all rows for correct variance estimation.
 #'
-#' @param data A survey design object.
+#' @details
+#' ## Chaining
+#' Successive `drop_na()` calls AND their conditions together, and they
+#' accumulate with [filter()] calls too. These are equivalent:
+#'
+#' ```r
+#' drop_na(d, bpxsy1) |> filter(ridageyr >= 18)
+#' filter(d, !is.na(bpxsy1), ridageyr >= 18)
+#' ```
+#'
+#' @param data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... <[`tidy-select`][tidyselect::language]> Columns to inspect for
 #'   `NA`. If empty, all columns are checked.
 #'
-#' @return The survey object with rows containing `NA` in the selected columns
-#'   marked out-of-domain. Row count is **unchanged**.
+#' @return
+#' An object of the same type as `data` with the following properties:
+#'
+#' * Rows are not added or removed.
+#' * Rows where selected columns contain `NA` are marked out-of-domain.
+#' * Columns and survey design attributes are unchanged.
 #'
 #' @examples
-#' library(tidyr)
-#' df <- data.frame(y = c(rnorm(99), NA), wt = runif(100, 1, 5))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
-#' # Mark rows with NA in y as out-of-domain
-#' d2 <- drop_na(d, y)
-#' nrow(d2@data)  # still 100
-#' d2@data[[surveycore::SURVEYCORE_DOMAIN_COL]]  # FALSE for the last row
+#' # Mark rows with NA in bpxsy1 as out-of-domain
+#' drop_na(d, bpxsy1)
+#'
+#' # Mark rows with NA in either blood pressure column
+#' drop_na(d, bpxsy1, bpxdi1)
+#'
+#' # No columns specified — any NA in any column marks the row out-of-domain
+#' drop_na(d)
 #'
 #' @family row operations
 #' @seealso [filter()] for domain-aware row marking

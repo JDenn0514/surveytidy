@@ -20,41 +20,64 @@
 #' Rename columns of a survey design object
 #'
 #' @description
-#' Renames columns in `@data` and automatically keeps the survey design in
-#' sync:
+#' `rename()` changes column names in the underlying data and automatically
+#' keeps the survey design in sync. Variable labels, value labels, and other
+#' metadata follow the rename — no manual bookkeeping required.
 #'
-#' * `@variables` — design variable column names (weights, strata, PSU, FPC,
-#'   replicate weights) are updated to the new names.
-#' * `@metadata` — variable labels, value labels, question prefaces, notes,
-#'   and transformation records are re-keyed.
-#' * `@variables$visible_vars` — any occurrence of the old name is replaced
-#'   with the new name.
+#' Renaming a design variable (weights, strata, PSUs) is fully supported:
+#' the design specification updates automatically and a
+#' `surveytidy_warning_rename_design_var` warning is issued to confirm the
+#' change.
 #'
-#' Renaming a design variable is allowed and issues
-#' `surveytidy_warning_rename_design_var` to confirm the design was updated.
+#' @details
+#' ## What gets updated
+#' * **Column names in `@data`** — the rename takes effect immediately.
+#' * **Design specification** — if a renamed column is a design variable
+#'   (weights, strata, PSU, FPC, or replicate weights), `@variables` is
+#'   updated to track the new name.
+#' * **Metadata** — variable labels, value labels, question prefaces, notes,
+#'   and transformation records in `@metadata` are re-keyed to the new name.
+#' * **`visible_vars`** — any occurrence of the old name in
+#'   `@variables$visible_vars` is replaced with the new name, so
+#'   [select()] + `rename()` pipelines work correctly.
 #'
-#' @param .data A survey design object.
+#' ## Renaming design variables
+#' Renaming a design variable (e.g., the weights column) is intentionally
+#' allowed. A `surveytidy_warning_rename_design_var` warning is issued as a
+#' reminder that the design specification has been updated — not to indicate
+#' an error.
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... <[`tidy-select`][tidyselect::language]> Use `new_name = old_name`
-#'   pairs to rename columns.
+#'   pairs to rename columns. Any number of columns can be renamed in a
+#'   single call.
 #'
-#' @return The survey object with updated column names, `@variables`, and
-#'   `@metadata`.
+#' @return
+#' An object of the same type as `.data` with the following properties:
+#'
+#' * Rows are not added or removed.
+#' * Column order is preserved.
+#' * Renamed columns are updated in `@data`, `@variables`, and `@metadata`.
+#' * Groups and survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-#'                  wt = runif(50, 1, 5))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(nhanes_2017,
+#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+#' )
 #'
 #' # Rename an outcome column
-#' d2 <- rename(d, outcome = y1)
+#' rename(d, sbp = bpxsy1)
 #'
-#' # Rename a design variable (warns and updates @variables$weights)
-#' d3 <- rename(d, weight = wt)
-#' d3@variables$weights  # "weight"
+#' # Rename multiple columns at once
+#' rename(d, sbp = bpxsy1, dbp = bpxdi1)
+#'
+#' # Rename a design variable — warns and updates the design specification
+#' rename(d, weights = wtmec2yr)
 #'
 #' @family modification
-#' @seealso [mutate()] to add columns, [select()] to drop columns
+#' @seealso [mutate()] to add or modify column values, [select()] to drop columns
 rename.survey_base <- function(.data, ...) {
   # Step 1: resolve the rename map via tidyselect
   # map: named integer vector, names = new names, values = column positions
