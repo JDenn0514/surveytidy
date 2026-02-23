@@ -96,6 +96,9 @@ incorrect standard errors. See Thomas Lumley's note for details:
 [`subset()`](https://rdrr.io/r/base/subset.html) for physical row
 removal (with a warning)
 
+Other filtering:
+[`filter_out.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter_out.survey_base.md)
+
 ## Examples
 
 ``` r
