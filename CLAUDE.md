@@ -116,22 +116,28 @@ tests/testthat/
 
 ## Before Starting Any Implementation
 
-**Read these files first — in this order — before writing any code:**
+**Start here:**
+- `.claude/WORKFLOW.md` — how the planning, implementation, and PR cycles fit together
 
-**Shared standards (all surveyverse packages follow these):**
-1. `../survey-standards/.claude/rules/code-style.md` — indentation, S7 method syntax, error conventions, function design, roxygen/package check hygiene
-2. `../survey-standards/.claude/rules/testing-standards.md` — test structure, coverage requirements, assertion patterns
-3. `../survey-standards/.claude/rules/changelog-workflow.md` — changelog entries (required before every PR) and decisions log (required after plan mode)
+**Rules (always apply — loaded at session start):**
+1. `.claude/rules/code-style.md` — indentation, pipe operator, air formatter, S7 patterns, cli error structure, argument order, helper placement
+2. `.claude/rules/r-package-conventions.md` — `::` usage, NAMESPACE, roxygen2, `@return`, `@examples`, export policy
+3. `.claude/rules/surveytidy-conventions.md` — S3 dispatch, verb method names, special columns (domain, visible_vars, @groups), return visibility
+4. `.claude/rules/testing-standards.md` — test structure, coverage requirements, assertion patterns, data generators
+5. `.claude/rules/testing-surveytidy.md` — `test_invariants()`, three design type loops, domain preservation, verb error patterns
+6. `.claude/rules/engineering-preferences.md` — DRY, well-tested, engineered enough, explicit over clever
 
-**PR workflow (on-demand — read when creating a PR):**
-- `.claude/skills/github-strategy.md` — branching model, commit format, PR workflow, CI/CD setup
+**Skills (invoke on-demand):**
+- `.claude/skills/spec-workflow/SKILL.md` — planning arc: draft → review → implementation plan → decisions log
+- `.claude/skills/r-implement/SKILL.md` — implementation loop: read plan → write code → verify → mark done
+- `.claude/skills/commit-and-pr/SKILL.md` — PR cycle: changelog → pre-flight → commit → PR → CI
 
-**Package-specific (surveytidy only):**
-- `.claude/rules/` — any package-specific rules or extensions
+**GitHub strategy (read when creating PRs):**
+- `.claude/rules/github-strategy.md` — branching model, commit format, PR workflow, CI/CD setup
 
-**Then reference:**
-- `../surveycore/CLAUDE.md` — for surveycore architecture (survey class structure, @data/@variables/@metadata)
-- `../surveycore/plans/` — error-messages.md, formal spec, implementation plan
+**Reference:**
+- `../surveycore/CLAUDE.md` — surveycore architecture (survey class structure, @data/@variables/@metadata)
+- `plans/error-messages.md` — surveytidy error/warning classes (update before adding any new class)
 
 ## Phase 0.5 Build Order
 
