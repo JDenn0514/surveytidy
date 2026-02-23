@@ -159,7 +159,8 @@
 <div class="section level2">
 <h2 id="before-starting-any-implementation">Before Starting Any Implementation<a class="anchor" aria-label="anchor" href="#before-starting-any-implementation"></a></h2>
 <p><strong>Read these files first — in this order — before writing any code:</strong></p>
-<p><strong>Shared standards (all surveyverse packages follow these):</strong> 1. <code>../survey-standards/.claude/rules/code-style.md</code> — indentation, S7 method syntax, error conventions, function design 2. <code>../survey-standards/.claude/rules/testing-standards.md</code> — test structure, coverage requirements, assertion patterns 3. <code>../survey-standards/.claude/rules/r-package-conventions.md</code> — roxygen2, NAMESPACE, exports, R CMD check hygiene 4. <code>../survey-standards/.claude/rules/github-strategy.md</code> — branching model, commit format, PR workflow 5. <code>../survey-standards/.claude/rules/changelog-workflow.md</code> — changelog entries (required before every PR) and decisions log (required after plan mode)</p>
+<p><strong>Shared standards (all surveyverse packages follow these):</strong> 1. <code>../survey-standards/.claude/rules/code-style.md</code> — indentation, S7 method syntax, error conventions, function design, roxygen/package check hygiene 2. <code>../survey-standards/.claude/rules/testing-standards.md</code> — test structure, coverage requirements, assertion patterns 3. <code>../survey-standards/.claude/rules/changelog-workflow.md</code> — changelog entries (required before every PR) and decisions log (required after plan mode)</p>
+<p><strong>PR workflow (on-demand — read when creating a PR):</strong> - <code>.claude/skills/github-strategy.md</code> — branching model, commit format, PR workflow, CI/CD setup</p>
 <p><strong>Package-specific (surveytidy only):</strong> - <code>.claude/rules/</code> — any package-specific rules or extensions</p>
 <p><strong>Then reference:</strong> - <code>../surveycore/CLAUDE.md</code> — for surveycore architecture (survey class structure, @data/@variables/@metadata) - <code>../surveycore/plans/</code> — error-messages.md, formal spec, implementation plan</p>
 </div>
@@ -268,7 +269,8 @@
 <div class="section level2">
 <h2 id="reference-documents">Reference Documents<a class="anchor" aria-label="anchor" href="#reference-documents"></a></h2>
 <p>All planning documents are in <code>plans/</code>: - (Currently minimal; will grow as Phase 0.5 proceeds)</p>
-<p>All finalized decisions are in <code>../survey-standards/.claude/rules/</code>: - <code>code-style.md</code> — R style, S7 patterns, error conventions, function design - <code>testing-standards.md</code> — test structure, coverage, assertion patterns, test data - <code>r-package-conventions.md</code> — roxygen2, NAMESPACE, exports, R CMD check hygiene - <code>github-strategy.md</code> — branching, commits, PRs, CI/CD, release process</p>
+<p>All finalized decisions are in <code>../survey-standards/.claude/rules/</code>: - <code>code-style.md</code> — R style, S7 patterns, error conventions, function design, roxygen/package check - <code>testing-standards.md</code> — test structure, coverage, assertion patterns, test data</p>
+<p>PR workflow: <code>.claude/skills/github-strategy.md</code></p>
 <hr><p><strong>Always defer to surveycore’s CLAUDE.md for survey class internals. surveytidy is an add-on layer.</strong></p>
 </div>
 </div>

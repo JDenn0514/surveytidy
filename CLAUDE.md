@@ -141,16 +141,16 @@ See `R/zzz.R` for full setup.
 
 **Shared standards (all surveyverse packages follow these):** 1.
 `../survey-standards/.claude/rules/code-style.md` — indentation, S7
-method syntax, error conventions, function design 2.
-`../survey-standards/.claude/rules/testing-standards.md` — test
-structure, coverage requirements, assertion patterns 3.
-`../survey-standards/.claude/rules/r-package-conventions.md` — roxygen2,
-NAMESPACE, exports, R CMD check hygiene 4.
-`../survey-standards/.claude/rules/github-strategy.md` — branching
-model, commit format, PR workflow 5.
+method syntax, error conventions, function design, roxygen/package check
+hygiene 2. `../survey-standards/.claude/rules/testing-standards.md` —
+test structure, coverage requirements, assertion patterns 3.
 `../survey-standards/.claude/rules/changelog-workflow.md` — changelog
 entries (required before every PR) and decisions log (required after
 plan mode)
+
+**PR workflow (on-demand — read when creating a PR):** -
+`.claude/skills/github-strategy.md` — branching model, commit format, PR
+workflow, CI/CD setup
 
 **Package-specific (surveytidy only):** - `.claude/rules/` — any
 package-specific rules or extensions
@@ -267,10 +267,10 @@ as Phase 0.5 proceeds)
 
 All finalized decisions are in `../survey-standards/.claude/rules/`: -
 `code-style.md` — R style, S7 patterns, error conventions, function
-design - `testing-standards.md` — test structure, coverage, assertion
-patterns, test data - `r-package-conventions.md` — roxygen2, NAMESPACE,
-exports, R CMD check hygiene - `github-strategy.md` — branching,
-commits, PRs, CI/CD, release process
+design, roxygen/package check - `testing-standards.md` — test structure,
+coverage, assertion patterns, test data
+
+PR workflow: `.claude/skills/github-strategy.md`
 
 ------------------------------------------------------------------------
 
