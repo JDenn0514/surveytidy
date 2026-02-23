@@ -2,7 +2,8 @@
 
 surveytidy provides dplyr and tidyr verbs for survey design objects
 created with the [surveycore](https://github.com/JDenn0514/surveycore)
-package. It makes survey analysis feel natural to tidyverse users:
+package. It makes survey analysis feel natural to tidyverse users. Full
+documentation is at <https://jdenn0514.github.io/surveytidy/>.
 
 ``` r
 library(surveycore)

@@ -1,14 +1,12 @@
-# Remove rows containing missing values from a survey design object
+# Mark rows with missing values as out-of-domain in a survey design object
 
-Physically removes rows where the specified columns contain `NA`. If no
-columns are specified, any `NA` in any column triggers removal. Always
-issues `surveycore_warning_physical_subset`. Errors if all rows would be
-removed.
+Marks rows where the specified columns contain `NA` as out-of-domain,
+without removing them. If no columns are specified, any `NA` in any
+column marks the row out-of-domain.
 
-Prefer
-[`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
-with `!is.na(col)` for subpopulation analyses — it keeps all rows and
-gives correct variance estimates.
+This is equivalent to `filter(!is.na(col1), !is.na(col2), ...)` and
+gives correct variance estimates for downstream analyses. Successive
+`drop_na()` calls AND their conditions together.
 
 ## Usage
 
@@ -31,15 +29,16 @@ drop_na(data, ...)
 ## Value
 
 The survey object with rows containing `NA` in the selected columns
-removed.
+marked out-of-domain. Row count is **unchanged**.
 
 ## See also
 
 [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
-for domain-aware row marking (preferred)
+for domain-aware row marking
 
 Other row operations:
-[`arrange.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+[`arrange.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md),
+[`slice.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
 
 ## Examples
 
@@ -48,8 +47,18 @@ library(tidyr)
 df <- data.frame(y = c(rnorm(99), NA), wt = runif(100, 1, 5))
 d  <- surveycore::as_survey(df, weights = wt)
 
-# Remove rows with NA in y
-d2 <- suppressWarnings(drop_na(d, y))
-nrow(d2@data)  # 99
+# Mark rows with NA in y as out-of-domain
+d2 <- drop_na(d, y)
+nrow(d2@data)  # still 100
 #> [1] 100
+d2@data[[surveycore::SURVEYCORE_DOMAIN_COL]]  # FALSE for the last row
+#>   [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [13]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [25]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [37]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [49]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [61]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [73]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [85]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+#>  [97]  TRUE  TRUE  TRUE FALSE
 ```

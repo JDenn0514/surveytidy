@@ -12,7 +12,7 @@ available via [`subset()`](https://rdrr.io/r/base/subset.html),
   [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
   : Filter survey data using domain estimation
 
-## Column selection
+## Column selection and inspection
 
 Select, reorder, extract, and inspect columns. Design variables
 (weights, strata, PSU, FPC) are always retained in `@data` even when not
@@ -47,13 +47,14 @@ Sort rows with
 for subpopulation analyses.
 
 - [`arrange(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice_head(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice_tail(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice_min(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice_max(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  [`slice_sample(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  : Sort rows and physically select rows of a survey design object
+  : Sort rows of a survey design object
+- [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_head(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_tail(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_min(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_max(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_sample(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  : Physically select rows of a survey design object
 
 ## Grouping
 
@@ -72,4 +73,5 @@ Physically remove rows with `NA` values. Issues a warning because
 physical removal can bias variance estimates.
 
 - [`drop_na(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
-  : Remove rows containing missing values from a survey design object
+  : Mark rows with missing values as out-of-domain in a survey design
+  object

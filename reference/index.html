@@ -46,7 +46,7 @@
         </dt>
         <dd>Filter survey data using domain estimation</dd>
       </dl></div><div class="section level2">
-      <h2 id="column-selection">Column selection<a class="anchor" aria-label="anchor" href="#column-selection"></a></h2>
+      <h2 id="column-selection-and-inspection">Column selection and inspection<a class="anchor" aria-label="anchor" href="#column-selection-and-inspection"></a></h2>
 
       <div class="section-desc"><p>Select, reorder, extract, and inspect columns. Design variables (weights, strata, PSU, FPC) are always retained in <code>@data</code> even when not explicitly selected.</p></div>
 
@@ -96,10 +96,17 @@
 
       <dl><dt>
 
-          <code><a href="arrange.survey_base.html">arrange(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="arrange.survey_base.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="arrange.survey_base.html">arrange(<i>&lt;survey_base&gt;</i>)</a></code>
 
         </dt>
-        <dd>Sort rows and physically select rows of a survey design object</dd>
+        <dd>Sort rows of a survey design object</dd>
+
+        <dt>
+
+          <code><a href="slice.survey_base.html">slice(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Physically select rows of a survey design object</dd>
       </dl></div><div class="section level2">
       <h2 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a></h2>
 
@@ -131,7 +138,7 @@
           <code><a href="drop_na.survey_base.html">drop_na(<i>&lt;survey_base&gt;</i>)</a></code>
 
         </dt>
-        <dd>Remove rows containing missing values from a survey design object</dd>
+        <dd>Mark rows with missing values as out-of-domain in a survey design object</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
