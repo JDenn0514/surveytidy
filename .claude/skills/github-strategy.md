@@ -1,8 +1,15 @@
 # surveycore GitHub Strategy
 
+<!-- Originally written for surveycore; applies to all surveyverse packages. -->
+<!-- Read this on-demand when creating PRs or setting up CI — not auto-loaded. -->
+
 **Version:** 1.0
 **Created:** February 2025
 **Status:** Decided — do not re-litigate without updating this document
+
+> **Also read before any PR:**
+> `../survey-standards/.claude/rules/changelog-workflow.md`
+> — changelog entries are required before every PR; decisions log required after plan mode.
 
 ---
 
