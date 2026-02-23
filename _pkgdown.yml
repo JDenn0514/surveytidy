@@ -32,54 +32,42 @@ navbar:
       href: https://github.com/JDenn0514/surveytidy
 
 reference:
-  - title: "Filtering and subsetting"
+  - title: "Data frame verbs"
+
+  - subtitle: "Rows"
     desc: >
-      `filter()` uses domain estimation — it marks rows as in-domain without
-      removing them, preserving correct variance estimation. Physical row
-      removal is available via `subset()`, `slice_*()`, and `drop_na()` with
-      appropriate warnings.
+      `filter()` and `filter_out()` use **domain estimation** — rows are marked
+      in or out of the analysis domain without being removed, so variance
+      estimates stay correct. Physical row removal (`subset()`, `slice_*()`,
+      `drop_na()`) is available but issues a warning because removing rows can
+      bias variance estimates.
     contents:
       - filter.survey_base
+      - filter_out.survey_base
+      - slice.survey_base
+      - arrange.survey_base
       - subset.survey_base
+      - drop_na.survey_base
 
-  - title: "Column selection and inspection"
+  - subtitle: "Columns"
     desc: >
-      Select, reorder, extract, and inspect columns. Design variables
-      (weights, strata, PSU, FPC) are always retained in `@data` even
-      when not explicitly selected.
+      Select, reorder, rename, create, extract, and inspect columns. Design
+      variables (weights, strata, PSU, FPC) are always retained in `@data`
+      even when not explicitly selected. `rename()` automatically updates the
+      survey design specification and variable metadata to match the new name.
     contents:
       - select.survey_base
       - relocate.survey_base
+      - rename.survey_base
+      - mutate.survey_base
       - pull.survey_base
       - glimpse.survey_base
 
-  - title: "Modifying columns"
+  - subtitle: "Groups"
     desc: >
-      Add or modify columns (`mutate()`) and rename them (`rename()`).
-      Both verbs keep the survey design specification and metadata in sync.
-    contents:
-      - mutate.survey_base
-      - rename.survey_base
-
-  - title: "Row ordering and physical selection"
-    desc: >
-      Sort rows with `arrange()`. The `slice_*()` family physically removes
-      rows — use `filter()` instead for subpopulation analyses.
-    contents:
-      - arrange.survey_base
-      - slice.survey_base
-
-  - title: "Grouping"
-    desc: >
-      Store grouping variables in `@groups` for use by estimation functions
-      and grouped `mutate()`. No `grouped_df` attribute is added to `@data`.
+      `group_by()` stores grouping variables in `@groups` for use by estimation
+      functions (Phase 1+). Unlike dplyr, no `grouped_df` attribute is added to
+      `@data` — grouping lives on the survey object itself.
     contents:
       - group_by.survey_base
       - ungroup.survey_base
-
-  - title: "Missing value removal"
-    desc: >
-      Physically remove rows with `NA` values. Issues a warning because
-      physical removal can bias variance estimates.
-    contents:
-      - drop_na.survey_base

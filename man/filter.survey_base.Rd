@@ -90,5 +90,8 @@ d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
 }
 \seealso{
 \code{\link[=subset]{subset()}} for physical row removal (with a warning)
+
+Other filtering: 
+\code{\link{filter_out.survey_base}()}
 }
 \concept{filtering}

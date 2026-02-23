@@ -171,6 +171,9 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 #'   evaluated against `@data`. Rows where **all** conditions are `TRUE` are
 #'   marked as out-of-domain. `NA` results are treated as `FALSE`
 #'   (the row stays in-domain).
+#' @param .by Not supported for survey objects. Use [group_by()] instead.
+#' @param .preserve Ignored (included for compatibility with the dplyr
+#'   generic signature).
 #'
 #' @return The survey object with an updated `..surveycore_domain..` column in
 #'   `@data`. Row count is **unchanged**.
@@ -194,7 +197,6 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 #'
 #' @family filtering
 #' @seealso [filter()] for including rows in the domain
-#' @noRd
 filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   if (!is.null(.by)) {
     cli::cli_abort(
