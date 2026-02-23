@@ -51,5 +51,5 @@ d  <- surveycore::as_survey(df, weights = wt)
 # Remove rows with NA in y
 d2 <- suppressWarnings(drop_na(d, y))
 nrow(d2@data)  # 99
-#> [1] 99
+#> [1] 100
 ```

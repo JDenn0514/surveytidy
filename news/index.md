@@ -72,8 +72,12 @@ survey design objects created with the `surveycore` package.
   `@groups` (partial ungroup).
 
 - [`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html) —
-  physical row removal for rows with `NA` in specified columns (or any
-  column). Issues `surveycore_warning_physical_subset`.
+  domain-aware NA handling. Marks rows with `NA` in specified columns
+  (or any column) as out-of-domain without removing them. Equivalent to
+  `filter(!is.na(col1), !is.na(col2), ...)` and gives correct variance
+  estimates for downstream analyses. Successive
+  [`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html)
+  calls AND their conditions together.
 
 - [`subset()`](https://rdrr.io/r/base/subset.html) — physical row
   removal with `surveycore_warning_physical_subset`. Prefer
