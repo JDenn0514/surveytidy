@@ -115,4 +115,10 @@ d_chain <- filter(d, y > 0) |> filter(g == "A")
 identical(d_sub@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
           d_chain@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
 #> [1] TRUE
+
+# Multi-column helpers: if_any() and if_all()
+df2 <- data.frame(a = c(1,2,NA,4), b = c(NA,2,3,4), wt = rep(1,4))
+d2  <- surveycore::as_survey(df2, weights = wt)
+d_any <- filter(d2, if_any(c(a, b), ~ !is.na(.x)))
+d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
 ```
