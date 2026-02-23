@@ -32,6 +32,13 @@
   )
 
   registerS3method(
+    "filter_out",
+    "surveycore::survey_base",
+    get("filter_out.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
     "dplyr_reconstruct",
     "surveycore::survey_base",
     get("dplyr_reconstruct.survey_base", envir = ns),

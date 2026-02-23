@@ -148,6 +148,149 @@ test_that("filter() warns and marks all rows out-of-domain when no rows match", 
 })
 
 
+# ── filter_out() — happy path ─────────────────────────────────────────────────
+
+test_that("filter_out() passes test_invariants() for all design types", {
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    result <- dplyr::filter_out(designs[[nm]], y1 > 55)
+    test_invariants(result)
+  }
+})
+
+test_that("filter_out() does not remove any rows from @data", {
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    result <- dplyr::filter_out(designs[[nm]], y1 > 55)
+    expect_equal(nrow(result@data), nrow(designs[[nm]]@data))
+  }
+})
+
+test_that("filter_out() sets domain column to the negation of the condition", {
+  d <- make_all_designs()$taylor
+  result <- dplyr::filter_out(d, y1 > 55)
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    !(d@data$y1 > 55)
+  )
+})
+
+test_that("filter_out() with no conditions keeps all rows in-domain", {
+  d <- make_all_designs()$taylor
+  result <- dplyr::filter_out(d)
+  domain <- result@data[[surveycore::SURVEYCORE_DOMAIN_COL]]
+  expect_true(all(domain))
+})
+
+test_that("filter_out() with multiple conditions ANDs before negating", {
+  d <- make_all_designs()$taylor
+  result <- dplyr::filter_out(d, y1 > 55, y2 > 0)
+  # Rows where BOTH conditions hold are excluded
+  expected <- !(d@data$y1 > 55 & d@data$y2 > 0)
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    expected
+  )
+})
+
+test_that("filter_out() is equivalent to filter() with negated condition", {
+  d <- make_all_designs()$taylor
+  result_out <- dplyr::filter_out(d, y1 > 55)
+  result_inv <- dplyr::filter(d, !(y1 > 55))
+  expect_identical(
+    result_out@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    result_inv@data[[surveycore::SURVEYCORE_DOMAIN_COL]]
+  )
+})
+
+test_that("filter_out() after filter() ANDs the domains correctly", {
+  d <- make_all_designs()$taylor
+  result <- d |> dplyr::filter(y1 > 45) |> dplyr::filter_out(y2 > 0)
+  expected <- (d@data$y1 > 45) & !(d@data$y2 > 0)
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    expected
+  )
+})
+
+test_that("filter() after filter_out() ANDs the domains correctly", {
+  d <- make_all_designs()$taylor
+  result <- d |> dplyr::filter_out(y1 > 55) |> dplyr::filter(y2 > 0)
+  expected <- !(d@data$y1 > 55) & (d@data$y2 > 0)
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    expected
+  )
+})
+
+test_that("filter_out() maps NA conditions to FALSE (row stays in-domain)", {
+  d <- make_all_designs()$taylor
+  d@data$y1[1] <- NA_real_
+  result <- dplyr::filter_out(d, y1 > 55)
+  # Row 1: NA condition → treated as FALSE → NOT excluded → stays in-domain
+  expect_true(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]][[1L]])
+})
+
+test_that("filter_out() preserves @groups", {
+  d <- make_all_designs()$taylor
+  d@groups <- c("group")
+  result <- dplyr::filter_out(d, y1 > 55)
+  expect_identical(result@groups, c("group"))
+})
+
+test_that("filter_out() preserves @metadata variable labels", {
+  d <- make_all_designs()$taylor
+  d@metadata@variable_labels[["y1"]] <- "Outcome variable 1"
+  result <- dplyr::filter_out(d, y1 > 55)
+  expect_identical(
+    result@metadata@variable_labels[["y1"]],
+    "Outcome variable 1"
+  )
+})
+
+
+# ── filter_out() — error paths ────────────────────────────────────────────────
+
+test_that("filter_out() rejects .by argument with typed error", {
+  d <- make_all_designs()$taylor
+  expect_error(
+    dplyr::filter_out(d, y1 > 55, .by = "group"),
+    class = "surveytidy_error_filter_by_unsupported"
+  )
+  expect_snapshot(
+    error = TRUE,
+    dplyr::filter_out(d, y1 > 55, .by = "group")
+  )
+})
+
+test_that("filter_out() rejects a non-logical condition result", {
+  d <- make_all_designs()$taylor
+  expect_error(
+    dplyr::filter_out(d, y1),
+    class = "surveytidy_error_filter_out_non_logical"
+  )
+  expect_snapshot(
+    error = TRUE,
+    dplyr::filter_out(d, y1)
+  )
+})
+
+
+# ── filter_out() — edge cases ─────────────────────────────────────────────────
+
+test_that("filter_out() warns when all rows are excluded", {
+  d <- make_all_designs()$taylor
+  expect_warning(
+    result <- dplyr::filter_out(d, y1 > -1e9),
+    class = "surveycore_warning_empty_domain"
+  )
+  expect_false(any(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]]))
+  expect_snapshot({
+    invisible(dplyr::filter_out(d, y1 > -1e9))
+  })
+})
+
+
 # ── dplyr_reconstruct() ───────────────────────────────────────────────────────
 
 test_that("dplyr_reconstruct() preserves survey class for all design types", {

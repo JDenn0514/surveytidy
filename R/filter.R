@@ -22,6 +22,7 @@
 #
 # Functions defined here:
 #   filter.survey_base()   — domain estimation (all verbs route here)
+#   filter_out()           — domain exclusion (complement of filter)
 #   subset.survey_base()   — physical row removal (with warning)
 #
 # Note: dplyr_reconstruct.survey_base() was moved to R/utils.R on
@@ -143,6 +144,117 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   # Store domain column in @data; accumulate condition quosures in @variables
   .data@data[[domain_col]] <- domain_mask
   .data@variables$domain <- c(.data@variables$domain, conditions)
+  .data
+}
+
+
+# ── filter_out() ─────────────────────────────────────────────────────────────
+
+#' Exclude rows from a survey domain
+#'
+#' @description
+#' The complement of [filter()]. `filter_out()` marks rows **matching** the
+#' condition as out-of-domain while leaving all other rows in-domain. Like
+#' [filter()], it **never removes rows** from the survey object.
+#'
+#' `filter_out(.data, cond)` is equivalent to `filter(.data, !cond)` but
+#' reads more naturally when the intent is exclusion.
+#'
+#' Chained calls accumulate via AND: rows must satisfy all prior in-domain
+#' conditions and none of the exclusion conditions to remain in-domain.
+#'
+#' @param .data A `survey_taylor`, `survey_replicate`, or `survey_twophase`
+#'   object created by [surveycore::as_survey()].
+#' @param ... <[`data-masking`][rlang::args_data_masking]> Logical conditions
+#'   evaluated against `@data`. Rows where **all** conditions are `TRUE` are
+#'   marked as out-of-domain. `NA` results are treated as `FALSE`
+#'   (the row stays in-domain).
+#'
+#' @return The survey object with an updated `..surveycore_domain..` column in
+#'   `@data`. Row count is **unchanged**.
+#'
+#' @examples
+#' library(dplyr)
+#' df <- data.frame(y = rnorm(100), x = runif(100),
+#'                  wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
+#' d <- surveycore::as_survey(df, weights = wt)
+#'
+#' # Exclude negative y values
+#' d_out <- filter_out(d, y < 0)
+#'
+#' # Equivalent to negating the condition in filter()
+#' d_inv <- filter(d, !(y < 0))
+#' identical(d_out@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+#'           d_inv@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
+#'
+#' # Chain with filter() — only x > 0.5 rows that are NOT in group B
+#' d_chain <- filter(d, x > 0.5) |> filter_out(g == "B")
+#'
+#' @family filtering
+#' @seealso [filter()] for including rows in the domain
+#' @noRd
+filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported for survey design objects.",
+        "i" = "Use {.fn group_by} to add grouping to a survey design."
+      ),
+      class = "surveytidy_error_filter_by_unsupported"
+    )
+  }
+
+  conditions <- rlang::quos(...)
+
+  if (length(conditions) == 0L) {
+    # No conditions — exclude nothing; all rows remain in-domain
+    exclude_mask <- rep(FALSE, nrow(.data@data))
+  } else {
+    evaluated <- vector("list", length(conditions))
+    for (i in seq_along(conditions)) {
+      q <- conditions[[i]]
+      result <- rlang::eval_tidy(q, data = .data@data)
+      if (!is.logical(result)) {
+        the_class <- class(result)[[1L]]
+        cli::cli_abort(
+          c(
+            "x" = "filter_out() condition {i} must be logical, not {.cls {the_class}}.",
+            "i" = "Condition: {.code {rlang::quo_text(q)}}.",
+            "v" = "Add a comparison operator, e.g. {.code > 0}."
+          ),
+          class = "surveytidy_error_filter_out_non_logical"
+        )
+      }
+      # NA conditions map to FALSE (row stays in-domain)
+      result[is.na(result)] <- FALSE
+      evaluated[[i]] <- result
+    }
+    exclude_mask <- Reduce(`&`, evaluated)
+  }
+
+  # In-domain = rows NOT matching the exclusion condition
+  domain_mask <- !exclude_mask
+
+  # AND with existing domain column if present (chained filters)
+  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
+  if (domain_col %in% names(.data@data)) {
+    domain_mask <- .data@data[[domain_col]] & domain_mask
+  }
+
+  # Warn on empty domain
+  if (!any(domain_mask)) {
+    cli::cli_warn(
+      c(
+        "!" = paste0(
+          "filter_out() produced an empty domain \u2014 all rows were excluded."
+        ),
+        "i" = "Variance estimation on this domain will fail."
+      ),
+      class = "surveycore_warning_empty_domain"
+    )
+  }
+
+  .data@data[[domain_col]] <- domain_mask
   .data
 }
 
