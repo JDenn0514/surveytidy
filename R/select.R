@@ -61,21 +61,19 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Select by name
-#' select(d, ridageyr, riagendr)
+#' select(d, gender, agecat)
 #'
 #' # Select by name pattern
-#' select(d, dplyr::starts_with("bpx"))
+#' select(d, dplyr::starts_with("smuse_"))
 #'
 #' # Select by type
 #' select(d, dplyr::where(is.numeric))
 #'
 #' # Drop columns with !
-#' select(d, !dplyr::starts_with("bpx"))
+#' select(d, !dplyr::starts_with("smuse_"))
 #'
 #' @family selecting
 #' @seealso [relocate()] to reorder columns, [rename()] to rename them,
@@ -167,20 +165,18 @@ select.survey_base <- function(.data, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Move ridageyr before riagendr
-#' relocate(d, ridageyr, .before = riagendr)
+#' # Move agecat before gender
+#' relocate(d, agecat, .before = gender)
 #'
-#' # Move all blood pressure columns to the front
-#' relocate(d, dplyr::starts_with("bpx"))
+#' # Move all social media columns to the front
+#' relocate(d, dplyr::starts_with("smuse_"))
 #'
 #' # After select(), relocate reorders the visible columns
 #' d |>
-#'   select(ridageyr, riagendr, bpxsy1) |>
-#'   relocate(bpxsy1, .before = ridageyr)
+#'   select(gender, agecat, partysum) |>
+#'   relocate(partysum, .before = gender)
 #'
 #' @family selecting
 #' @seealso [select()] to keep or drop columns, [rename()] to rename them
@@ -249,15 +245,13 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Extract a column by name
-#' pull(d, ridageyr)
+#' pull(d, agecat)
 #'
-#' # Named vector — values of ridageyr named by seqn
-#' pull(d, ridageyr, name = seqn)
+#' # Named vector — values of agecat named by respid
+#' pull(d, agecat, name = respid)
 #'
 #' @family selecting
 #' @seealso [select()] to keep columns in the survey object
@@ -285,16 +279,14 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Glimpse all columns
 #' glimpse(d)
 #'
 #' # After select(), shows only the selected columns
 #' d |>
-#'   select(ridageyr, riagendr, bpxsy1) |>
+#'   select(gender, agecat, partysum) |>
 #'   glimpse()
 #'
 #' @family selecting

@@ -79,26 +79,24 @@ column of \verb{@data}. \code{TRUE} means in-domain; \code{FALSE} means out-of-d
 \examples{
 library(surveytidy)
 library(surveycore)
-d <- as_survey(nhanes_2017,
-  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Keep adults only
-filter(d, ridageyr >= 18)
+# Keep adults 50 and older
+filter(d, agecat >= 3)
 
 # Multiple conditions are AND-ed together
-filter(d, ridageyr >= 18, riagendr == 2)
+filter(d, agecat >= 3, gender == 2)
 
 # filter_out() excludes matching rows — complement of filter()
-filter_out(d, ridageyr < 18)
+filter_out(d, agecat == 1)
 
 # Chained calls accumulate (these are equivalent)
-filter(d, ridageyr >= 18, riagendr == 2)
-filter(d, ridageyr >= 18) |> filter(riagendr == 2)
+filter(d, agecat >= 3, gender == 2)
+filter(d, agecat >= 3) |> filter(gender == 2)
 
 # Multi-column conditions with if_any() and if_all()
-filter(d, dplyr::if_any(c(bpxsy1, bpxdi1), ~ !is.na(.x)))
-filter(d, dplyr::if_all(c(bpxsy1, bpxdi1), ~ !is.na(.x)))
+filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
+filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 
 }
 \seealso{

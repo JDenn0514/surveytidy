@@ -36,12 +36,10 @@ reminder of the statistical implications.
 \examples{
 library(surveytidy)
 library(surveycore)
-d <- as_survey(nhanes_2017,
-  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Physical row removal — always issues a warning
-subset(d, ridageyr >= 18)
+subset(d, agecat >= 3)
 
 }
 \seealso{

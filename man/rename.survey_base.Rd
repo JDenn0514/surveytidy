@@ -7,46 +7,71 @@
 rename.survey_base(.data, ...)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Use \code{new_name = old_name}
-pairs to rename columns.}
+pairs to rename columns. Any number of columns can be renamed in a
+single call.}
 }
 \value{
-The survey object with updated column names, \verb{@variables}, and
-\verb{@metadata}.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item Rows are not added or removed.
+\item Column order is preserved.
+\item Renamed columns are updated in \verb{@data}, \verb{@variables}, and \verb{@metadata}.
+\item Groups and survey design attributes are preserved.
+}
 }
 \description{
-Renames columns in \verb{@data} and automatically keeps the survey design in
-sync:
+\code{rename()} changes column names in the underlying data and automatically
+keeps the survey design in sync. Variable labels, value labels, and other
+metadata follow the rename — no manual bookkeeping required.
+
+Renaming a design variable (weights, strata, PSUs) is fully supported:
+the design specification updates automatically and a
+\code{surveytidy_warning_rename_design_var} warning is issued to confirm the
+change.
+}
+\details{
+\subsection{What gets updated}{
 \itemize{
-\item \verb{@variables} — design variable column names (weights, strata, PSU, FPC,
-replicate weights) are updated to the new names.
-\item \verb{@metadata} — variable labels, value labels, question prefaces, notes,
-and transformation records are re-keyed.
-\item \verb{@variables$visible_vars} — any occurrence of the old name is replaced
-with the new name.
+\item \strong{Column names in \verb{@data}} — the rename takes effect immediately.
+\item \strong{Design specification} — if a renamed column is a design variable
+(weights, strata, PSU, FPC, or replicate weights), \verb{@variables} is
+updated to track the new name.
+\item \strong{Metadata} — variable labels, value labels, question prefaces, notes,
+and transformation records in \verb{@metadata} are re-keyed to the new name.
+\item \strong{\code{visible_vars}} — any occurrence of the old name in
+\verb{@variables$visible_vars} is replaced with the new name, so
+\code{\link[=select]{select()}} + \code{rename()} pipelines work correctly.
+}
 }
 
-Renaming a design variable is allowed and issues
-\code{surveytidy_warning_rename_design_var} to confirm the design was updated.
+\subsection{Renaming design variables}{
+
+Renaming a design variable (e.g., the weights column) is intentionally
+allowed. A \code{surveytidy_warning_rename_design_var} warning is issued as a
+reminder that the design specification has been updated — not to indicate
+an error.
+}
 }
 \examples{
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-                 wt = runif(50, 1, 5))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Rename an outcome column
-d2 <- rename(d, outcome = y1)
+rename(d, financial_situation = fin_sit)
 
-# Rename a design variable (warns and updates @variables$weights)
-d3 <- rename(d, weight = wt)
-d3@variables$weights  # "weight"
+# Rename multiple columns at once
+rename(d, region = cregion, education = educcat)
+
+# Rename a design variable — warns and updates the design specification
+rename(d, survey_weight = weight)
 
 }
 \seealso{
-\code{\link[=mutate]{mutate()}} to add columns, \code{\link[=select]{select()}} to drop columns
+\code{\link[=mutate]{mutate()}} to add or modify column values, \code{\link[=select]{select()}} to drop columns
 
 Other modification: 
 \code{\link{mutate.survey_base}()}

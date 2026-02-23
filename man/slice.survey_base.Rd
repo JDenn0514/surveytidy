@@ -22,22 +22,44 @@ slice_max.survey_base(.data, ...)
 slice_sample.survey_base(.data, ...)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{Passed to the corresponding \verb{dplyr::slice_*()} function.}
 }
 \value{
-A physical subset of the survey object's rows.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item A subset of rows is retained; unselected rows are permanently removed.
+\item Columns and survey design attributes are unchanged.
+\item Always issues \code{surveycore_warning_physical_subset}.
+}
 }
 \description{
 \code{slice()}, \code{slice_head()}, \code{slice_tail()}, \code{slice_min()}, \code{slice_max()},
-and \code{slice_sample()} \strong{physically remove rows} and always issue
-\code{surveycore_warning_physical_subset}. They error if the result would have
-0 rows. Prefer \code{\link[=filter]{filter()}} for subpopulation analyses.
+and \code{slice_sample()} \strong{physically remove rows} from a survey design
+object. For subpopulation analyses, use \code{\link[=filter]{filter()}} instead — it marks
+rows as out-of-domain without removing them, preserving valid variance
+estimation.
 
-\code{slice_sample(weight_by = )} additionally warns with
-\code{surveytidy_warning_slice_sample_weight_by} because the \code{weight_by}
-column is independent of the survey design weights.
+All slice functions always issue \code{surveycore_warning_physical_subset}
+and error if the result would have 0 rows.
+}
+\details{
+\subsection{Physical subsetting}{
+
+Unlike \code{\link[=filter]{filter()}}, slice functions actually remove rows. This changes
+the survey design — unless the design was explicitly built for the
+subset population, variance estimates may be incorrect.
+}
+
+\subsection{\code{slice_sample()} and survey weights}{
+
+\code{slice_sample(weight_by = )} samples rows proportional to a column's
+values, independently of the survey design weights. A
+\code{surveytidy_warning_slice_sample_weight_by} warning is issued as a
+reminder. If you intend probability-proportional sampling, use the
+design weights directly.
+}
 }
 \section{Functions}{
 \itemize{
@@ -53,17 +75,23 @@ column is independent of the survey design weights.
 
 }}
 \examples{
-library(dplyr)
-df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Physical row selection (issues warning)
-d2 <- suppressWarnings(slice_head(d, n = 20))
+# First 10 rows (issues a physical subset warning)
+slice_head(d, n = 10)
+
+# Rows with the 5 lowest survey weights
+slice_min(d, order_by = weight, n = 5)
+
+# Random sample of 50 rows
+slice_sample(d, n = 50)
 
 }
 \seealso{
-\code{\link[=filter]{filter()}} for domain-aware row marking (preferred),
-\code{\link[=arrange]{arrange()}} for row sorting
+\code{\link[=filter]{filter()}} for domain-aware row marking (preferred for
+subpopulation analyses), \code{\link[=arrange]{arrange()}} for row sorting
 
 Other row operations: 
 \code{\link{drop_na.survey_base}()}

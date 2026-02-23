@@ -68,30 +68,28 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Group by a column
-#' group_by(d, riagendr)
+#' group_by(d, gender)
 #'
 #' # Grouped mutate — within-group mean centring
 #' d |>
-#'   group_by(riagendr) |>
-#'   mutate(bp_centred = bpxsy1 - mean(bpxsy1, na.rm = TRUE))
+#'   group_by(gender) |>
+#'   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
 #'
 #' # Add a second grouping variable with .add = TRUE
 #' d |>
-#'   group_by(riagendr) |>
-#'   group_by(ridreth3, .add = TRUE)
+#'   group_by(gender) |>
+#'   group_by(cregion, .add = TRUE)
 #'
 #' # Remove all groups
-#' d |> group_by(riagendr) |> ungroup()
+#' d |> group_by(gender) |> ungroup()
 #'
-#' # Partial ungroup — remove only riagendr, keep ridreth3
+#' # Partial ungroup — remove only gender, keep cregion
 #' d |>
-#'   group_by(riagendr, ridreth3) |>
-#'   ungroup(riagendr)
+#'   group_by(gender, cregion) |>
+#'   ungroup(gender)
 #'
 #' @family grouping
 group_by.survey_base <- function(

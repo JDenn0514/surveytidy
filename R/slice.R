@@ -121,15 +121,13 @@ utils::globalVariables("check_fn")
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # First 10 rows (issues a physical subset warning)
 #' slice_head(d, n = 10)
 #'
-#' # Rows with the 5 lowest ages
-#' slice_min(d, order_by = ridageyr, n = 5)
+#' # Rows with the 5 lowest survey weights
+#' slice_min(d, order_by = weight, n = 5)
 #'
 #' # Random sample of 50 rows
 #' slice_sample(d, n = 50)

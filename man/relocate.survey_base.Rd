@@ -7,40 +7,63 @@
 relocate.survey_base(.data, ..., .before = NULL, .after = NULL)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Columns to move.}
 
-\item{.before, .after}{<\code{\link[tidyselect:language]{tidy-select}}> Destination
-for the selected columns. At most one of \code{.before} and \code{.after} may be
-supplied.}
+\item{.before, .after}{<\code{\link[tidyselect:language]{tidy-select}}> A destination
+column. Columns in \code{...} are placed immediately before or after it.
+Specify at most one of \code{.before} and \code{.after}.}
 }
 \value{
-The survey object with \verb{@variables$visible_vars} or \verb{@data} column
-order updated.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item Rows are not modified.
+\item All columns are present; only their order changes.
+\item Design variables are not moved.
+\item Groups and survey design attributes are preserved.
+}
 }
 \description{
-Move columns to a new position. When \verb{@variables$visible_vars} is set
-(i.e. after a \code{select()} call), only the visible columns are reordered —
-design variables keep their position in \verb{@data}. When \code{visible_vars} is
-\code{NULL}, the full \verb{@data} column order is updated.
+\code{relocate()} moves columns to a new position using the same
+\link[tidyselect:language]{tidyselect mini-language} as \code{\link[=select]{select()}}. Design
+variables (weights, strata, PSUs) are not moved — only analysis columns
+change position.
+}
+\details{
+\subsection{Design variable positions}{
+
+Design variables are always preserved at their current position in the
+underlying data. When you call \code{relocate()}, only non-design columns are
+affected by the reordering.
+}
+
+\subsection{After \code{select()}}{
+
+When \code{\link[=select]{select()}} has been called, \code{relocate()} reorders the visible columns
+(those shown when you print the object). This has no effect on the physical
+column order in the underlying data.
+}
 }
 \examples{
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), y2 = rnorm(50), y3 = rnorm(50),
-                 wt = runif(50, 1, 5))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Move y3 before y1
-d2 <- relocate(d, y3, .before = y1)
+# Move agecat before gender
+relocate(d, agecat, .before = gender)
 
-# Works on visible_vars too (after a select())
-d3 <- select(d, y1, y2, y3) |> relocate(y2, .after = y3)
-d3@variables$visible_vars    # c("y1", "y3", "y2")
+# Move all social media columns to the front
+relocate(d, dplyr::starts_with("smuse_"))
+
+# After select(), relocate reorders the visible columns
+d |>
+  select(gender, agecat, partysum) |>
+  relocate(partysum, .before = gender)
 
 }
 \seealso{
-\code{\link[=select]{select()}} to keep or drop columns
+\code{\link[=select]{select()}} to keep or drop columns, \code{\link[=rename]{rename()}} to rename them
 
 Other selecting: 
 \code{\link{glimpse.survey_base}()},

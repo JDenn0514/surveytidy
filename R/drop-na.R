@@ -46,15 +46,13 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Mark rows with NA in bpxsy1 as out-of-domain
-#' drop_na(d, bpxsy1)
+#' # Mark rows with NA in votegen_post as out-of-domain
+#' drop_na(d, votegen_post)
 #'
-#' # Mark rows with NA in either blood pressure column
-#' drop_na(d, bpxsy1, bpxdi1)
+#' # Mark rows with NA in either social media column
+#' drop_na(d, smuse_fb, smuse_yt)
 #'
 #' # No columns specified — any NA in any column marks the row out-of-domain
 #' drop_na(d)

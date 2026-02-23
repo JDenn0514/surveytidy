@@ -51,21 +51,19 @@ are removed. Metadata for retained columns is preserved.
 \examples{
 library(surveytidy)
 library(surveycore)
-d <- as_survey(nhanes_2017,
-  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Select by name
-select(d, ridageyr, riagendr)
+select(d, gender, agecat)
 
 # Select by name pattern
-select(d, dplyr::starts_with("bpx"))
+select(d, dplyr::starts_with("smuse_"))
 
 # Select by type
 select(d, dplyr::where(is.numeric))
 
 # Drop columns with !
-select(d, !dplyr::starts_with("bpx"))
+select(d, !dplyr::starts_with("smuse_"))
 
 }
 \seealso{

@@ -14,8 +14,7 @@ functions of variables. Use \code{\link[dplyr:desc]{dplyr::desc()}} to sort a va
 order.}
 
 \item{.by_group}{If \code{TRUE}, sorts first by the grouping variables set by
-\code{\link[=group_by]{group_by()}}. Grouping in \code{survey_base} objects is stored in \verb{@groups},
-not as a data frame attribute.}
+\code{\link[=group_by]{group_by()}}.}
 
 \item{.locale}{The locale to use for ordering strings. If \code{NULL}, uses the
 \code{"C"} locale. See \code{\link[stringi:about_locale]{stringi::locale()}} for available locales.}
@@ -52,22 +51,20 @@ rows are in or out of the survey domain.
 \examples{
 library(surveytidy)
 library(surveycore)
-d <- as_survey(nhanes_2017,
-  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Sort by age ascending
-arrange(d, ridageyr)
+# Sort by age category ascending
+arrange(d, agecat)
 
-# Sort by age descending
-arrange(d, dplyr::desc(ridageyr))
+# Sort by age category descending
+arrange(d, dplyr::desc(agecat))
 
 # Sort by multiple variables
-arrange(d, riagendr, dplyr::desc(ridageyr))
+arrange(d, gender, dplyr::desc(agecat))
 
 # Sort by grouping variables first
-d_grouped <- group_by(d, riagendr)
-arrange(d_grouped, .by_group = TRUE, ridageyr)
+d_grouped <- group_by(d, gender)
+arrange(d_grouped, .by_group = TRUE, agecat)
 
 }
 \seealso{

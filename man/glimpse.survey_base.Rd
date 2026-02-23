@@ -7,7 +7,7 @@
 glimpse.survey_base(x, width = NULL, ...)
 }
 \arguments{
-\item{x}{A survey design object.}
+\item{x}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{width}{Width of the output. Defaults to the console width.}
 
@@ -17,22 +17,23 @@ glimpse.survey_base(x, width = NULL, ...)
 \code{x} invisibly.
 }
 \description{
-Print a transposed, condensed summary of the survey object's columns and
-their types. Respects \verb{@variables$visible_vars} — if set (i.e. after a
-\code{select()} call), only the user-selected columns are shown, not the
-design variables.
+Print a transposed summary of the survey object's columns — column names
+run down the left, data types and values run across. Respects \code{\link[=select]{select()}}:
+if columns have been selected, only those columns are shown; design
+variables are hidden from the display.
 }
 \examples{
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-                 wt = runif(50, 1, 5), g = sample(c("A","B"), 50, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Shows all columns
+# Glimpse all columns
 glimpse(d)
 
-# After select(), shows only visible columns
-glimpse(select(d, y1, y2))
+# After select(), shows only the selected columns
+d |>
+  select(gender, agecat, partysum) |>
+  glimpse()
 
 }
 \seealso{

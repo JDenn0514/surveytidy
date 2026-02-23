@@ -37,8 +37,7 @@
 #'   functions of variables. Use [desc()] to sort a variable in descending
 #'   order.
 #' @param .by_group If `TRUE`, sorts first by the grouping variables set by
-#'   [group_by()]. Grouping in `survey_base` objects is stored in `@groups`,
-#'   not as a data frame attribute.
+#'   [group_by()].
 #' @param .locale The locale to use for ordering strings. If `NULL`, uses the
 #'   `"C"` locale. See [stringi::locale()] for available locales.
 #'
@@ -53,22 +52,20 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Sort by age ascending
-#' arrange(d, ridageyr)
+#' # Sort by age category ascending
+#' arrange(d, agecat)
 #'
-#' # Sort by age descending
-#' arrange(d, dplyr::desc(ridageyr))
+#' # Sort by age category descending
+#' arrange(d, dplyr::desc(agecat))
 #'
 #' # Sort by multiple variables
-#' arrange(d, riagendr, dplyr::desc(ridageyr))
+#' arrange(d, gender, dplyr::desc(agecat))
 #'
 #' # Sort by grouping variables first
-#' d_grouped <- group_by(d, riagendr)
-#' arrange(d_grouped, .by_group = TRUE, ridageyr)
+#' d_grouped <- group_by(d, gender)
+#' arrange(d_grouped, .by_group = TRUE, agecat)
 #'
 #' @family single table verbs
 #' @seealso [filter()] for domain-aware row marking,

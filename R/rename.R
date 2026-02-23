@@ -63,18 +63,16 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Rename an outcome column
-#' rename(d, sbp = bpxsy1)
+#' rename(d, financial_situation = fin_sit)
 #'
 #' # Rename multiple columns at once
-#' rename(d, sbp = bpxsy1, dbp = bpxdi1)
+#' rename(d, region = cregion, education = educcat)
 #'
 #' # Rename a design variable — warns and updates the design specification
-#' rename(d, weights = wtmec2yr)
+#' rename(d, survey_weight = weight)
 #'
 #' @family modification
 #' @seealso [mutate()] to add or modify column values, [select()] to drop columns

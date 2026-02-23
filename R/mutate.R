@@ -77,23 +77,22 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' d <- as_survey(nhanes_2017,
-#'   ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
-#' )
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Add a new column
-#' mutate(d, age_months = ridageyr * 12)
+#' mutate(d, college_grad = educcat == 1)
 #'
 #' # Conditional recoding
-#' mutate(d, adult = dplyr::if_else(ridageyr >= 18, "adult", "minor"))
+#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
 #'
 #' # Grouped mutate — within-group mean centring
 #' d |>
-#'   group_by(riagendr) |>
-#'   mutate(bp_centred = bpxsy1 - mean(bpxsy1, na.rm = TRUE))
+#'   group_by(gender) |>
+#'   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
 #'
 #' # .keep = "none" keeps only new columns plus design vars (always preserved)
-#' mutate(d, age_months = ridageyr * 12, .keep = "none")
+#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+#'   .keep = "none")
 #'
 #' @family modification
 #' @seealso [rename()] to rename columns, [select()] to drop columns

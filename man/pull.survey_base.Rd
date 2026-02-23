@@ -7,18 +7,20 @@
 pull.survey_base(.data, var = -1, name = NULL, ...)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
-\item{var}{<\code{\link[rlang:args_data_masking]{data-masking}}> Column to extract.
-Defaults to the last column.}
+\item{var}{<\code{\link[rlang:args_data_masking]{data-masking}}> The column to
+extract. Accepts a bare name, a positive integer (counting from the
+left), or a negative integer (counting from the right). Defaults to the
+last column.}
 
-\item{name}{<\code{\link[rlang:args_data_masking]{data-masking}}> Optional column
+\item{name}{<\code{\link[rlang:args_data_masking]{data-masking}}> An optional column
 whose values are used as names for the returned vector.}
 
 \item{...}{Passed to \code{dplyr::pull()}.}
 }
 \value{
-A plain vector (not a survey object).
+A vector the same length as the number of rows in \code{.data}.
 }
 \description{
 Pull a single column out of a survey design object as a plain vector.
@@ -26,12 +28,15 @@ This is a terminal operation — the result is not a survey object and cannot
 be piped back into survey verbs.
 }
 \examples{
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), wt = runif(50, 1, 5))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Extract y1 as a numeric vector
-pull(d, y1)
+# Extract a column by name
+pull(d, agecat)
+
+# Named vector — values of agecat named by respid
+pull(d, agecat, name = respid)
 
 }
 \seealso{
