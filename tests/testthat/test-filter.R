@@ -101,6 +101,60 @@ test_that("filter() preserves @metadata variable labels", {
 })
 
 
+# ── filter() — if_any() / if_all() ───────────────────────────────────────────
+
+test_that("filter() supports if_any() for multi-column domain selection", {
+  skip_if_not_installed("dplyr")
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- dplyr::filter(d, dplyr::if_any(c(y1, y2), ~ .x > 60))
+    test_invariants(result)
+    expected <- d@data$y1 > 60 | d@data$y2 > 60
+    expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
+  }
+})
+
+test_that("filter() supports if_all() for multi-column domain selection", {
+  skip_if_not_installed("dplyr")
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    # suppressWarnings: if_all() may yield an empty domain for some design
+    # fixtures; that behaviour is tested separately.
+    result <- suppressWarnings(dplyr::filter(d, dplyr::if_all(c(y1, y2), ~ .x > 40)))
+    test_invariants(result)
+    expected <- d@data$y1 > 40 & d@data$y2 > 40
+    expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
+  }
+})
+
+test_that("filter() if_any() treats NA columns as FALSE (outside domain)", {
+  skip_if_not_installed("dplyr")
+  df <- data.frame(
+    a = c(NA_real_, 2, 3),
+    b = c(1, NA_real_, 3),
+    wt = c(1, 1, 1)
+  )
+  d <- surveycore::as_survey(df, weights = wt)
+  # if_any: row 1 has NA in a, but b=1>0 → in-domain
+  #         row 2 has a=2>0, but b is NA → in-domain
+  #         row 3: both > 0 → in-domain
+  result <- dplyr::filter(d, dplyr::if_any(c(a, b), ~ .x > 0))
+  expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], c(TRUE, TRUE, TRUE))
+})
+
+test_that("chained filter() with if_any() correctly ANDs the domains", {
+  skip_if_not_installed("dplyr")
+  d <- make_all_designs()$taylor
+  result <- d |>
+    dplyr::filter(dplyr::if_any(c(y1, y2), ~ .x > 60)) |>
+    dplyr::filter(group == "A")
+  expected <- (d@data$y1 > 60 | d@data$y2 > 60) & (d@data$group == "A")
+  expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
+})
+
+
 # ── filter() — error paths ────────────────────────────────────────────────────
 
 test_that("filter() rejects .by argument with typed error", {
@@ -116,18 +170,12 @@ test_that("filter() rejects .by argument with typed error", {
   )
 })
 
-test_that("filter() rejects a non-logical condition result", {
+test_that("filter() errors when a condition is non-logical", {
   skip_if_not_installed("dplyr")
   d <- make_all_designs()$taylor
-  # y1 is numeric — missing comparison operator
-  expect_error(
-    dplyr::filter(d, y1),
-    class = "surveytidy_error_filter_non_logical"
-  )
-  expect_snapshot(
-    error = TRUE,
-    dplyr::filter(d, y1)
-  )
+  # y1 is numeric — missing comparison operator; dplyr raises the error
+  expect_error(dplyr::filter(d, y1))
+  expect_snapshot(error = TRUE, dplyr::filter(d, y1))
 })
 
 
@@ -249,6 +297,33 @@ test_that("filter_out() preserves @metadata variable labels", {
 })
 
 
+# ── filter_out() — if_any() / if_all() ───────────────────────────────────────
+
+test_that("filter_out() supports if_any() for multi-column exclusion", {
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- dplyr::filter_out(d, dplyr::if_any(c(y1, y2), ~ .x > 80))
+    test_invariants(result)
+    # Rows where ANY of y1/y2 > 80 are excluded
+    expected <- !(d@data$y1 > 80 | d@data$y2 > 80)
+    expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
+  }
+})
+
+test_that("filter_out() supports if_all() for multi-column exclusion", {
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- dplyr::filter_out(d, dplyr::if_all(c(y1, y2), ~ .x > 40))
+    test_invariants(result)
+    # Rows where ALL of y1 AND y2 > 40 are excluded
+    expected <- !(d@data$y1 > 40 & d@data$y2 > 40)
+    expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
+  }
+})
+
+
 # ── filter_out() — error paths ────────────────────────────────────────────────
 
 test_that("filter_out() rejects .by argument with typed error", {
@@ -263,16 +338,11 @@ test_that("filter_out() rejects .by argument with typed error", {
   )
 })
 
-test_that("filter_out() rejects a non-logical condition result", {
+test_that("filter_out() errors when a condition is non-logical", {
   d <- make_all_designs()$taylor
-  expect_error(
-    dplyr::filter_out(d, y1),
-    class = "surveytidy_error_filter_out_non_logical"
-  )
-  expect_snapshot(
-    error = TRUE,
-    dplyr::filter_out(d, y1)
-  )
+  # y1 is numeric — missing comparison operator; dplyr raises the error
+  expect_error(dplyr::filter_out(d, y1))
+  expect_snapshot(error = TRUE, dplyr::filter_out(d, y1))
 })
 
 

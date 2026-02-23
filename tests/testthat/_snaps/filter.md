@@ -7,15 +7,15 @@
       x `.by` is not supported for survey design objects.
       i Use `group_by()` to add grouping to a survey design.
 
-# filter() rejects a non-logical condition result
+# filter() errors when a condition is non-logical
 
     Code
       dplyr::filter(d, y1)
     Condition
       Error in `dplyr::filter()`:
-      x Filter condition 1 must be logical, not <numeric>.
-      i Condition: `y1`.
-      v Add a comparison operator, e.g. `> 0`.
+      i In argument: `y1`.
+      Caused by error:
+      ! `..1` must be a logical vector, not a double vector.
 
 # filter() warns and marks all rows out-of-domain when no rows match
 
@@ -35,15 +35,15 @@
       x `.by` is not supported for survey design objects.
       i Use `group_by()` to add grouping to a survey design.
 
-# filter_out() rejects a non-logical condition result
+# filter_out() errors when a condition is non-logical
 
     Code
       dplyr::filter_out(d, y1)
     Condition
-      Error in `dplyr::filter_out()`:
-      x filter_out() condition 1 must be logical, not <numeric>.
-      i Condition: `y1`.
-      v Add a comparison operator, e.g. `> 0`.
+      Error in `dplyr::filter()`:
+      i In argument: `y1`.
+      Caused by error:
+      ! `..1` must be a logical vector, not a double vector.
 
 # filter_out() warns when all rows are excluded
 
