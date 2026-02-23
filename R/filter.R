@@ -46,7 +46,8 @@
 #'   object created by [surveycore::as_survey()].
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Logical conditions
 #'   evaluated against `@data`. Multiple conditions are AND-ed together.
-#'   `NA` results are treated as `FALSE` (outside domain).
+#'   `NA` results are treated as `FALSE` (outside domain). Supports dplyr
+#'   helpers like [dplyr::if_any()] and [dplyr::if_all()].
 #' @param .by Not supported for survey objects. Use [group_by()] instead.
 #' @param .preserve Ignored (included for compatibility with the dplyr
 #'   generic signature).
@@ -78,6 +79,12 @@
 #' identical(d_sub@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
 #'           d_chain@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
 #'
+#' # Multi-column helpers: if_any() and if_all()
+#' df2 <- data.frame(a = c(1,2,NA,4), b = c(NA,2,3,4), wt = rep(1,4))
+#' d2  <- surveycore::as_survey(df2, weights = wt)
+#' d_any <- filter(d2, if_any(c(a, b), ~ !is.na(.x)))
+#' d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
+#'
 #' @family filtering
 #' @seealso [subset()] for physical row removal (with a warning)
 filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
@@ -91,38 +98,33 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
     )
   }
 
-  # Evaluate filter conditions against @data.
-  # Quosures already capture the user's environment — no need to pass env.
+  # Capture quosures for accumulation in @variables$domain (done at the end).
   conditions <- rlang::quos(...)
+
+  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
+  n <- nrow(.data@data)
 
   if (length(conditions) == 0L) {
     # No conditions — trivial domain (all rows in-domain)
-    domain_mask <- rep(TRUE, nrow(.data@data))
+    domain_mask <- rep(TRUE, n)
   } else {
-    evaluated <- vector("list", length(conditions))
-    for (i in seq_along(conditions)) {
-      q <- conditions[[i]]
-      result <- rlang::eval_tidy(q, data = .data@data)
-      if (!is.logical(result)) {
-        the_class <- class(result)[[1L]]
-        cli::cli_abort(
-          c(
-            "x" = "Filter condition {i} must be logical, not {.cls {the_class}}.",
-            "i" = "Condition: {.code {rlang::quo_text(q)}}.",
-            "v" = "Add a comparison operator, e.g. {.code > 0}."
-          ),
-          class = "surveytidy_error_filter_non_logical"
-        )
-      }
-      # NA conditions map to FALSE (outside domain)
-      result[is.na(result)] <- FALSE
-      evaluated[[i]] <- result
+    # Evaluate conditions via dplyr::filter() so that dplyr helpers like
+    # if_any() and if_all() work. These functions require dplyr's internal
+    # data-masking context, which rlang::eval_tidy() alone does not provide.
+    #
+    # Strategy: attach a sentinel row-ID column, run dplyr::filter(), then
+    # use set membership to determine which rows are in-domain.
+    row_id_col <- "..surveytidy_filter_id.."
+    while (row_id_col %in% names(.data@data)) {
+      row_id_col <- paste0(".", row_id_col, ".")
     }
-    domain_mask <- Reduce(`&`, evaluated)
+    tmp <- .data@data
+    tmp[[row_id_col]] <- seq_len(n)
+    kept <- dplyr::filter(tmp, ...)
+    domain_mask <- seq_len(n) %in% kept[[row_id_col]]
   }
 
   # AND with existing domain column if present (chained filters)
-  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
   if (domain_col %in% names(.data@data)) {
     domain_mask <- .data@data[[domain_col]] & domain_mask
   }
@@ -204,39 +206,30 @@ filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
     )
   }
 
-  conditions <- rlang::quos(...)
+  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
+  n <- nrow(.data@data)
 
-  if (length(conditions) == 0L) {
+  if (...length() == 0L) {
     # No conditions — exclude nothing; all rows remain in-domain
-    exclude_mask <- rep(FALSE, nrow(.data@data))
+    domain_mask <- rep(TRUE, n)
   } else {
-    evaluated <- vector("list", length(conditions))
-    for (i in seq_along(conditions)) {
-      q <- conditions[[i]]
-      result <- rlang::eval_tidy(q, data = .data@data)
-      if (!is.logical(result)) {
-        the_class <- class(result)[[1L]]
-        cli::cli_abort(
-          c(
-            "x" = "filter_out() condition {i} must be logical, not {.cls {the_class}}.",
-            "i" = "Condition: {.code {rlang::quo_text(q)}}.",
-            "v" = "Add a comparison operator, e.g. {.code > 0}."
-          ),
-          class = "surveytidy_error_filter_out_non_logical"
-        )
-      }
-      # NA conditions map to FALSE (row stays in-domain)
-      result[is.na(result)] <- FALSE
-      evaluated[[i]] <- result
+    # Evaluate conditions via dplyr::filter() to support if_any()/if_all().
+    # Rows that survive the filter MATCH the exclusion condition, so those
+    # are the rows to mark out-of-domain.
+    row_id_col <- "..surveytidy_filter_id.."
+    while (row_id_col %in% names(.data@data)) {
+      row_id_col <- paste0(".", row_id_col, ".")
     }
-    exclude_mask <- Reduce(`&`, evaluated)
+    tmp <- .data@data
+    tmp[[row_id_col]] <- seq_len(n)
+    kept <- dplyr::filter(tmp, ...)
+    # In-domain = rows NOT matching the exclusion condition
+    # (dplyr treats NA conditions as FALSE → those rows are NOT in kept →
+    #  they stay in-domain, matching the documented behaviour)
+    domain_mask <- !(seq_len(n) %in% kept[[row_id_col]])
   }
 
-  # In-domain = rows NOT matching the exclusion condition
-  domain_mask <- !exclude_mask
-
-  # AND with existing domain column if present (chained filters)
-  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
+  # AND with existing domain column if present (chained calls)
   if (domain_col %in% names(.data@data)) {
     domain_mask <- .data@data[[domain_col]] & domain_mask
   }
