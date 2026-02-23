@@ -4,7 +4,7 @@
 \alias{drop_na.survey_base}
 \title{Mark rows with missing values as out-of-domain in a survey design object}
 \usage{
-\method{drop_na}{survey_base}(data, ...)
+drop_na.survey_base(data, ...)
 }
 \arguments{
 \item{data}{A survey design object.}
@@ -37,10 +37,9 @@ d2@data[[surveycore::SURVEYCORE_DOMAIN_COL]]  # FALSE for the last row
 
 }
 \seealso{
-\code{\link[dplyr:filter]{dplyr::filter()}} for domain-aware row marking
+\code{\link[=filter]{filter()}} for domain-aware row marking
 
 Other row operations: 
-\code{\link{arrange.survey_base}()},
 \code{\link{slice.survey_base}()}
 }
 \concept{row operations}

@@ -9,17 +9,17 @@
 \alias{slice_sample.survey_base}
 \title{Physically select rows of a survey design object}
 \usage{
-\method{slice}{survey_base}(.data, ...)
+slice.survey_base(.data, ...)
 
-\method{slice_head}{survey_base}(.data, ...)
+slice_head.survey_base(.data, ...)
 
-\method{slice_tail}{survey_base}(.data, ...)
+slice_tail.survey_base(.data, ...)
 
-\method{slice_min}{survey_base}(.data, ...)
+slice_min.survey_base(.data, ...)
 
-\method{slice_max}{survey_base}(.data, ...)
+slice_max.survey_base(.data, ...)
 
-\method{slice_sample}{survey_base}(.data, ...)
+slice_sample.survey_base(.data, ...)
 }
 \arguments{
 \item{.data}{A survey design object.}
@@ -33,7 +33,7 @@ A physical subset of the survey object's rows.
 \code{slice()}, \code{slice_head()}, \code{slice_tail()}, \code{slice_min()}, \code{slice_max()},
 and \code{slice_sample()} \strong{physically remove rows} and always issue
 \code{surveycore_warning_physical_subset}. They error if the result would have
-0 rows. Prefer \code{\link[dplyr:filter]{dplyr::filter()}} for subpopulation analyses.
+0 rows. Prefer \code{\link[=filter]{filter()}} for subpopulation analyses.
 
 \code{slice_sample(weight_by = )} additionally warns with
 \code{surveytidy_warning_slice_sample_weight_by} because the \code{weight_by}
@@ -41,15 +41,15 @@ column is independent of the survey design weights.
 }
 \section{Functions}{
 \itemize{
-\item \code{slice_head(survey_base)}: Select first \code{n} rows.
+\item \code{slice_head.survey_base()}: Select first \code{n} rows.
 
-\item \code{slice_tail(survey_base)}: Select last \code{n} rows.
+\item \code{slice_tail.survey_base()}: Select last \code{n} rows.
 
-\item \code{slice_min(survey_base)}: Select rows with the smallest values.
+\item \code{slice_min.survey_base()}: Select rows with the smallest values.
 
-\item \code{slice_max(survey_base)}: Select rows with the largest values.
+\item \code{slice_max.survey_base()}: Select rows with the largest values.
 
-\item \code{slice_sample(survey_base)}: Randomly sample rows.
+\item \code{slice_sample.survey_base()}: Randomly sample rows.
 
 }}
 \examples{
@@ -62,11 +62,10 @@ d2 <- suppressWarnings(slice_head(d, n = 20))
 
 }
 \seealso{
-\code{\link[dplyr:filter]{dplyr::filter()}} for domain-aware row marking (preferred),
-\code{\link[dplyr:arrange]{dplyr::arrange()}} for row sorting
+\code{\link[=filter]{filter()}} for domain-aware row marking (preferred),
+\code{\link[=arrange]{arrange()}} for row sorting
 
 Other row operations: 
-\code{\link{arrange.survey_base}()},
 \code{\link{drop_na.survey_base}()}
 }
 \concept{row operations}

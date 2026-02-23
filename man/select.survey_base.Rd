@@ -2,89 +2,79 @@
 % Please edit documentation in R/select.R
 \name{select.survey_base}
 \alias{select.survey_base}
-\alias{relocate.survey_base}
-\alias{pull.survey_base}
-\alias{glimpse.survey_base}
-\title{Select, relocate, pull, and glimpse columns of a survey design object}
+\title{Keep or drop columns using their names and types}
 \usage{
-\method{select}{survey_base}(.data, ...)
-
-\method{relocate}{survey_base}(.data, ..., .before = NULL, .after = NULL)
-
-\method{pull}{survey_base}(.data, var = -1, name = NULL, ...)
-
-\method{glimpse}{survey_base}(x, width = NULL, ...)
+select.survey_base(.data, ...)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
-\item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Columns to select /
-reorder. For \code{pull()}, the column to extract.}
-
-\item{.before, .after}{<\code{\link[tidyselect:language]{tidy-select}}> Destination
-of relocated columns (passed to \code{dplyr::relocate()}).}
-
-\item{var}{<\code{\link[rlang:args_data_masking]{data-masking}}> Column to pull.
-Defaults to the last column.}
-
-\item{name}{<\code{\link[rlang:args_data_masking]{data-masking}}> Optional column
-to use as names for the returned vector.}
-
-\item{x}{A survey design object (for \code{glimpse()}).}
-
-\item{width}{Width of the output, passed to \code{dplyr::glimpse()}.}
+\item{...}{<\code{\link[tidyselect:language]{tidy-select}}> One or more unquoted
+column names or tidy-select expressions.}
 }
 \value{
+An object of the same type as \code{.data} with the following properties:
 \itemize{
-\item \code{select()}, \code{relocate()}: the survey object with updated \verb{@data} and/or
-\verb{@variables$visible_vars}.
-\item \code{pull()}: a plain vector (not a survey object).
-\item \code{glimpse()}: \code{x} invisibly.
+\item Rows are not modified.
+\item Non-selected, non-design columns are permanently removed.
+\item Design variables are always retained.
+\item Survey design attributes are preserved.
 }
 }
 \description{
-\itemize{
-\item \code{select()} chooses which columns to keep, \strong{always retaining design
-variables} (weights, strata, PSU, FPC, replicate weights) even when not
-explicitly selected. The user's selection is recorded in
-\verb{@variables$visible_vars} so \code{print()} hides the design columns.
-\item \code{relocate()} reorders \code{visible_vars} when set; reorders \verb{@data} otherwise.
-\item \code{pull()} extracts a column as a plain vector (terminal — result is not a
-survey object).
-\item \code{glimpse()} prints a concise column summary, respecting \code{visible_vars}.
+\code{select()} keeps the named columns and drops all others, using the
+\link[tidyselect:language]{tidyselect mini-language} to describe column sets.
+Design variables (weights, strata, PSU, FPC, replicate weights) are
+\strong{always retained} even when not explicitly selected — they are required
+for variance estimation. After \code{select()}, \code{print()} shows only the columns
+you selected; design variables remain in the object but are hidden from
+display.
+
+\code{select()} is irreversible: dropped columns are permanently removed from
+the survey object and cannot be recovered within the same pipeline.
+}
+\details{
+\subsection{Design variable preservation}{
+
+Regardless of what you select, the following are always kept in the
+survey object: weights, strata, PSUs, FPC columns, replicate weights,
+and the domain column (if set by \code{\link[=filter]{filter()}}). They are hidden from
+\code{print()} output but remain available for variance estimation.
+}
+
+\subsection{Metadata}{
+
+Variable labels, value labels, and other metadata for dropped columns
+are removed. Metadata for retained columns is preserved.
 }
 }
-\section{Functions}{
-\itemize{
-\item \code{relocate(survey_base)}: Reorder columns.
-
-\item \code{pull(survey_base)}: Extract a column as a vector.
-
-\item \code{glimpse(survey_base)}: Print a concise column summary.
-
-}}
 \examples{
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-                 wt = runif(50, 1, 5), g = sample(c("A","B"), 50, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(nhanes_2017,
+  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+)
 
-# select() keeps design vars even though only y1, y2 are named
-d2 <- select(d, y1, y2)
-names(d2@data)               # includes wt (design var)
-d2@variables$visible_vars    # c("y1", "y2")
+# Select by name
+select(d, ridageyr, riagendr)
 
-# relocate() moves y2 before y1 in the visible columns
-d3 <- relocate(d2, y2, .before = y1)
+# Select by name pattern
+select(d, dplyr::starts_with("bpx"))
 
-# pull() returns a plain numeric vector
-pull(d, y1)
+# Select by type
+select(d, dplyr::where(is.numeric))
 
-# glimpse() respects visible_vars
-glimpse(d2)
+# Drop columns with !
+select(d, !dplyr::starts_with("bpx"))
 
 }
 \seealso{
-\code{\link[dplyr:mutate]{dplyr::mutate()}} to add columns, \code{\link[dplyr:rename]{dplyr::rename()}} to rename them
+\code{\link[=relocate]{relocate()}} to reorder columns, \code{\link[=rename]{rename()}} to rename them,
+\code{\link[=mutate]{mutate()}} to add new ones
+
+Other selecting: 
+\code{\link{glimpse.survey_base}()},
+\code{\link{pull.survey_base}()},
+\code{\link{relocate.survey_base}()}
 }
 \concept{selecting}

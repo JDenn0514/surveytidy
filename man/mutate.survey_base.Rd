@@ -4,7 +4,7 @@
 \alias{mutate.survey_base}
 \title{Add or modify columns of a survey design object}
 \usage{
-\method{mutate}{survey_base}(
+mutate.survey_base(
   .data,
   ...,
   .by = NULL,
@@ -20,7 +20,7 @@
 The name gives the new column name; the value is an expression evaluated
 against \verb{@data}.}
 
-\item{.by}{Not used directly — use \code{\link[dplyr:group_by]{dplyr::group_by()}} instead. If \verb{@groups} is
+\item{.by}{Not used directly — use \code{\link[=group_by]{group_by()}} instead. If \verb{@groups} is
 set and \code{.by} is \code{NULL}, \verb{@groups} is used as the effective grouping.}
 
 \item{.keep}{Which columns to retain. One of \code{"all"} (default), \code{"used"},
@@ -42,7 +42,7 @@ Delegates to \code{dplyr::mutate()} on \verb{@data}, then:
 \item Appends newly created columns to \verb{@variables$visible_vars} when it is set.
 \item Records the transformation expression for new columns in
 \verb{@metadata@transformations}.
-\item Respects \verb{@groups} set by \code{\link[dplyr:group_by]{dplyr::group_by()}} — pass \code{.by = NULL} (the default)
+\item Respects \verb{@groups} set by \code{\link[=group_by]{group_by()}} — pass \code{.by = NULL} (the default)
 and grouping from \code{group_by()} is applied automatically.
 }
 }
@@ -70,7 +70,7 @@ d3 <- d |>
 
 }
 \seealso{
-\code{\link[dplyr:rename]{dplyr::rename()}} to rename columns, \code{\link[dplyr:select]{dplyr::select()}} to drop columns
+\code{\link[=rename]{rename()}} to rename columns, \code{\link[=select]{select()}} to drop columns
 
 Other modification: 
 \code{\link{rename.survey_base}()}

@@ -2,96 +2,107 @@
 % Please edit documentation in R/filter.R
 \name{filter.survey_base}
 \alias{filter.survey_base}
-\alias{subset.survey_base}
-\title{Filter survey data using domain estimation}
+\alias{filter_out.survey_base}
+\title{Keep or drop rows using domain estimation}
 \usage{
-\method{filter}{survey_base}(.data, ..., .by = NULL, .preserve = FALSE)
+filter.survey_base(.data, ..., .by = NULL, .preserve = FALSE)
 
-\method{subset}{survey_base}(x, condition, ...)
+filter_out.survey_base(.data, ..., .by = NULL, .preserve = FALSE)
 }
 \arguments{
-\item{.data}{A \code{survey_taylor}, \code{survey_replicate}, or \code{survey_twophase}
-object created by \code{\link[surveycore:as_survey]{surveycore::as_survey()}}.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
-\item{...}{Ignored (for compatibility with the base \code{subset()} signature).}
+\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Logical conditions
+evaluated against the survey data. Multiple conditions are combined with
+\code{&}. \code{NA} results are treated as \code{FALSE}.}
 
-\item{.by}{Not supported for survey objects. Use \code{\link[dplyr:group_by]{dplyr::group_by()}} instead.}
+\item{.by}{Not supported for survey objects. Use \code{\link[=group_by]{group_by()}} to add
+grouping.}
 
-\item{.preserve}{Ignored (included for compatibility with the dplyr
-generic signature).}
-
-\item{x}{A survey design object.}
-
-\item{condition}{A logical expression evaluated against \code{x@data}.}
+\item{.preserve}{Ignored. Included for compatibility with the dplyr generic.}
 }
 \value{
-The survey object with an updated \code{..surveycore_domain..} column in
-\verb{@data}. Row count is \strong{unchanged}.
-
-A survey object of the same class with only matching rows retained.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item All rows appear in the output.
+\item Domain status of each row may be updated.
+\item Columns are not modified.
+\item Groups are not modified.
+\item Survey design attributes are preserved.
+}
 }
 \description{
-Mark rows as in-domain without removing them. Unlike \code{base::subset()} or a
-plain data-frame filter, \code{filter()} \strong{never removes rows} from the survey
-object. Instead it writes a logical column \code{..surveycore_domain..} to
-\verb{@data}. Variance estimation therefore uses all rows — the full design is
-intact — while analysis is restricted to the domain.
+\code{filter()} and \code{filter_out()} mark rows as in or out of the survey domain
+without removing them. Unlike a standard data frame filter, all rows are
+always retained — only their domain status changes. Estimation functions
+restrict analysis to in-domain rows while using the full design for
+variance estimation.
 
-Chained \code{filter()} calls AND their conditions together:
-\code{filter(d, A) |> filter(d, B)} is identical to \code{filter(d, A, B)}.
-
-Physically removes rows from the survey data where \code{condition} evaluates
-to \code{FALSE}. Unlike \code{\link[dplyr:filter]{dplyr::filter()}}, this changes the underlying design and can
-bias variance estimates.
+\code{filter()} marks rows \strong{matching} the condition as in-domain.
+\code{filter_out()} marks rows \strong{matching} the condition as out-of-domain — it
+is the complement of \code{filter()}, and reads more naturally when the intent
+is exclusion.
 }
 \details{
-For subpopulation analyses, use \code{\link[dplyr:filter]{dplyr::filter()}} instead. Only use \code{subset()}
-when you have explicitly built the survey design for the subset population.
+\subsection{Chaining}{
+
+Multiple calls accumulate via AND: a row must satisfy every condition to
+remain in-domain. These are equivalent:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{filter(d, ridageyr >= 18, riagendr == 2)
+filter(d, ridageyr >= 18) |> filter(riagendr == 2)
+}\if{html}{\out{</div>}}
 }
-\section{Functions}{
+
+\subsection{Missing values}{
+
+Unlike base \code{[}, both functions treat \code{NA} as \code{FALSE}: rows where the
+condition evaluates to \code{NA} are treated as out-of-domain.
+}
+
+\subsection{Useful filter functions}{
 \itemize{
-\item \code{subset(survey_base)}: Physically remove rows (use sparingly).
-Always issues \code{surveycore_warning_physical_subset}. Prefer \code{filter()} for
-subpopulation analyses.
-
-}}
-\section{Domain estimation vs. physical subsetting}{
-
-\code{filter()} is the correct tool for subpopulation analyses. Physically
-removing rows (via \code{base::subset()}, \code{\link[=subset]{subset()}}, or \code{\link[dplyr:slice]{dplyr::slice()}}) changes
-which units contribute to variance estimation and yields incorrect standard
-errors. See Thomas Lumley's note for details:
-\url{https://notstatschat.rbind.io/2021/07/22/subsets-and-subpopulations-in-survey-inference}
+\item Comparisons: \code{==}, \code{>}, \code{>=}, \code{<}, \code{<=}, \code{!=}
+\item Logical: \code{&}, \code{|}, \code{!}, \code{\link[=xor]{xor()}}
+\item Missing values: \code{\link[=is.na]{is.na()}}
+\item Range: \code{\link[dplyr:between]{dplyr::between()}}, \code{\link[dplyr:near]{dplyr::near()}}
+\item Multi-column: \code{\link[dplyr:across]{dplyr::if_any()}}, \code{\link[dplyr:across]{dplyr::if_all()}}
+}
 }
 
+\subsection{Inspecting the domain}{
+
+The domain status of each row is stored in the \code{..surveycore_domain..}
+column of \verb{@data}. \code{TRUE} means in-domain; \code{FALSE} means out-of-domain.
+}
+}
 \examples{
-library(dplyr)
-df <- data.frame(y = rnorm(100), x = runif(100),
-                 wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(nhanes_2017,
+  ids = sdmvpsu, weights = wtmec2yr, strata = sdmvstra, nest = TRUE
+)
 
-# Single condition
-d_pos <- filter(d, y > 0)
+# Keep adults only
+filter(d, ridageyr >= 18)
 
-# Multiple conditions (AND-ed)
-d_sub <- filter(d, y > 0, g == "A")
+# Multiple conditions are AND-ed together
+filter(d, ridageyr >= 18, riagendr == 2)
 
-# Chained filters produce the same domain column
-d_chain <- filter(d, y > 0) |> filter(g == "A")
-identical(d_sub@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
-          d_chain@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
+# filter_out() excludes matching rows — complement of filter()
+filter_out(d, ridageyr < 18)
 
-# Multi-column helpers: if_any() and if_all()
-df2 <- data.frame(a = c(1,2,NA,4), b = c(NA,2,3,4), wt = rep(1,4))
-d2  <- surveycore::as_survey(df2, weights = wt)
-d_any <- filter(d2, if_any(c(a, b), ~ !is.na(.x)))
-d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
+# Chained calls accumulate (these are equivalent)
+filter(d, ridageyr >= 18, riagendr == 2)
+filter(d, ridageyr >= 18) |> filter(riagendr == 2)
+
+# Multi-column conditions with if_any() and if_all()
+filter(d, dplyr::if_any(c(bpxsy1, bpxdi1), ~ !is.na(.x)))
+filter(d, dplyr::if_all(c(bpxsy1, bpxdi1), ~ !is.na(.x)))
 
 }
 \seealso{
-\code{\link[=subset]{subset()}} for physical row removal (with a warning)
-
-Other filtering: 
-\code{\link{filter_out.survey_base}()}
+\code{\link[=filter_out]{filter_out()}} for excluding rows, \code{\link[=subset]{subset()}} for physical row
+removal
 }
 \concept{filtering}

@@ -5,9 +5,14 @@
 \alias{ungroup.survey_base}
 \title{Group and ungroup a survey design object}
 \usage{
-\method{group_by}{survey_base}(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
+group_by.survey_base(
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = dplyr::group_by_drop_default(.data)
+)
 
-\method{ungroup}{survey_base}(x, ...)
+ungroup.survey_base(x, ...)
 }
 \arguments{
 \item{.data}{A survey design object.}
@@ -29,7 +34,7 @@ The survey object with \verb{@groups} updated.
 \itemize{
 \item \code{group_by()} stores grouping column names in \verb{@groups}. Unlike dplyr,
 \strong{no \code{grouped_df} attribute} is attached to \verb{@data} — grouping is kept on
-the survey object itself. Phase 1 estimation functions and \code{\link[dplyr:mutate]{dplyr::mutate()}} read
+the survey object itself. Phase 1 estimation functions and \code{\link[=mutate]{mutate()}} read
 \verb{@groups} to apply grouped calculations.
 \item \code{ungroup()} with no arguments removes all groups. With column arguments it
 performs a \strong{partial ungroup}, removing only the named columns from
@@ -38,7 +43,7 @@ performs a \strong{partial ungroup}, removing only the named columns from
 }
 \section{Functions}{
 \itemize{
-\item \code{ungroup(survey_base)}: Remove grouping variables.
+\item \code{ungroup.survey_base()}: Remove grouping variables.
 
 }}
 \examples{

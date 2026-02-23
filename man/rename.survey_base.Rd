@@ -4,7 +4,7 @@
 \alias{rename.survey_base}
 \title{Rename columns of a survey design object}
 \usage{
-\method{rename}{survey_base}(.data, ...)
+rename.survey_base(.data, ...)
 }
 \arguments{
 \item{.data}{A survey design object.}
@@ -46,7 +46,7 @@ d3@variables$weights  # "weight"
 
 }
 \seealso{
-\code{\link[dplyr:mutate]{dplyr::mutate()}} to add columns, \code{\link[dplyr:select]{dplyr::select()}} to drop columns
+\code{\link[=mutate]{mutate()}} to add columns, \code{\link[=select]{select()}} to drop columns
 
 Other modification: 
 \code{\link{mutate.survey_base}()}
