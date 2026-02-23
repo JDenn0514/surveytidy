@@ -26,6 +26,34 @@
       ! filter() produced an empty domain — no rows match the condition.
       i Variance estimation on this domain will fail.
 
+# filter_out() rejects .by argument with typed error
+
+    Code
+      dplyr::filter_out(d, y1 > 55, .by = "group")
+    Condition
+      Error in `dplyr::filter_out()`:
+      x `.by` is not supported for survey design objects.
+      i Use `group_by()` to add grouping to a survey design.
+
+# filter_out() rejects a non-logical condition result
+
+    Code
+      dplyr::filter_out(d, y1)
+    Condition
+      Error in `dplyr::filter_out()`:
+      x filter_out() condition 1 must be logical, not <numeric>.
+      i Condition: `y1`.
+      v Add a comparison operator, e.g. `> 0`.
+
+# filter_out() warns when all rows are excluded
+
+    Code
+      invisible(dplyr::filter_out(d, y1 > -1e+09))
+    Condition
+      Warning:
+      ! filter_out() produced an empty domain — all rows were excluded.
+      i Variance estimation on this domain will fail.
+
 # dplyr_reconstruct() errors when a design variable is removed
 
     Code
