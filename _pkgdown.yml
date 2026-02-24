@@ -67,8 +67,17 @@ reference:
   - subtitle: "Groups"
     desc: >
       `group_by()` stores grouping columns on the survey object for use by
-      grouped operations like `mutate()`. Unlike dplyr, the underlying data
-      is not modified — groups are stored on the survey object and applied
-      when needed.
+      grouped operations like `mutate()`. `rowwise()` enables row-by-row
+      computation. Unlike dplyr, the underlying data is not modified — groups
+      are stored on the survey object and applied when needed.
     contents:
       - group_by.survey_base
+      - rowwise.survey_base
+
+  - subtitle: "Predicates"
+    desc: >
+      Test the current grouping and rowwise state of a survey design object.
+      These predicates are designed for use by estimation functions in Phase 1.
+    contents:
+      - is_rowwise
+      - is_grouped

@@ -1,6 +1,6 @@
 # R/group-by.R
 #
-# group_by() and ungroup() for survey design objects.
+# group_by(), ungroup(), and group_vars() for survey design objects.
 #
 # Grouping state is stored exclusively in @groups — a character vector of
 # column names. dplyr's grouped_df attribute is NOT added to @data.
@@ -13,9 +13,17 @@
 # is used only to extract column names via dplyr::group_vars() — it is
 # discarded afterward.
 #
-# ungroup() with no arguments removes all groups. With column arguments, it
-# removes only the named columns from @groups (partial ungroup), matching
-# dplyr semantics exactly.
+# ungroup() with no arguments removes all groups and exits rowwise mode.
+# With column arguments, it removes only the named columns from @groups
+# (partial ungroup), matching dplyr semantics exactly — rowwise mode is NOT
+# cleared by partial ungroup.
+#
+# group_by() with .add = FALSE (default) replaces @groups and clears rowwise
+# keys. With .add = TRUE when in rowwise mode, it promotes rowwise id_cols to
+# @groups, then appends the new groups, then exits rowwise mode.
+#
+# group_vars.survey_base() returns @groups directly — no filtering needed
+# because @groups never contains a sentinel value.
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/zzz.R for the registration calls.
@@ -27,6 +35,7 @@
 #' @description
 #' `group_by()` stores grouping columns on the survey object for use in
 #' grouped operations like [mutate()]. `ungroup()` removes the grouping.
+#' `group_vars()` returns the current grouping column names.
 #'
 #' Unlike dplyr, groups are not attached to the underlying data frame —
 #' they are stored on the survey object itself and applied when needed by
@@ -41,13 +50,21 @@
 #' By default, `group_by()` replaces existing groups. Use `.add = TRUE` to
 #' append to the current grouping instead.
 #'
+#' ## Rowwise mode and group_by()
+#' `group_by(.add = FALSE)` (the default) exits rowwise mode — it clears
+#' `@variables$rowwise` and `@variables$rowwise_id_cols`. `group_by(.add =
+#' TRUE)` when the design is rowwise promotes the rowwise id columns to
+#' `@groups`, appends the new groups, then clears rowwise mode — mirroring
+#' dplyr's behaviour exactly.
+#'
 #' ## Partial ungroup
-#' `ungroup()` with no arguments removes all groups. With column arguments,
-#' it removes only the specified columns from the grouping.
+#' `ungroup()` with no arguments removes all groups and exits rowwise mode.
+#' With column arguments, it removes only the specified columns from the
+#' grouping — rowwise mode is **not** affected.
 #'
 #' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param x A [`survey_base`][surveycore::survey_base] object (for
-#'   `ungroup()`).
+#'   `ungroup()` and `group_vars()`).
 #' @param ... <[`data-masking`][rlang::args_data_masking]> For `group_by()`:
 #'   columns to group by. Computed expressions (e.g.,
 #'   `cut(ridageyr, breaks = c(0, 18, 65, Inf))`) are supported. For
@@ -62,12 +79,16 @@
 #' An object of the same type as the input with the following properties:
 #'
 #' * Rows, columns, and survey design attributes are unchanged.
-#' * For `group_by()`: grouping columns are set or updated.
-#' * For `ungroup()`: all or specified grouping columns are removed.
+#' * For `group_by()`: grouping columns are set or updated; rowwise keys
+#'   are cleared.
+#' * For `ungroup()`: all or specified grouping columns are removed; rowwise
+#'   keys are cleared on full ungroup only.
+#' * For `group_vars()`: a character vector of current grouping column names.
 #'
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#' library(dplyr)
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Group by a column
@@ -91,6 +112,9 @@
 #'   group_by(gender, cregion) |>
 #'   ungroup(gender)
 #'
+#' # Get current grouping column names
+#' d |> group_by(gender, cregion) |> group_vars()
+#'
 #' @family grouping
 group_by.survey_base <- function(
   .data,
@@ -105,8 +129,21 @@ group_by.survey_base <- function(
   group_names <- dplyr::group_vars(grouped)
 
   if (isTRUE(.add)) {
-    .data@groups <- unique(c(.data@groups, group_names))
+    if (isTRUE(.data@variables$rowwise)) {
+      # .add = TRUE when rowwise: promote id_cols to @groups first, then
+      # append new groups, then exit rowwise mode. Mirrors dplyr behaviour.
+      base_groups <- .data@variables$rowwise_id_cols %||% character(0)
+      .data@variables$rowwise <- NULL
+      .data@variables$rowwise_id_cols <- NULL
+      .data@groups <- unique(c(base_groups, group_names))
+    } else {
+      # .add = TRUE when NOT rowwise: append to existing groups as before
+      .data@groups <- unique(c(.data@groups, group_names))
+    }
   } else {
+    # .add = FALSE (default): replace @groups and exit rowwise mode
+    .data@variables$rowwise <- NULL
+    .data@variables$rowwise_id_cols <- NULL
     .data@groups <- group_names
   }
 
@@ -119,13 +156,25 @@ group_by.survey_base <- function(
 #' @rdname group_by.survey_base
 ungroup.survey_base <- function(x, ...) {
   if (...length() == 0L) {
-    # No arguments: remove ALL groups
+    # No arguments: remove ALL groups and exit rowwise mode
     x@groups <- character(0)
+    x@variables$rowwise <- NULL
+    x@variables$rowwise_id_cols <- NULL
   } else {
     # Column arguments: partial ungroup — remove only the specified columns
+    # from @groups. Rowwise mode is NOT cleared (matches dplyr behaviour).
     pos <- tidyselect::eval_select(rlang::expr(c(...)), x@data)
     to_remove <- names(pos)
     x@groups <- setdiff(x@groups, to_remove)
   }
   x
+}
+
+
+# ── group_vars() ──────────────────────────────────────────────────────────────
+
+#' @rdname group_by.survey_base
+#' @noRd
+group_vars.survey_base <- function(x) {
+  x@groups
 }
