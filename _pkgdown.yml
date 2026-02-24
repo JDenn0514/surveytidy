@@ -36,25 +36,24 @@ reference:
 
   - subtitle: "Rows"
     desc: >
-      `filter()` and `filter_out()` use **domain estimation** — rows are marked
-      in or out of the analysis domain without being removed, so variance
-      estimates stay correct. Physical row removal (`subset()`, `slice_*()`,
-      `drop_na()`) is available but issues a warning because removing rows can
-      bias variance estimates.
+      `filter()`, `filter_out()`, and `drop_na()` use **domain estimation** —
+      rows are marked in or out of the analysis domain without being removed,
+      so variance estimates stay correct. Physical row removal (`subset()`,
+      `slice_*()`) is also available but issues a warning because removing rows
+      can bias variance estimates.
     contents:
       - filter.survey_base
-      - filter_out.survey_base
-      - slice.survey_base
-      - arrange.survey_base
-      - subset.survey_base
       - drop_na.survey_base
+      - arrange.survey_base
+      - slice.survey_base
+      - subset.survey_base
 
   - subtitle: "Columns"
     desc: >
       Select, reorder, rename, create, extract, and inspect columns. Design
-      variables (weights, strata, PSU, FPC) are always retained in `@data`
-      even when not explicitly selected. `rename()` automatically updates the
-      survey design specification and variable metadata to match the new name.
+      variables (weights, strata, PSU, FPC) are always retained even when not
+      explicitly selected. `rename()` automatically updates the survey design
+      specification and variable metadata to match the new name.
     contents:
       - select.survey_base
       - relocate.survey_base
@@ -65,9 +64,9 @@ reference:
 
   - subtitle: "Groups"
     desc: >
-      `group_by()` stores grouping variables in `@groups` for use by estimation
-      functions (Phase 1+). Unlike dplyr, no `grouped_df` attribute is added to
-      `@data` — grouping lives on the survey object itself.
+      `group_by()` stores grouping columns on the survey object for use by
+      grouped operations like `mutate()`. Unlike dplyr, the underlying data
+      is not modified — groups are stored on the survey object and applied
+      when needed.
     contents:
       - group_by.survey_base
-      - ungroup.survey_base
