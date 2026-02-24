@@ -2,45 +2,63 @@
 % Please edit documentation in R/drop-na.R
 \name{drop_na.survey_base}
 \alias{drop_na.survey_base}
-\title{Mark rows with missing values as out-of-domain in a survey design object}
+\title{Mark rows with missing values as out-of-domain}
 \usage{
-\method{drop_na}{survey_base}(data, ...)
+drop_na.survey_base(data, ...)
 }
 \arguments{
-\item{data}{A survey design object.}
+\item{data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Columns to inspect for
 \code{NA}. If empty, all columns are checked.}
 }
 \value{
-The survey object with rows containing \code{NA} in the selected columns
-marked out-of-domain. Row count is \strong{unchanged}.
+An object of the same type as \code{data} with the following properties:
+\itemize{
+\item Rows are not added or removed.
+\item Rows where selected columns contain \code{NA} are marked out-of-domain.
+\item Columns and survey design attributes are unchanged.
+}
 }
 \description{
-Marks rows where the specified columns contain \code{NA} as out-of-domain,
-without removing them. If no columns are specified, any \code{NA} in any column
-marks the row out-of-domain.
+\code{drop_na()} marks rows where specified columns contain \code{NA} as
+out-of-domain, without removing them. If no columns are specified, any
+\code{NA} in any column marks the row out-of-domain.
 
-This is equivalent to \code{filter(!is.na(col1), !is.na(col2), ...)} and gives
-correct variance estimates for downstream analyses. Successive \code{drop_na()}
-calls AND their conditions together.
+This is the domain-aware equivalent of tidyr's \code{drop_na()}: rather than
+physically dropping rows, it applies \code{\link[=filter]{filter()}} with \code{!is.na()} conditions,
+preserving all rows for correct variance estimation.
+}
+\details{
+\subsection{Chaining}{
+
+Successive \code{drop_na()} calls AND their conditions together, and they
+accumulate with \code{\link[=filter]{filter()}} calls too. These are equivalent:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{drop_na(d, bpxsy1) |> filter(ridageyr >= 18)
+filter(d, !is.na(bpxsy1), ridageyr >= 18)
+}\if{html}{\out{</div>}}
+}
 }
 \examples{
-library(tidyr)
-df <- data.frame(y = c(rnorm(99), NA), wt = runif(100, 1, 5))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Mark rows with NA in y as out-of-domain
-d2 <- drop_na(d, y)
-nrow(d2@data)  # still 100
-d2@data[[surveycore::SURVEYCORE_DOMAIN_COL]]  # FALSE for the last row
+# Mark rows with NA in votegen_post as out-of-domain
+drop_na(d, votegen_post)
+
+# Mark rows with NA in either social media column
+drop_na(d, smuse_fb, smuse_yt)
+
+# No columns specified — any NA in any column marks the row out-of-domain
+drop_na(d)
 
 }
 \seealso{
-\code{\link[dplyr:filter]{dplyr::filter()}} for domain-aware row marking
+\code{\link[=filter]{filter()}} for domain-aware row marking
 
 Other row operations: 
-\code{\link{arrange.survey_base}()},
 \code{\link{slice.survey_base}()}
 }
 \concept{row operations}

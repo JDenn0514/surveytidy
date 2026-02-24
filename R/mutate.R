@@ -17,53 +17,82 @@
 
 # ── mutate() ──────────────────────────────────────────────────────────────────
 
-#' Add or modify columns of a survey design object
+#' Create, modify, and delete columns of a survey design object
 #'
 #' @description
-#' Delegates to `dplyr::mutate()` on `@data`, then:
+#' `mutate()` adds new columns or modifies existing ones while preserving the
+#' survey design structure required for valid variance estimation. It delegates
+#' column computation to `dplyr::mutate()` on the underlying data.
 #'
-#' * Re-attaches any design variables dropped by `.keep = "none"` or
-#'   `.keep = "used"`.
-#' * Appends newly created columns to `@variables$visible_vars` when it is set.
-#' * Records the transformation expression for new columns in
-#'   `@metadata@transformations`.
-#' * Respects `@groups` set by [group_by()] — pass `.by = NULL` (the default)
-#'   and grouping from `group_by()` is applied automatically.
+#' Use `NULL` as a value to delete a column. Design variables (weights,
+#' strata, PSUs) cannot be deleted this way — they are always preserved.
 #'
-#' @param .data A survey design object.
+#' @details
+#' ## Design variable modification
+#' If the left-hand side of a mutation names a design variable (e.g.,
+#' `mutate(d, wt = wt * 2)`), a `surveytidy_warning_mutate_design_var`
+#' warning is issued. Detection is name-based: `across()` calls that happen
+#' to modify design variables will **not** trigger the warning.
+#'
+#' ## `.keep` and design variables
+#' Design variables (weights, strata, PSUs, FPC, replicate weights, and the
+#' domain column) are always preserved in the output, regardless of `.keep`.
+#' This ensures variance estimation remains valid even when `.keep = "none"`.
+#'
+#' ## Grouped mutate
+#' Grouping set by [group_by()] is respected automatically — leave `.by =
+#' NULL` (the default) and mutate expressions will compute within groups.
+#' The `.by` argument is not used directly.
+#'
+#' ## Useful mutate functions
+#' * Arithmetic: `+`, `-`, `*`, `/`, `^`, `%%`, `%/%`
+#' * Rounding: [round()], [floor()], [ceiling()], [trunc()]
+#' * Ranking: [dplyr::dense_rank()], [dplyr::min_rank()], [dplyr::row_number()]
+#' * Cumulative: [cumsum()], [cummax()], [cummin()], [cummean()]
+#' * Conditional: [dplyr::if_else()], [dplyr::case_when()], [dplyr::case_match()]
+#' * Missing values: [dplyr::na_if()], [dplyr::coalesce()]
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Name-value pairs.
-#'   The name gives the new column name; the value is an expression evaluated
-#'   against `@data`.
-#' @param .by Not used directly — use [group_by()] instead. If `@groups` is
-#'   set and `.by` is `NULL`, `@groups` is used as the effective grouping.
+#'   The name gives the output column name; the value is an expression
+#'   evaluated against the survey data. Use `NULL` to delete a non-design
+#'   column.
+#' @param .by Not used directly. Set grouping with [group_by()] instead.
+#'   When `@groups` is non-empty and `.by` is `NULL` (the default), the
+#'   active groups are applied automatically.
 #' @param .keep Which columns to retain. One of `"all"` (default), `"used"`,
 #'   `"unused"`, or `"none"`. Design variables are always re-attached
-#'   regardless of `.keep`.
+#'   regardless of this argument.
 #' @param .before,.after <[`tidy-select`][tidyselect::language]> Optionally
 #'   position new columns before or after an existing one.
 #'
-#' @return The survey object with updated `@data`, `@variables$visible_vars`,
-#'   and `@metadata@transformations`.
+#' @return
+#' An object of the same type as `.data` with the following properties:
 #'
-#' @section Detecting design variable modification:
-#' If the left-hand side of a mutation names a design variable (e.g.,
-#' `mutate(d, wt = wt * 2)`), a `surveytidy_warning_mutate_design_var` warning
-#' is issued. Detection is name-based — `across()` calls that happen to
-#' modify design variables will **not** trigger the warning.
+#' * Rows are not added or removed.
+#' * Columns are retained, modified, or removed per `...` and `.keep`.
+#' * Design variables (weights, strata, PSUs) are always present.
+#' * Groups and survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
-#'                  g = sample(c("A","B"), 100, TRUE))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # Add a new column
-#' d2 <- mutate(d, y_sq = y^2)
+#' mutate(d, college_grad = educcat == 1)
 #'
-#' # Grouped mutate
-#' d3 <- d |>
-#'   group_by(g) |>
-#'   mutate(g_mean = mean(y))
+#' # Conditional recoding
+#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
+#'
+#' # Grouped mutate — within-group mean centring
+#' d |>
+#'   group_by(gender) |>
+#'   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
+#'
+#' # .keep = "none" keeps only new columns plus design vars (always preserved)
+#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+#'   .keep = "none")
 #'
 #' @family modification
 #' @seealso [rename()] to rename columns, [select()] to drop columns

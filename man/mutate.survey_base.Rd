@@ -2,9 +2,9 @@
 % Please edit documentation in R/mutate.R
 \name{mutate.survey_base}
 \alias{mutate.survey_base}
-\title{Add or modify columns of a survey design object}
+\title{Create, modify, and delete columns of a survey design object}
 \usage{
-\method{mutate}{survey_base}(
+mutate.survey_base(
   .data,
   ...,
   .by = NULL,
@@ -14,63 +14,97 @@
 )
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Name-value pairs.
-The name gives the new column name; the value is an expression evaluated
-against \verb{@data}.}
+The name gives the output column name; the value is an expression
+evaluated against the survey data. Use \code{NULL} to delete a non-design
+column.}
 
-\item{.by}{Not used directly — use \code{\link[dplyr:group_by]{dplyr::group_by()}} instead. If \verb{@groups} is
-set and \code{.by} is \code{NULL}, \verb{@groups} is used as the effective grouping.}
+\item{.by}{Not used directly. Set grouping with \code{\link[=group_by]{group_by()}} instead.
+When \verb{@groups} is non-empty and \code{.by} is \code{NULL} (the default), the
+active groups are applied automatically.}
 
 \item{.keep}{Which columns to retain. One of \code{"all"} (default), \code{"used"},
 \code{"unused"}, or \code{"none"}. Design variables are always re-attached
-regardless of \code{.keep}.}
+regardless of this argument.}
 
 \item{.before, .after}{<\code{\link[tidyselect:language]{tidy-select}}> Optionally
 position new columns before or after an existing one.}
 }
 \value{
-The survey object with updated \verb{@data}, \verb{@variables$visible_vars},
-and \verb{@metadata@transformations}.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item Rows are not added or removed.
+\item Columns are retained, modified, or removed per \code{...} and \code{.keep}.
+\item Design variables (weights, strata, PSUs) are always present.
+\item Groups and survey design attributes are preserved.
+}
 }
 \description{
-Delegates to \code{dplyr::mutate()} on \verb{@data}, then:
-\itemize{
-\item Re-attaches any design variables dropped by \code{.keep = "none"} or
-\code{.keep = "used"}.
-\item Appends newly created columns to \verb{@variables$visible_vars} when it is set.
-\item Records the transformation expression for new columns in
-\verb{@metadata@transformations}.
-\item Respects \verb{@groups} set by \code{\link[dplyr:group_by]{dplyr::group_by()}} — pass \code{.by = NULL} (the default)
-and grouping from \code{group_by()} is applied automatically.
+\code{mutate()} adds new columns or modifies existing ones while preserving the
+survey design structure required for valid variance estimation. It delegates
+column computation to \code{dplyr::mutate()} on the underlying data.
+
+Use \code{NULL} as a value to delete a column. Design variables (weights,
+strata, PSUs) cannot be deleted this way — they are always preserved.
 }
-}
-\section{Detecting design variable modification}{
+\details{
+\subsection{Design variable modification}{
 
 If the left-hand side of a mutation names a design variable (e.g.,
-\code{mutate(d, wt = wt * 2)}), a \code{surveytidy_warning_mutate_design_var} warning
-is issued. Detection is name-based — \code{across()} calls that happen to
-modify design variables will \strong{not} trigger the warning.
+\code{mutate(d, wt = wt * 2)}), a \code{surveytidy_warning_mutate_design_var}
+warning is issued. Detection is name-based: \code{across()} calls that happen
+to modify design variables will \strong{not} trigger the warning.
 }
 
+\subsection{\code{.keep} and design variables}{
+
+Design variables (weights, strata, PSUs, FPC, replicate weights, and the
+domain column) are always preserved in the output, regardless of \code{.keep}.
+This ensures variance estimation remains valid even when \code{.keep = "none"}.
+}
+
+\subsection{Grouped mutate}{
+
+Grouping set by \code{\link[=group_by]{group_by()}} is respected automatically — leave \code{.by = NULL} (the default) and mutate expressions will compute within groups.
+The \code{.by} argument is not used directly.
+}
+
+\subsection{Useful mutate functions}{
+\itemize{
+\item Arithmetic: \code{+}, \code{-}, \code{*}, \code{/}, \code{^}, \code{\%\%}, \code{\%/\%}
+\item Rounding: \code{\link[=round]{round()}}, \code{\link[=floor]{floor()}}, \code{\link[=ceiling]{ceiling()}}, \code{\link[=trunc]{trunc()}}
+\item Ranking: \code{\link[dplyr:row_number]{dplyr::dense_rank()}}, \code{\link[dplyr:row_number]{dplyr::min_rank()}}, \code{\link[dplyr:row_number]{dplyr::row_number()}}
+\item Cumulative: \code{\link[=cumsum]{cumsum()}}, \code{\link[=cummax]{cummax()}}, \code{\link[=cummin]{cummin()}}, \code{\link[dplyr:cumall]{dplyr::cummean()}}
+\item Conditional: \code{\link[dplyr:if_else]{dplyr::if_else()}}, \code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}}, \code{\link[dplyr:case_match]{dplyr::case_match()}}
+\item Missing values: \code{\link[dplyr:na_if]{dplyr::na_if()}}, \code{\link[dplyr:coalesce]{dplyr::coalesce()}}
+}
+}
+}
 \examples{
-library(dplyr)
-df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
-                 g = sample(c("A","B"), 100, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Add a new column
-d2 <- mutate(d, y_sq = y^2)
+mutate(d, college_grad = educcat == 1)
 
-# Grouped mutate
-d3 <- d |>
-  group_by(g) |>
-  mutate(g_mean = mean(y))
+# Conditional recoding
+mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
+
+# Grouped mutate — within-group mean centring
+d |>
+  group_by(gender) |>
+  mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
+
+# .keep = "none" keeps only new columns plus design vars (always preserved)
+mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+  .keep = "none")
 
 }
 \seealso{
-\code{\link[dplyr:rename]{dplyr::rename()}} to rename columns, \code{\link[dplyr:select]{dplyr::select()}} to drop columns
+\code{\link[=rename]{rename()}} to rename columns, \code{\link[=select]{select()}} to drop columns
 
 Other modification: 
 \code{\link{rename.survey_base}()}

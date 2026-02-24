@@ -30,63 +30,87 @@
 
 # ── filter() ─────────────────────────────────────────────────────────────────
 
-#' Filter survey data using domain estimation
+#' Keep or drop rows using domain estimation
 #'
 #' @description
-#' Mark rows as in-domain without removing them. Unlike `base::subset()` or a
-#' plain data-frame filter, `filter()` **never removes rows** from the survey
-#' object. Instead it writes a logical column `..surveycore_domain..` to
-#' `@data`. Variance estimation therefore uses all rows — the full design is
-#' intact — while analysis is restricted to the domain.
+#' `filter()` and `filter_out()` mark rows as in or out of the survey domain
+#' without removing them. Unlike a standard data frame filter, all rows are
+#' always retained — only their domain status changes. Estimation functions
+#' restrict analysis to in-domain rows while using the full design for
+#' variance estimation.
 #'
-#' Chained `filter()` calls AND their conditions together:
-#' `filter(d, A) |> filter(d, B)` is identical to `filter(d, A, B)`.
+#' `filter()` marks rows **matching** the condition as in-domain.
+#' `filter_out()` marks rows **matching** the condition as out-of-domain — it
+#' is the complement of `filter()`, and reads more naturally when the intent
+#' is exclusion.
 #'
-#' @param .data A `survey_taylor`, `survey_replicate`, or `survey_twophase`
-#'   object created by [surveycore::as_survey()].
+#' @details
+#' ## Chaining
+#' Multiple calls accumulate via AND: a row must satisfy every condition to
+#' remain in-domain. These are equivalent:
+#'
+#' ```r
+#' filter(d, ridageyr >= 18, riagendr == 2)
+#' filter(d, ridageyr >= 18) |> filter(riagendr == 2)
+#' ```
+#'
+#' ## Missing values
+#' Unlike base `[`, both functions treat `NA` as `FALSE`: rows where the
+#' condition evaluates to `NA` are treated as out-of-domain.
+#'
+#' ## Useful filter functions
+#' * Comparisons: `==`, `>`, `>=`, `<`, `<=`, `!=`
+#' * Logical: `&`, `|`, `!`, [xor()]
+#' * Missing values: [is.na()]
+#' * Range: [dplyr::between()], [dplyr::near()]
+#' * Multi-column: [dplyr::if_any()], [dplyr::if_all()]
+#'
+#' ## Inspecting the domain
+#' The domain status of each row is stored in the `..surveycore_domain..`
+#' column of `@data`. `TRUE` means in-domain; `FALSE` means out-of-domain.
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Logical conditions
-#'   evaluated against `@data`. Multiple conditions are AND-ed together.
-#'   `NA` results are treated as `FALSE` (outside domain). Supports dplyr
-#'   helpers like [dplyr::if_any()] and [dplyr::if_all()].
-#' @param .by Not supported for survey objects. Use [group_by()] instead.
-#' @param .preserve Ignored (included for compatibility with the dplyr
-#'   generic signature).
+#'   evaluated against the survey data. Multiple conditions are combined with
+#'   `&`. `NA` results are treated as `FALSE`.
+#' @param .by Not supported for survey objects. Use [group_by()] to add
+#'   grouping.
+#' @param .preserve Ignored. Included for compatibility with the dplyr generic.
 #'
-#' @return The survey object with an updated `..surveycore_domain..` column in
-#'   `@data`. Row count is **unchanged**.
+#' @return
+#' An object of the same type as `.data` with the following properties:
 #'
-#' @section Domain estimation vs. physical subsetting:
-#' `filter()` is the correct tool for subpopulation analyses. Physically
-#' removing rows (via `base::subset()`, [subset()], or [slice()]) changes
-#' which units contribute to variance estimation and yields incorrect standard
-#' errors. See Thomas Lumley's note for details:
-#' <https://notstatschat.rbind.io/2021/07/22/subsets-and-subpopulations-in-survey-inference>
+#' * All rows appear in the output.
+#' * Domain status of each row may be updated.
+#' * Columns are not modified.
+#' * Groups are not modified.
+#' * Survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y = rnorm(100), x = runif(100),
-#'                  wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Single condition
-#' d_pos <- filter(d, y > 0)
+#' # Keep adults 50 and older
+#' filter(d, agecat >= 3)
 #'
-#' # Multiple conditions (AND-ed)
-#' d_sub <- filter(d, y > 0, g == "A")
+#' # Multiple conditions are AND-ed together
+#' filter(d, agecat >= 3, gender == 2)
 #'
-#' # Chained filters produce the same domain column
-#' d_chain <- filter(d, y > 0) |> filter(g == "A")
-#' identical(d_sub@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
-#'           d_chain@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
+#' # filter_out() excludes matching rows — complement of filter()
+#' filter_out(d, agecat == 1)
 #'
-#' # Multi-column helpers: if_any() and if_all()
-#' df2 <- data.frame(a = c(1,2,NA,4), b = c(NA,2,3,4), wt = rep(1,4))
-#' d2  <- surveycore::as_survey(df2, weights = wt)
-#' d_any <- filter(d2, if_any(c(a, b), ~ !is.na(.x)))
-#' d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
+#' # Chained calls accumulate (these are equivalent)
+#' filter(d, agecat >= 3, gender == 2)
+#' filter(d, agecat >= 3) |> filter(gender == 2)
+#'
+#' # Multi-column conditions with if_any() and if_all()
+#' filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
+#' filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #'
 #' @family filtering
-#' @seealso [subset()] for physical row removal (with a warning)
+#' @seealso [filter_out()] for excluding rows, [subset()] for physical row
+#'   removal
 filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   if (!is.null(.by)) {
     cli::cli_abort(
@@ -152,51 +176,7 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 
 # ── filter_out() ─────────────────────────────────────────────────────────────
 
-#' Exclude rows from a survey domain
-#'
-#' @description
-#' The complement of [filter()]. `filter_out()` marks rows **matching** the
-#' condition as out-of-domain while leaving all other rows in-domain. Like
-#' [filter()], it **never removes rows** from the survey object.
-#'
-#' `filter_out(.data, cond)` is equivalent to `filter(.data, !cond)` but
-#' reads more naturally when the intent is exclusion.
-#'
-#' Chained calls accumulate via AND: rows must satisfy all prior in-domain
-#' conditions and none of the exclusion conditions to remain in-domain.
-#'
-#' @param .data A `survey_taylor`, `survey_replicate`, or `survey_twophase`
-#'   object created by [surveycore::as_survey()].
-#' @param ... <[`data-masking`][rlang::args_data_masking]> Logical conditions
-#'   evaluated against `@data`. Rows where **all** conditions are `TRUE` are
-#'   marked as out-of-domain. `NA` results are treated as `FALSE`
-#'   (the row stays in-domain).
-#' @param .by Not supported for survey objects. Use [group_by()] instead.
-#' @param .preserve Ignored (included for compatibility with the dplyr
-#'   generic signature).
-#'
-#' @return The survey object with an updated `..surveycore_domain..` column in
-#'   `@data`. Row count is **unchanged**.
-#'
-#' @examples
-#' library(dplyr)
-#' df <- data.frame(y = rnorm(100), x = runif(100),
-#'                  wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
-#' d <- surveycore::as_survey(df, weights = wt)
-#'
-#' # Exclude negative y values
-#' d_out <- filter_out(d, y < 0)
-#'
-#' # Equivalent to negating the condition in filter()
-#' d_inv <- filter(d, !(y < 0))
-#' identical(d_out@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
-#'           d_inv@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
-#'
-#' # Chain with filter() — only x > 0.5 rows that are NOT in group B
-#' d_chain <- filter(d, x > 0.5) |> filter_out(g == "B")
-#'
-#' @family filtering
-#' @seealso [filter()] for including rows in the domain
+#' @rdname filter.survey_base
 filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   if (!is.null(.by)) {
     cli::cli_abort(
@@ -256,24 +236,42 @@ filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 
 # ── subset() ─────────────────────────────────────────────────────────────────
 
-#' Physically Remove Rows from a Survey Design Object
+#' Physically remove rows from a survey design object
 #'
-#' Physically removes rows from the survey data where `condition` evaluates
-#' to `FALSE`. Unlike [filter()], this changes the underlying design and can
-#' bias variance estimates.
+#' @description
+#' `subset()` physically removes rows from a
+#' [`survey_base`][surveycore::survey_base] object where `condition` evaluates
+#' to `FALSE`. **This changes the survey design.** Unless the design was
+#' explicitly built for the subset population, variance estimates will be
+#' incorrect.
 #'
-#' For subpopulation analyses, use [filter()] instead. Only use `subset()`
-#' when you have explicitly built the survey design for the subset population.
+#' For subpopulation analyses, use [filter()] instead. `filter()` marks rows
+#' as in or out of the domain without removing them, leaving the full design
+#' intact for variance estimation.
 #'
-#' @param x A `survey_taylor`, `survey_replicate`, or `survey_twophase` object.
-#' @param condition A logical expression evaluated against `x@data`.
-#' @param ... Ignored (for compatibility with the base `subset()` signature).
-#' @return A survey object of the same class with only matching rows retained.
-#' @describeIn filter.survey_base Physically remove rows (use sparingly).
-#'   Always issues `surveycore_warning_physical_subset`. Prefer `filter()` for
-#'   subpopulation analyses.
-#' @param x A survey design object.
-#' @param condition A logical expression evaluated against `x@data`.
+#' `subset()` always emits a `surveycore_warning_physical_subset` warning as a
+#' reminder of the statistical implications.
+#'
+#' @param x A [`survey_base`][surveycore::survey_base] object.
+#' @param condition A logical expression evaluated against the survey data.
+#'   Rows where `condition` is `FALSE` or `NA` are removed.
+#' @param ... Ignored. Included for compatibility with the base [subset()]
+#'   generic.
+#'
+#' @return
+#' An object of the same type as `x` with only matching rows retained. Always
+#' issues `surveycore_warning_physical_subset`.
+#'
+#' @examples
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#'
+#' # Physical row removal — always issues a warning
+#' subset(d, agecat >= 3)
+#'
+#' @seealso [filter()] for domain-aware row marking (preferred for
+#'   subpopulation analyses)
 #' @export
 subset.survey_base <- function(x, condition, ...) {
   .warn_physical_subset("subset")

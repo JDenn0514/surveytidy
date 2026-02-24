@@ -15,12 +15,12 @@ statistics.
 \details{
 \subsection{Key verbs}{
 \itemize{
-\item \code{\link[dplyr:filter]{dplyr::filter()}} — domain estimation (marks rows, never removes them)
-\item \code{\link[dplyr:select]{dplyr::select()}} — column selection preserving design variables
-\item \code{\link[dplyr:mutate]{dplyr::mutate()}} — add/modify columns with weight-change warnings
-\item \code{\link[dplyr:rename]{dplyr::rename()}} — auto-updates design variable names and metadata
-\item \code{\link[dplyr:group_by]{dplyr::group_by()}} / \code{\link[dplyr:group_by]{dplyr::ungroup()}} — grouped analysis support
-\item \code{\link[dplyr:arrange]{dplyr::arrange()}} — row sorting preserving domain membership
+\item \code{\link[=filter]{filter()}} — domain estimation (marks rows, never removes them)
+\item \code{\link[=select]{select()}} — column selection preserving design variables
+\item \code{\link[=mutate]{mutate()}} — add/modify columns with weight-change warnings
+\item \code{\link[=rename]{rename()}} — auto-updates design variable names and metadata
+\item \code{\link[=group_by]{group_by()}} / \code{\link[=ungroup]{ungroup()}} — grouped analysis support
+\item \code{\link[=arrange]{arrange()}} — row sorting preserving domain membership
 \item \code{\link[=subset]{subset()}} — physical row removal with a strong warning
 }
 }

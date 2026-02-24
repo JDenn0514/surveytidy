@@ -14,38 +14,63 @@
 
 # ── arrange() ─────────────────────────────────────────────────────────────────
 
-#' Sort rows of a survey design object
+#' Order rows using column values
 #'
 #' @description
-#' `arrange()` sorts rows in `@data`. The domain column moves with the rows —
-#' no update to `@variables$domain` is needed. Supports `.by_group = TRUE`
-#' using `@groups` set by [group_by()].
+#' `arrange()` orders the rows of a [`survey_base`][surveycore::survey_base]
+#' object by the values of selected columns.
 #'
-#' For physically removing rows, see [slice()]. Prefer [filter()] for
-#' subpopulation analyses.
+#' Unlike most other verbs, `arrange()` largely ignores grouping — use
+#' `.by_group = TRUE` to sort by grouping variables first.
 #'
-#' @param .data A survey design object.
-#' @param ... <[`data-masking`][rlang::args_data_masking]> Variables or
-#'   expressions to sort by.
-#' @param .by_group Logical. If `TRUE` and `@groups` is set, rows are sorted
-#'   by the grouping variables first, then by `...`.
+#' @details
+#' ## Missing values
+#' Unlike base [sort()], `NA` values are always sorted to the end, even when
+#' using [desc()].
 #'
-#' @return The survey object with rows reordered.
+#' ## Domain column
+#' The domain column moves with the rows — row reordering does not affect which
+#' rows are in or out of the survey domain.
+#'
+#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param ... <[`data-masking`][rlang::args_data_masking]> Variables, or
+#'   functions of variables. Use [desc()] to sort a variable in descending
+#'   order.
+#' @param .by_group If `TRUE`, sorts first by the grouping variables set by
+#'   [group_by()].
+#' @param .locale The locale to use for ordering strings. If `NULL`, uses the
+#'   `"C"` locale. See [stringi::locale()] for available locales.
+#'
+#' @return
+#' An object of the same type as `.data` with the following properties:
+#'
+#' * All rows appear in the output, usually in a different position.
+#' * Columns are not modified.
+#' * Groups are not modified.
+#' * Survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
-#' df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
-#'                  g = sample(c("A","B"), 100, TRUE))
-#' d  <- surveycore::as_survey(df, weights = wt)
+#' library(surveytidy)
+#' library(surveycore)
+#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Sort rows
-#' d2 <- arrange(d, y)
-#' d3 <- arrange(d, desc(y))
+#' # Sort by age category ascending
+#' arrange(d, agecat)
 #'
-#' @family row operations
-#' @seealso [filter()] for domain-aware row marking (preferred),
+#' # Sort by age category descending
+#' arrange(d, dplyr::desc(agecat))
+#'
+#' # Sort by multiple variables
+#' arrange(d, gender, dplyr::desc(agecat))
+#'
+#' # Sort by grouping variables first
+#' d_grouped <- group_by(d, gender)
+#' arrange(d_grouped, .by_group = TRUE, agecat)
+#'
+#' @family single table verbs
+#' @seealso [filter()] for domain-aware row marking,
 #'   [slice()] for physical row selection
-arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
+arrange.survey_base <- function(.data, ..., .by_group = FALSE, .locale = NULL) {
   # When .by_group = TRUE and @groups is non-empty, prepend the group columns
   # to the sort order. dplyr's native .by_group = TRUE would silently do
   # nothing because @data has no grouped_df attribute — groups are stored in
@@ -54,10 +79,16 @@ arrange.survey_base <- function(.data, ..., .by_group = FALSE) {
     new_data <- dplyr::arrange(
       .data@data,
       dplyr::across(dplyr::all_of(.data@groups)),
-      ...
+      ...,
+      .locale = .locale
     )
   } else {
-    new_data <- dplyr::arrange(.data@data, ..., .by_group = .by_group)
+    new_data <- dplyr::arrange(
+      .data@data,
+      ...,
+      .by_group = .by_group,
+      .locale = .locale
+    )
   }
   .data@data <- new_data
   .data

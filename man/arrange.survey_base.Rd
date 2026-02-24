@@ -2,47 +2,73 @@
 % Please edit documentation in R/arrange.R
 \name{arrange.survey_base}
 \alias{arrange.survey_base}
-\title{Sort rows of a survey design object}
+\title{Order rows using column values}
 \usage{
-\method{arrange}{survey_base}(.data, ..., .by_group = FALSE)
+arrange.survey_base(.data, ..., .by_group = FALSE, .locale = NULL)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
-\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variables or
-expressions to sort by.}
+\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variables, or
+functions of variables. Use \code{\link[dplyr:desc]{dplyr::desc()}} to sort a variable in descending
+order.}
 
-\item{.by_group}{Logical. If \code{TRUE} and \verb{@groups} is set, rows are sorted
-by the grouping variables first, then by \code{...}.}
+\item{.by_group}{If \code{TRUE}, sorts first by the grouping variables set by
+\code{\link[=group_by]{group_by()}}.}
+
+\item{.locale}{The locale to use for ordering strings. If \code{NULL}, uses the
+\code{"C"} locale. See \code{\link[stringi:about_locale]{stringi::locale()}} for available locales.}
 }
 \value{
-The survey object with rows reordered.
+An object of the same type as \code{.data} with the following properties:
+\itemize{
+\item All rows appear in the output, usually in a different position.
+\item Columns are not modified.
+\item Groups are not modified.
+\item Survey design attributes are preserved.
+}
 }
 \description{
-\code{arrange()} sorts rows in \verb{@data}. The domain column moves with the rows —
-no update to \verb{@variables$domain} is needed. Supports \code{.by_group = TRUE}
-using \verb{@groups} set by \code{\link[dplyr:group_by]{dplyr::group_by()}}.
+\code{arrange()} orders the rows of a \code{\link[surveycore:survey_base]{survey_base}}
+object by the values of selected columns.
 
-For physically removing rows, see \code{\link[dplyr:slice]{dplyr::slice()}}. Prefer \code{\link[dplyr:filter]{dplyr::filter()}} for
-subpopulation analyses.
+Unlike most other verbs, \code{arrange()} largely ignores grouping — use
+\code{.by_group = TRUE} to sort by grouping variables first.
+}
+\details{
+\subsection{Missing values}{
+
+Unlike base \code{\link[=sort]{sort()}}, \code{NA} values are always sorted to the end, even when
+using \code{\link[dplyr:desc]{dplyr::desc()}}.
+}
+
+\subsection{Domain column}{
+
+The domain column moves with the rows — row reordering does not affect which
+rows are in or out of the survey domain.
+}
 }
 \examples{
-library(dplyr)
-df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
-                 g = sample(c("A","B"), 100, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Sort rows
-d2 <- arrange(d, y)
-d3 <- arrange(d, desc(y))
+# Sort by age category ascending
+arrange(d, agecat)
+
+# Sort by age category descending
+arrange(d, dplyr::desc(agecat))
+
+# Sort by multiple variables
+arrange(d, gender, dplyr::desc(agecat))
+
+# Sort by grouping variables first
+d_grouped <- group_by(d, gender)
+arrange(d_grouped, .by_group = TRUE, agecat)
 
 }
 \seealso{
-\code{\link[dplyr:filter]{dplyr::filter()}} for domain-aware row marking (preferred),
-\code{\link[dplyr:slice]{dplyr::slice()}} for physical row selection
-
-Other row operations: 
-\code{\link{drop_na.survey_base}()},
-\code{\link{slice.survey_base}()}
+\code{\link[=filter]{filter()}} for domain-aware row marking,
+\code{\link[=slice]{slice()}} for physical row selection
 }
-\concept{row operations}
+\concept{single table verbs}

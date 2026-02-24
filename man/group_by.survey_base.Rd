@@ -5,56 +5,93 @@
 \alias{ungroup.survey_base}
 \title{Group and ungroup a survey design object}
 \usage{
-\method{group_by}{survey_base}(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
+group_by.survey_base(
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = dplyr::group_by_drop_default(.data)
+)
 
-\method{ungroup}{survey_base}(x, ...)
+ungroup.survey_base(x, ...)
 }
 \arguments{
-\item{.data}{A survey design object.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
-\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to group
-by. Computed expressions (e.g., \code{cut(age, breaks)}) are supported.}
+\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> For \code{group_by()}:
+columns to group by. Computed expressions (e.g.,
+\code{cut(ridageyr, breaks = c(0, 18, 65, Inf))}) are supported. For
+\code{ungroup()}: columns to remove from the current grouping. Omit to
+remove all groups.}
 
-\item{.add}{Logical. If \code{TRUE}, add to existing groups rather than
-replacing them.}
+\item{.add}{When \code{FALSE} (default), replaces existing groups. Use
+\code{.add = TRUE} to add to the current grouping instead.}
 
-\item{.drop}{Passed to \code{dplyr::group_by_drop_default()}.}
+\item{.drop}{Accepted for compatibility with the dplyr interface; has no
+effect on survey design objects.}
 
-\item{x}{A survey design object (for \code{ungroup()}).}
+\item{x}{A \code{\link[surveycore:survey_base]{survey_base}} object (for
+\code{ungroup()}).}
 }
 \value{
-The survey object with \verb{@groups} updated.
+An object of the same type as the input with the following properties:
+\itemize{
+\item Rows, columns, and survey design attributes are unchanged.
+\item For \code{group_by()}: grouping columns are set or updated.
+\item For \code{ungroup()}: all or specified grouping columns are removed.
+}
 }
 \description{
-\itemize{
-\item \code{group_by()} stores grouping column names in \verb{@groups}. Unlike dplyr,
-\strong{no \code{grouped_df} attribute} is attached to \verb{@data} — grouping is kept on
-the survey object itself. Phase 1 estimation functions and \code{\link[dplyr:mutate]{dplyr::mutate()}} read
-\verb{@groups} to apply grouped calculations.
-\item \code{ungroup()} with no arguments removes all groups. With column arguments it
-performs a \strong{partial ungroup}, removing only the named columns from
-\verb{@groups}.
-}
-}
-\section{Functions}{
-\itemize{
-\item \code{ungroup(survey_base)}: Remove grouping variables.
+\code{group_by()} stores grouping columns on the survey object for use in
+grouped operations like \code{\link[=mutate]{mutate()}}. \code{ungroup()} removes the grouping.
 
-}}
+Unlike dplyr, groups are not attached to the underlying data frame —
+they are stored on the survey object itself and applied when needed by
+verbs that support grouping.
+}
+\details{
+\subsection{Grouped operations}{
+
+After calling \code{group_by()}, \code{\link[=mutate]{mutate()}} computes within groups. Future
+estimation functions will also use grouping to perform stratified analysis.
+}
+
+\subsection{Adding to existing groups}{
+
+By default, \code{group_by()} replaces existing groups. Use \code{.add = TRUE} to
+append to the current grouping instead.
+}
+
+\subsection{Partial ungroup}{
+
+\code{ungroup()} with no arguments removes all groups. With column arguments,
+it removes only the specified columns from the grouping.
+}
+}
 \examples{
-library(dplyr)
-df <- data.frame(y = rnorm(100), wt = runif(100, 1, 5),
-                 region = sample(c("N","S","E","W"), 100, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Group and then compute group means via mutate()
-d2 <- d |>
-  group_by(region) |>
-  mutate(region_mean = mean(y))
+# Group by a column
+group_by(d, gender)
 
-# Partial ungroup
-d3 <- group_by(d, region)
-d4 <- ungroup(d3)          # remove all groups
+# Grouped mutate — within-group mean centring
+d |>
+  group_by(gender) |>
+  mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
+
+# Add a second grouping variable with .add = TRUE
+d |>
+  group_by(gender) |>
+  group_by(cregion, .add = TRUE)
+
+# Remove all groups
+d |> group_by(gender) |> ungroup()
+
+# Partial ungroup — remove only gender, keep cregion
+d |>
+  group_by(gender, cregion) |>
+  ungroup(gender)
 
 }
 \concept{grouping}
