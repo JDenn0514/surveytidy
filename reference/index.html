@@ -37,7 +37,7 @@
       <dl></dl></div><div class="section level2">
 
       <h3 id="rows">Rows<a class="anchor" aria-label="anchor" href="#rows"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>, <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code>) is available but issues a warning because removing rows can bias variance estimates.</p></div>
+      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code>, and <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>) is also available but issues a warning because removing rows can bias variance estimates.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -53,10 +53,10 @@
 
         <dt>
 
-          <code><a href="slice.survey_base.html">slice.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_head.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_tail.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_min.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_max.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_sample.survey_base()</a></code>
+          <code><a href="drop_na.survey_base.html">drop_na.survey_base()</a></code>
 
         </dt>
-        <dd>Physically select rows of a survey design object</dd>
+        <dd>Mark rows with missing values as out-of-domain</dd>
 
         <dt>
 
@@ -67,21 +67,21 @@
 
         <dt>
 
+          <code><a href="slice.survey_base.html">slice.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_head.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_tail.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_min.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_max.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_sample.survey_base()</a></code>
+
+        </dt>
+        <dd>Physically select rows of a survey design object</dd>
+
+        <dt>
+
           <code><a href="subset.survey_base.html">subset(<i>&lt;survey_base&gt;</i>)</a></code>
 
         </dt>
         <dd>Physically remove rows from a survey design object</dd>
-
-        <dt>
-
-          <code><a href="drop_na.survey_base.html">drop_na.survey_base()</a></code>
-
-        </dt>
-        <dd>Mark rows with missing values as out-of-domain</dd>
       </dl></div><div class="section level2">
 
       <h3 id="columns">Columns<a class="anchor" aria-label="anchor" href="#columns"></a></h3>
-      <div class="section-desc"><p>Select, reorder, rename, create, extract, and inspect columns. Design variables (weights, strata, PSU, FPC) are always retained in <code>@data</code> even when not explicitly selected. <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code> automatically updates the survey design specification and variable metadata to match the new name.</p></div>
+      <div class="section-desc"><p>Select, reorder, rename, create, extract, and inspect columns. Design variables (weights, strata, PSU, FPC) are always retained even when not explicitly selected. <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code> automatically updates the survey design specification and variable metadata to match the new name.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -132,7 +132,7 @@
       </dl></div><div class="section level2">
 
       <h3 id="groups">Groups<a class="anchor" aria-label="anchor" href="#groups"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> stores grouping variables in <code>@groups</code> for use by estimation functions (Phase 1+). Unlike dplyr, no <code>grouped_df</code> attribute is added to <code>@data</code> — grouping lives on the survey object itself.</p></div>
+      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> stores grouping columns on the survey object for use by grouped operations like <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. Unlike dplyr, the underlying data is not modified — groups are stored on the survey object and applied when needed.</p></div>
 
       <dl></dl></div><div class="section level2">
 
