@@ -74,7 +74,7 @@
 #' distinct(d)
 #'
 #' # Deduplicate by one column (all other columns still retained)
-#' distinct(d, region)
+#' distinct(d, cregion)
 #'
 #' @family row operations
 #' @seealso [filter()] for domain-aware row marking (preferred for

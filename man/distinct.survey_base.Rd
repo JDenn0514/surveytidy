@@ -72,7 +72,7 @@ d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 distinct(d)
 
 # Deduplicate by one column (all other columns still retained)
-distinct(d, region)
+distinct(d, cregion)
 
 }
 \seealso{
