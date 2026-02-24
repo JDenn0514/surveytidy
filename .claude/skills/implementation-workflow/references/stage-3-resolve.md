@@ -54,7 +54,7 @@ explicit direction on each issue.
 
 ## Issue Format
 
-For each issue (whether from the review file or found during this session):
+For each issue (whether from the review file or found during this session) use `AskUserQuestion` tool:
 
 ```
 **Issue [N]: [Short title]**
