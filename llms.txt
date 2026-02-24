@@ -479,11 +479,26 @@ metadata to match the new name.
 [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
 stores grouping columns on the survey object for use by grouped
 operations like
-[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html). Unlike
-dplyr, the underlying data is not modified — groups are stored on the
-survey object and applied when needed.
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
+[`rowwise()`](https://dplyr.tidyverse.org/reference/rowwise.html)
+enables row-by-row computation. Unlike dplyr, the underlying data is not
+modified — groups are stored on the survey object and applied when
+needed.
 
 - [`group_by.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
   [`ungroup.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
   : Group and ungroup a survey design object
+- [`rowwise.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.survey_base.md)
+  : Compute row-wise on a survey design object
+
+### Predicates
+
+Test the current grouping and rowwise state of a survey design object.
+These predicates are designed for use by estimation functions in Phase
+1.
+
+- [`is_rowwise()`](https://jdenn0514.github.io/surveytidy/reference/is_rowwise.md)
+  : Test whether a survey design is in rowwise mode
+- [`is_grouped()`](https://jdenn0514.github.io/surveytidy/reference/is_grouped.md)
+  : Test whether a survey design has active grouping
 

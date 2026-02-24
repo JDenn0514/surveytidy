@@ -139,7 +139,7 @@
       </dl></div><div class="section level2">
 
       <h3 id="groups">Groups<a class="anchor" aria-label="anchor" href="#groups"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> stores grouping columns on the survey object for use by grouped operations like <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. Unlike dplyr, the underlying data is not modified — groups are stored on the survey object and applied when needed.</p></div>
+      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> stores grouping columns on the survey object for use by grouped operations like <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. <code><a href="https://dplyr.tidyverse.org/reference/rowwise.html" class="external-link">rowwise()</a></code> enables row-by-row computation. Unlike dplyr, the underlying data is not modified — groups are stored on the survey object and applied when needed.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -152,6 +152,36 @@
 
         </dt>
         <dd>Group and ungroup a survey design object</dd>
+
+        <dt>
+
+          <code><a href="rowwise.survey_base.html">rowwise.survey_base()</a></code>
+
+        </dt>
+        <dd>Compute row-wise on a survey design object</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="predicates">Predicates<a class="anchor" aria-label="anchor" href="#predicates"></a></h3>
+      <div class="section-desc"><p>Test the current grouping and rowwise state of a survey design object. These predicates are designed for use by estimation functions in Phase 1.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="is_rowwise.html">is_rowwise()</a></code>
+
+        </dt>
+        <dd>Test whether a survey design is in rowwise mode</dd>
+
+        <dt>
+
+          <code><a href="is_grouped.html">is_grouped()</a></code>
+
+        </dt>
+        <dd>Test whether a survey design has active grouping</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

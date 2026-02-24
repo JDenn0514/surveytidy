@@ -6,6 +6,8 @@ operations like
 [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
 removes the grouping.
+[`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html)
+returns the current grouping column names.
 
 Unlike dplyr, groups are not attached to the underlying data frame —
 they are stored on the survey object itself and applied when needed by
@@ -58,7 +60,8 @@ ungroup.survey_base(x, ...)
   A
   [`survey_base`](https://jdenn0514.github.io/surveycore/reference/survey_base.html)
   object (for
-  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)).
+  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) and
+  [`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html)).
 
 ## Value
 
@@ -68,11 +71,16 @@ An object of the same type as the input with the following properties:
 
 - For
   [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html):
-  grouping columns are set or updated.
+  grouping columns are set or updated; rowwise keys are cleared.
 
 - For
   [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html):
-  all or specified grouping columns are removed.
+  all or specified grouping columns are removed; rowwise keys are
+  cleared on full ungroup only.
+
+- For
+  [`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html):
+  a character vector of current grouping column names.
 
 ## Details
 
@@ -91,17 +99,34 @@ By default,
 replaces existing groups. Use `.add = TRUE` to append to the current
 grouping instead.
 
+### Rowwise mode and group_by()
+
+`group_by(.add = FALSE)` (the default) exits rowwise mode — it clears
+`@variables$rowwise` and `@variables$rowwise_id_cols`.
+`group_by(.add = TRUE)` when the design is rowwise promotes the rowwise
+id columns to `@groups`, appends the new groups, then clears rowwise
+mode — mirroring dplyr's behaviour exactly.
+
 ### Partial ungroup
 
 [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) with
-no arguments removes all groups. With column arguments, it removes only
-the specified columns from the grouping.
+no arguments removes all groups and exits rowwise mode. With column
+arguments, it removes only the specified columns from the grouping —
+rowwise mode is **not** affected.
+
+## See also
+
+Other grouping:
+[`is_grouped()`](https://jdenn0514.github.io/surveytidy/reference/is_grouped.md),
+[`is_rowwise()`](https://jdenn0514.github.io/surveytidy/reference/is_rowwise.md),
+[`rowwise.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.survey_base.md)
 
 ## Examples
 
 ``` r
 library(surveytidy)
 library(surveycore)
+library(dplyr)
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Group by a column
@@ -253,4 +278,8 @@ d |>
 #> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+
+# Get current grouping column names
+d |> group_by(gender, cregion) |> group_vars()
+#> [1] "gender"  "cregion"
 ```
