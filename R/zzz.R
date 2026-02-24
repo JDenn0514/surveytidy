@@ -109,6 +109,13 @@
     envir = asNamespace("dplyr")
   )
 
+  registerS3method(
+    "rename_with",
+    "surveycore::survey_base",
+    get("rename_with.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── feature/arrange ───────────────────────────────────────────────────────
 
   registerS3method(

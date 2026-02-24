@@ -2,9 +2,12 @@
 % Please edit documentation in R/rename.R
 \name{rename.survey_base}
 \alias{rename.survey_base}
+\alias{rename_with.survey_base}
 \title{Rename columns of a survey design object}
 \usage{
 rename.survey_base(.data, ...)
+
+rename_with.survey_base(.data, .fn, .cols = dplyr::everything(), ...)
 }
 \arguments{
 \item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
@@ -12,20 +15,32 @@ rename.survey_base(.data, ...)
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Use \code{new_name = old_name}
 pairs to rename columns. Any number of columns can be renamed in a
 single call.}
+
+\item{.fn}{A function (or formula/lambda) applied to selected column names.
+Must return a character vector of the same length as its input, with no
+duplicates and no conflicts with existing non-renamed column names.}
+
+\item{.cols}{<\code{\link[tidyselect:language]{tidy-select}}> Columns whose names
+\code{.fn} will transform. Defaults to all columns.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
 \itemize{
 \item Rows are not added or removed.
 \item Column order is preserved.
-\item Renamed columns are updated in \verb{@data}, \verb{@variables}, and \verb{@metadata}.
-\item Groups and survey design attributes are preserved.
+\item Renamed columns are updated in \verb{@data}, \verb{@variables}, \verb{@metadata}, and
+\verb{@groups}.
+\item Survey design attributes are preserved.
 }
 }
 \description{
-\code{rename()} changes column names in the underlying data and automatically
-keeps the survey design in sync. Variable labels, value labels, and other
-metadata follow the rename — no manual bookkeeping required.
+\code{rename()} and \code{rename_with()} change column names in the underlying data
+and automatically keep the survey design in sync. Variable labels, value
+labels, and other metadata follow the rename — no manual bookkeeping
+required.
+
+Use \code{rename()} for \code{new_name = old_name} pairs; use \code{rename_with()} to
+apply a function across a selection of column names.
 
 Renaming a design variable (weights, strata, PSUs) is fully supported:
 the design specification updates automatically and a
@@ -44,6 +59,8 @@ and transformation records in \verb{@metadata} are re-keyed to the new name.
 \item \strong{\code{visible_vars}} — any occurrence of the old name in
 \verb{@variables$visible_vars} is replaced with the new name, so
 \code{\link[=select]{select()}} + \code{rename()} pipelines work correctly.
+\item \strong{Groups} — if a renamed column is in the active grouping, \verb{@groups}
+is updated to use the new name.
 }
 }
 
@@ -54,11 +71,35 @@ allowed. A \code{surveytidy_warning_rename_design_var} warning is issued as a
 reminder that the design specification has been updated — not to indicate
 an error.
 }
+
+\subsection{rename_with() function forms}{
+
+\code{.fn} can be any of:
+\itemize{
+\item A bare function: \code{rename_with(d, toupper)}
+\item A formula: \code{rename_with(d, ~ toupper(.))}
+\item A lambda: \verb{rename_with(d, \\(x) paste0(x, "_v2"))}
+}
+
+Extra arguments to \code{.fn} can be passed via \code{...}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{rename_with(d, stringr::str_replace, .cols = starts_with("y"),
+            pattern = "y", replacement = "outcome")
+}\if{html}{\out{</div>}}
+
+\code{.cols} uses tidy-select syntax. The default \code{dplyr::everything()} applies
+\code{.fn} to all columns including design variables — which will trigger a
+\code{surveytidy_warning_rename_design_var} warning for each renamed design
+variable.
+}
 }
 \examples{
+library(dplyr)
 library(surveytidy)
 library(surveycore)
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+
+# rename() ----------------------------------------------------------------
 
 # Rename an outcome column
 rename(d, financial_situation = fin_sit)
@@ -69,9 +110,18 @@ rename(d, region = cregion, education = educcat)
 # Rename a design variable — warns and updates the design specification
 rename(d, survey_weight = weight)
 
+# rename_with() -----------------------------------------------------------
+
+# Apply a function to all outcome columns
+rename_with(d, toupper, .cols = starts_with("econ"))
+
+# Use a formula
+rename_with(d, ~ paste0(., "_v2"), .cols = starts_with("econ"))
+
 }
 \seealso{
-\code{\link[=mutate]{mutate()}} to add or modify column values, \code{\link[=select]{select()}} to drop columns
+\code{\link[=mutate]{mutate()}} to add or modify column values, \code{\link[=select]{select()}} to drop
+columns
 
 Other modification: 
 \code{\link{mutate.survey_base}()}

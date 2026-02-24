@@ -32,6 +32,9 @@ dplyr::mutate
 dplyr::rename
 
 #' @export
+dplyr::rename_with
+
+#' @export
 dplyr::relocate
 
 #' @export

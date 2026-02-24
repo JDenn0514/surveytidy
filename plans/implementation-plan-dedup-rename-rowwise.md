@@ -18,7 +18,7 @@ See Sequencing section for suggested merge order.
 ## PR Map
 
 - [x] PR 1: `feature/distinct` — `distinct.survey_base()` with physical-subset warning and design-var guard
-- [ ] PR 2: `feature/rename-with` — `.apply_rename_map()` refactor + `rename_with.survey_base()`
+- [x] PR 2: `feature/rename-with` — `.apply_rename_map()` refactor + `rename_with.survey_base()`
 - [ ] PR 3: `feature/rowwise` — `rowwise.survey_base()`, `mutate()` rowwise routing, `group_by()` `.add=TRUE` fix, three exported predicates
 
 ---
