@@ -14,6 +14,9 @@
 # ── dplyr verbs ───────────────────────────────────────────────────────────────
 
 #' @export
+dplyr::distinct
+
+#' @export
 dplyr::filter
 
 #' @export

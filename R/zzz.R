@@ -22,6 +22,15 @@
   # twophase) via S3's class hierarchy walk.
   ns <- asNamespace(pkgname)
 
+  # ── feature/distinct ──────────────────────────────────────────────────────
+
+  registerS3method(
+    "distinct",
+    "surveycore::survey_base",
+    get("distinct.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── feature/filter ────────────────────────────────────────────────────────
 
   registerS3method(
