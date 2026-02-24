@@ -79,7 +79,6 @@
 #' @family row operations
 #' @seealso [filter()] for domain-aware row marking (preferred for
 #'   subpopulation analyses)
-#' @noRd
 distinct.survey_base <- function(.data, ..., .keep_all = FALSE) {
   # Step 1: Always warn — distinct() physically removes rows.
   .warn_physical_subset("distinct")
