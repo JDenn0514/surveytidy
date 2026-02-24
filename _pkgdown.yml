@@ -59,6 +59,7 @@ reference:
       - select.survey_base
       - relocate.survey_base
       - rename.survey_base
+      - rename_with.survey_base
       - mutate.survey_base
       - pull.survey_base
       - glimpse.survey_base
