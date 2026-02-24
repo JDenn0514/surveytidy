@@ -59,6 +59,7 @@ drop_na(d)
 \code{\link[=filter]{filter()}} for domain-aware row marking
 
 Other row operations: 
+\code{\link{distinct.survey_base}()},
 \code{\link{slice.survey_base}()}
 }
 \concept{row operations}

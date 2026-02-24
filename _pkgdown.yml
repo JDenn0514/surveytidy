@@ -43,6 +43,7 @@ reference:
       can bias variance estimates.
     contents:
       - filter.survey_base
+      - distinct.survey_base
       - drop_na.survey_base
       - arrange.survey_base
       - slice.survey_base

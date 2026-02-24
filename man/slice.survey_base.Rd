@@ -94,6 +94,7 @@ slice_sample(d, n = 50)
 subpopulation analyses), \code{\link[=arrange]{arrange()}} for row sorting
 
 Other row operations: 
+\code{\link{distinct.survey_base}()},
 \code{\link{drop_na.survey_base}()}
 }
 \concept{row operations}
