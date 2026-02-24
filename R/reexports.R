@@ -47,6 +47,12 @@ dplyr::group_by
 dplyr::ungroup
 
 #' @export
+dplyr::rowwise
+
+#' @export
+dplyr::group_vars
+
+#' @export
 dplyr::pull
 
 #' @export

@@ -30,19 +30,23 @@ remove all groups.}
 effect on survey design objects.}
 
 \item{x}{A \code{\link[surveycore:survey_base]{survey_base}} object (for
-\code{ungroup()}).}
+\code{ungroup()} and \code{group_vars()}).}
 }
 \value{
 An object of the same type as the input with the following properties:
 \itemize{
 \item Rows, columns, and survey design attributes are unchanged.
-\item For \code{group_by()}: grouping columns are set or updated.
-\item For \code{ungroup()}: all or specified grouping columns are removed.
+\item For \code{group_by()}: grouping columns are set or updated; rowwise keys
+are cleared.
+\item For \code{ungroup()}: all or specified grouping columns are removed; rowwise
+keys are cleared on full ungroup only.
+\item For \code{group_vars()}: a character vector of current grouping column names.
 }
 }
 \description{
 \code{group_by()} stores grouping columns on the survey object for use in
 grouped operations like \code{\link[=mutate]{mutate()}}. \code{ungroup()} removes the grouping.
+\code{group_vars()} returns the current grouping column names.
 
 Unlike dplyr, groups are not attached to the underlying data frame —
 they are stored on the survey object itself and applied when needed by
@@ -61,15 +65,25 @@ By default, \code{group_by()} replaces existing groups. Use \code{.add = TRUE} t
 append to the current grouping instead.
 }
 
+\subsection{Rowwise mode and group_by()}{
+
+\code{group_by(.add = FALSE)} (the default) exits rowwise mode — it clears
+\verb{@variables$rowwise} and \verb{@variables$rowwise_id_cols}. \code{group_by(.add = TRUE)} when the design is rowwise promotes the rowwise id columns to
+\verb{@groups}, appends the new groups, then clears rowwise mode — mirroring
+dplyr's behaviour exactly.
+}
+
 \subsection{Partial ungroup}{
 
-\code{ungroup()} with no arguments removes all groups. With column arguments,
-it removes only the specified columns from the grouping.
+\code{ungroup()} with no arguments removes all groups and exits rowwise mode.
+With column arguments, it removes only the specified columns from the
+grouping — rowwise mode is \strong{not} affected.
 }
 }
 \examples{
 library(surveytidy)
 library(surveycore)
+library(dplyr)
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # Group by a column
@@ -93,5 +107,14 @@ d |>
   group_by(gender, cregion) |>
   ungroup(gender)
 
+# Get current grouping column names
+d |> group_by(gender, cregion) |> group_vars()
+
+}
+\seealso{
+Other grouping: 
+\code{\link{is_grouped}()},
+\code{\link{is_rowwise}()},
+\code{\link{rowwise.survey_base}()}
 }
 \concept{grouping}

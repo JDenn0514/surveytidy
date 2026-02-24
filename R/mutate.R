@@ -106,16 +106,37 @@ mutate.survey_base <- function(
 ) {
   .keep <- match.arg(.keep)
 
-  # Step 1: Grouped mutate — when .by is NULL but @groups is non-empty, use
-  # @groups as the effective grouping so group_by(d, g) |> mutate(z = mean(x))
-  # works identically to dplyr's grouped_df behaviour.
+  # Step 1: Determine base_data and effective_by based on rowwise / grouped
+  # mode. Rowwise mode takes precedence over grouping.
+  #
+  # Rowwise: wrap @data in dplyr::rowwise() so expressions like
+  # max(c_across(starts_with("y"))) compute per-row. effective_by is unused
+  # in this branch.
+  #
+  # Grouped: pass @groups as the effective .by so group_by(d, g) |>
+  # mutate(z = mean(x)) works identically to dplyr's grouped_df behaviour.
   # Pass the character vector directly (not wrapped in all_of()) — dplyr's .by
   # accepts character vectors, and all_of() outside a selection context is
   # deprecated in tidyselect 1.2.0.
-  effective_by <- if (is.null(.by) && length(.data@groups) > 0L) {
-    .data@groups
+  #
+  # Ungrouped: effective_by is whatever the user passed as .by (usually NULL).
+  rowwise_mode <- isTRUE(.data@variables$rowwise)
+  id_cols <- .data@variables$rowwise_id_cols %||% character(0)
+  group_names <- .data@groups
+
+  if (rowwise_mode) {
+    effective_by <- NULL
+    base_data <- if (length(id_cols) > 0L) {
+      dplyr::rowwise(.data@data, dplyr::all_of(id_cols))
+    } else {
+      dplyr::rowwise(.data@data)
+    }
+  } else if (is.null(.by) && length(group_names) > 0L) {
+    base_data <- .data@data
+    effective_by <- group_names
   } else {
-    .by
+    base_data <- .data@data
+    effective_by <- .by
   }
 
   # Step 2: Detect design variable modification by name.
@@ -156,7 +177,7 @@ mutate.survey_base <- function(
 
   new_data <- rlang::inject(
     dplyr::mutate(
-      .data@data,
+      base_data,
       ...,
       !!!if (has_by) list(.by = effective_by) else list(),
       .keep = .keep,
@@ -164,6 +185,14 @@ mutate.survey_base <- function(
       !!!if (has_after) list(.after = !!after_quo) else list()
     )
   )
+
+  # Strip rowwise_df class after rowwise mutation. dplyr::mutate() on a
+  # rowwise_df returns a rowwise_df. If this class leaks into @data, every
+  # subsequent mutate() call on the object will behave row-wise — even after
+  # ungroup() has cleared @variables$rowwise. Stripping here prevents that.
+  if (rowwise_mode) {
+    new_data <- dplyr::ungroup(new_data)
+  }
 
   # Step 4: Re-attach protected columns that .keep dropped
   # (e.g., .keep = "none" removes all non-mutated columns, including design vars)

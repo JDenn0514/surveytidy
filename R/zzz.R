@@ -183,6 +183,22 @@
     envir = asNamespace("dplyr")
   )
 
+  # ── feature/rowwise ───────────────────────────────────────────────────────
+
+  registerS3method(
+    "rowwise",
+    "surveycore::survey_base",
+    get("rowwise.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "group_vars",
+    "surveycore::survey_base",
+    get("group_vars.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── feature/drop-na ───────────────────────────────────────────────────────
 
   registerS3method(
