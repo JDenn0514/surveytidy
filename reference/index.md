@@ -9,26 +9,26 @@
 **domain estimation** — rows are marked in or out of the analysis domain
 without being removed, so variance estimates stay correct. Physical row
 removal ([`subset()`](https://rdrr.io/r/base/subset.html), `slice_*()`,
-`drop_na()`) is available but issues a warning because removing rows can
-bias variance estimates.
+[`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html)) is
+available but issues a warning because removing rows can bias variance
+estimates.
 
-- [`filter(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
-  [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
-  : Filter survey data using domain estimation
-- [`filter_out(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter_out.survey_base.md)
-  : Exclude rows from a survey domain
-- [`slice(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
-  [`slice_head(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
-  [`slice_tail(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
-  [`slice_min(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
-  [`slice_max(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
-  [`slice_sample(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+- [`filter.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
+  [`filter_out.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
+  : Keep or drop rows using domain estimation
+- [`slice.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_head.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_tail.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_min.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_max.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
+  [`slice_sample.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
   : Physically select rows of a survey design object
-- [`arrange(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
-  : Sort rows of a survey design object
-- [`drop_na(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
-  : Mark rows with missing values as out-of-domain in a survey design
-  object
+- [`arrange.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)
+  : Order rows using column values
+- [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/subset.survey_base.md)
+  : Physically remove rows from a survey design object
+- [`drop_na.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
+  : Mark rows with missing values as out-of-domain
 
 ### Columns
 
@@ -39,16 +39,18 @@ even when not explicitly selected.
 automatically updates the survey design specification and variable
 metadata to match the new name.
 
-- [`select(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
-  [`relocate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
-  [`pull(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
-  [`glimpse(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
-  : Select, relocate, pull, and glimpse columns of a survey design
-  object
-- [`rename(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.md)
+- [`select.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/select.survey_base.md)
+  : Keep or drop columns using their names and types
+- [`relocate.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/relocate.survey_base.md)
+  : Change column order in a survey design object
+- [`rename.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.md)
   : Rename columns of a survey design object
-- [`mutate(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
-  : Add or modify columns of a survey design object
+- [`mutate.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
+  : Create, modify, and delete columns of a survey design object
+- [`pull.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/pull.survey_base.md)
+  : Extract a column from a survey design object
+- [`glimpse.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.survey_base.md)
+  : Get a glimpse of a survey design object
 
 ### Groups
 
@@ -57,6 +59,6 @@ stores grouping variables in `@groups` for use by estimation functions
 (Phase 1+). Unlike dplyr, no `grouped_df` attribute is added to `@data`
 — grouping lives on the survey object itself.
 
-- [`group_by(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
-  [`ungroup(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
+- [`group_by.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
+  [`ungroup.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md)
   : Group and ungroup a survey design object

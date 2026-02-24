@@ -11,25 +11,24 @@ correct variance estimation of subpopulation statistics.
 
 ### Key verbs
 
-- [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
-  — domain estimation (marks rows, never removes them)
+- [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) —
+  domain estimation (marks rows, never removes them)
 
-- [`dplyr::select()`](https://dplyr.tidyverse.org/reference/select.html)
-  — column selection preserving design variables
+- [`select()`](https://dplyr.tidyverse.org/reference/select.html) —
+  column selection preserving design variables
 
-- [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-  — add/modify columns with weight-change warnings
+- [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) —
+  add/modify columns with weight-change warnings
 
-- [`dplyr::rename()`](https://dplyr.tidyverse.org/reference/rename.html)
-  — auto-updates design variable names and metadata
+- [`rename()`](https://dplyr.tidyverse.org/reference/rename.html) —
+  auto-updates design variable names and metadata
 
-- [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  /
-  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  — grouped analysis support
+- [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) /
+  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) —
+  grouped analysis support
 
-- [`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)
-  — row sorting preserving domain membership
+- [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) —
+  row sorting preserving domain membership
 
 - [`subset()`](https://rdrr.io/r/base/subset.html) — physical row
   removal with a strong warning

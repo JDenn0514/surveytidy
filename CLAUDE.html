@@ -56,11 +56,11 @@
 <h2 id="vision--goals">Vision &amp; Goals<a class="anchor" aria-label="anchor" href="#vision--goals"></a></h2>
 <p>surveytidy makes survey analysis feel natural to tidyverse users by:</p>
 <ol style="list-style-type: decimal"><li>
-<strong>Domain-aware filtering</strong> — <code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code> marks rows in/out of domain without removing them</li>
+<strong>Domain-aware filtering</strong> — <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> marks rows in/out of domain without removing them</li>
 <li>
-<strong>Intelligent metadata handling</strong> — <code>select()</code> and <code>rename()</code> update labels automatically</li>
+<strong>Intelligent metadata handling</strong> — <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code> update labels automatically</li>
 <li>
-<strong>Group-by support</strong> — <code>group_by()</code> sets up stratification for Phase 1 estimation functions</li>
+<strong>Group-by support</strong> — <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> sets up stratification for Phase 1 estimation functions</li>
 <li>
 <strong>Familiar API</strong> — Users never write formula syntax; everything uses bare names (tidy-select)</li>
 </ol></div>
@@ -129,22 +129,22 @@
 <li>Type: logical column in <code>@data</code>
 </li>
 <li>Content: TRUE for in-domain rows, FALSE for out-of-domain rows</li>
-<li>Never removed; only created/updated by <code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code>
+<li>Never removed; only created/updated by <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>
 </li>
 </ul></div>
 <div class="section level4">
 <h4 id="visible_vars">visible_vars<a class="anchor" aria-label="anchor" href="#visible_vars"></a></h4>
 <ul><li>Key in <code>@variables$visible_vars</code>
 </li>
-<li>Set by <code>select()</code> to the user’s explicit column selection</li>
+<li>Set by <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code> to the user’s explicit column selection</li>
 <li>Controls which columns <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows (hides design vars from display)</li>
 <li>NULL means all columns in <code>@data</code> are shown (default)</li>
-<li>After <code>select()</code>, <code>@data</code> only contains design vars + user-selected cols; <code>visible_vars</code> tracks the user’s selection so design vars are hidden from print</li>
+<li>After <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code>, <code>@data</code> only contains design vars + user-selected cols; <code>visible_vars</code> tracks the user’s selection so design vars are hidden from print</li>
 </ul></div>
 <div class="section level4">
 <h4 id="groups">@groups<a class="anchor" aria-label="anchor" href="#groups"></a></h4>
-<ul><li>Reserved for Phase 0.5 (now used by <code>group_by()</code>)</li>
-<li>Populated by <code>group_by()</code>, cleared by <code>ungroup()</code>
+<ul><li>Reserved for Phase 0.5 (now used by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code>)</li>
+<li>Populated by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code>, cleared by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>
 </li>
 <li>Will be used by Phase 1 estimation functions</li>
 </ul></div>
@@ -213,7 +213,7 @@
 <li>Normalises <code>visible_vars</code> to <code>NULL</code> when result is empty (e.g. user selects only design variables) — <code>NULL</code> means “show all columns in @data”</li>
 <li>Deletes <code>@metadata</code> entries for physically removed columns only</li>
 <li>
-<code>select()</code> is irreversible within a pipeline: removed columns are gone</li>
+<code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code> is irreversible within a pipeline: removed columns are gone</li>
 </ul></div>
 <div class="section level3">
 <h3 id="rename-specifics">rename() Specifics<a class="anchor" aria-label="anchor" href="#rename-specifics"></a></h3>
@@ -248,7 +248,7 @@
 <span><span class="co">#' df &lt;- data.frame(...)</span></span>
 <span><span class="co">#' d  &lt;- surveycore::as_survey(df, weights = wt)</span></span>
 <span><span class="co">#' arrange(d, y)</span></span></code></pre></div>
-<p>Use <code><a href="https://tidyr.tidyverse.org" class="external-link">library(tidyr)</a></code> instead for <code>drop_na()</code> and other tidyr verbs.</p>
+<p>Use <code><a href="https://tidyr.tidyverse.org" class="external-link">library(tidyr)</a></code> instead for <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code> and other tidyr verbs.</p>
 </div>
 </div>
 <div class="section level2">

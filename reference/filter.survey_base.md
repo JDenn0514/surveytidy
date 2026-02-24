@@ -1,127 +1,304 @@
-# Filter survey data using domain estimation
+# Keep or drop rows using domain estimation
 
-Mark rows as in-domain without removing them. Unlike
-[`base::subset()`](https://rdrr.io/r/base/subset.html) or a plain
-data-frame filter,
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) **never
-removes rows** from the survey object. Instead it writes a logical
-column `..surveycore_domain..` to `@data`. Variance estimation therefore
-uses all rows — the full design is intact — while analysis is restricted
-to the domain.
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) and
+[`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) mark
+rows as in or out of the survey domain without removing them. Unlike a
+standard data frame filter, all rows are always retained — only their
+domain status changes. Estimation functions restrict analysis to
+in-domain rows while using the full design for variance estimation.
 
-Chained [`filter()`](https://dplyr.tidyverse.org/reference/filter.html)
-calls AND their conditions together: `filter(d, A) |> filter(d, B)` is
-identical to `filter(d, A, B)`.
-
-Physically removes rows from the survey data where `condition` evaluates
-to `FALSE`. Unlike
-[`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
-this changes the underlying design and can bias variance estimates.
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) marks
+rows **matching** the condition as in-domain.
+[`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html)
+marks rows **matching** the condition as out-of-domain — it is the
+complement of
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html), and
+reads more naturally when the intent is exclusion.
 
 ## Usage
 
 ``` r
-# S3 method for class 'survey_base'
-filter(.data, ..., .by = NULL, .preserve = FALSE)
+filter.survey_base(.data, ..., .by = NULL, .preserve = FALSE)
 
-# S3 method for class 'survey_base'
-subset(x, condition, ...)
+filter_out.survey_base(.data, ..., .by = NULL, .preserve = FALSE)
 ```
 
 ## Arguments
 
 - .data:
 
-  A `survey_taylor`, `survey_replicate`, or `survey_twophase` object
-  created by
-  [`surveycore::as_survey()`](https://jdenn0514.github.io/surveycore/reference/as_survey.html).
+  A
+  [`survey_base`](https://jdenn0514.github.io/surveycore/reference/survey_base.html)
+  object.
 
 - ...:
 
-  Ignored (for compatibility with the base
-  [`subset()`](https://rdrr.io/r/base/subset.html) signature).
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  Logical conditions evaluated against the survey data. Multiple
+  conditions are combined with `&`. `NA` results are treated as `FALSE`.
 
 - .by:
 
   Not supported for survey objects. Use
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  instead.
+  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) to
+  add grouping.
 
 - .preserve:
 
-  Ignored (included for compatibility with the dplyr generic signature).
-
-- x:
-
-  A survey design object.
-
-- condition:
-
-  A logical expression evaluated against `x@data`.
+  Ignored. Included for compatibility with the dplyr generic.
 
 ## Value
 
-The survey object with an updated `..surveycore_domain..` column in
-`@data`. Row count is **unchanged**.
+An object of the same type as `.data` with the following properties:
 
-A survey object of the same class with only matching rows retained.
+- All rows appear in the output.
+
+- Domain status of each row may be updated.
+
+- Columns are not modified.
+
+- Groups are not modified.
+
+- Survey design attributes are preserved.
 
 ## Details
 
-For subpopulation analyses, use
-[`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
-instead. Only use [`subset()`](https://rdrr.io/r/base/subset.html) when
-you have explicitly built the survey design for the subset population.
+### Chaining
 
-## Functions
+Multiple calls accumulate via AND: a row must satisfy every condition to
+remain in-domain. These are equivalent:
 
-- `subset(survey_base)`: Physically remove rows (use sparingly). Always
-  issues `surveycore_warning_physical_subset`. Prefer
-  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) for
-  subpopulation analyses.
+    filter(d, ridageyr >= 18, riagendr == 2)
+    filter(d, ridageyr >= 18) |> filter(riagendr == 2)
 
-## Domain estimation vs. physical subsetting
+### Missing values
 
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) is the
-correct tool for subpopulation analyses. Physically removing rows (via
-[`base::subset()`](https://rdrr.io/r/base/subset.html),
-[`subset()`](https://rdrr.io/r/base/subset.html), or
-[`dplyr::slice()`](https://dplyr.tidyverse.org/reference/slice.html))
-changes which units contribute to variance estimation and yields
-incorrect standard errors. See Thomas Lumley's note for details:
-<https://notstatschat.rbind.io/2021/07/22/subsets-and-subpopulations-in-survey-inference>
+Unlike base `[`, both functions treat `NA` as `FALSE`: rows where the
+condition evaluates to `NA` are treated as out-of-domain.
+
+### Useful filter functions
+
+- Comparisons: `==`, `>`, `>=`, `<`, `<=`, `!=`
+
+- Logical: `&`, `|`, `!`, [`xor()`](https://rdrr.io/r/base/Logic.html)
+
+- Missing values: [`is.na()`](https://rdrr.io/r/base/NA.html)
+
+- Range:
+  [`dplyr::between()`](https://dplyr.tidyverse.org/reference/between.html),
+  [`dplyr::near()`](https://dplyr.tidyverse.org/reference/near.html)
+
+- Multi-column:
+  [`dplyr::if_any()`](https://dplyr.tidyverse.org/reference/across.html),
+  [`dplyr::if_all()`](https://dplyr.tidyverse.org/reference/across.html)
+
+### Inspecting the domain
+
+The domain status of each row is stored in the `..surveycore_domain..`
+column of `@data`. `TRUE` means in-domain; `FALSE` means out-of-domain.
 
 ## See also
 
-[`subset()`](https://rdrr.io/r/base/subset.html) for physical row
-removal (with a warning)
-
-Other filtering:
-[`filter_out.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter_out.survey_base.md)
+[`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) for
+excluding rows, [`subset()`](https://rdrr.io/r/base/subset.html) for
+physical row removal
 
 ## Examples
 
 ``` r
-library(dplyr)
-df <- data.frame(y = rnorm(100), x = runif(100),
-                 wt = runif(100, 1, 5), g = sample(c("A","B"), 100, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Single condition
-d_pos <- filter(d, y > 0)
+# Keep adults 50 and older
+filter(d, agecat >= 3)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Multiple conditions (AND-ed)
-d_sub <- filter(d, y > 0, g == "A")
+# Multiple conditions are AND-ed together
+filter(d, agecat >= 3, gender == 2)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Chained filters produce the same domain column
-d_chain <- filter(d, y > 0) |> filter(g == "A")
-identical(d_sub@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
-          d_chain@data[[surveycore::SURVEYCORE_DOMAIN_COL]])
-#> [1] TRUE
+# filter_out() excludes matching rows — complement of filter()
+filter_out(d, agecat == 1)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Multi-column helpers: if_any() and if_all()
-df2 <- data.frame(a = c(1,2,NA,4), b = c(NA,2,3,4), wt = rep(1,4))
-d2  <- surveycore::as_survey(df2, weights = wt)
-d_any <- filter(d2, if_any(c(a, b), ~ !is.na(.x)))
-d_all <- filter(d2, if_all(c(a, b), ~ !is.na(.x)))
+# Chained calls accumulate (these are equivalent)
+filter(d, agecat >= 3, gender == 2)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+filter(d, agecat >= 3) |> filter(gender == 2)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+
+# Multi-column conditions with if_any() and if_all()
+filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
+filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 66
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 59 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 ```

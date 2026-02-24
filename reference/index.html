@@ -37,7 +37,7 @@
       <dl></dl></div><div class="section level2">
 
       <h3 id="rows">Rows<a class="anchor" aria-label="anchor" href="#rows"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>, <code>drop_na()</code>) is available but issues a warning because removing rows can bias variance estimates.</p></div>
+      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>, <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code>) is available but issues a warning because removing rows can bias variance estimates.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -46,38 +46,38 @@
 
       <dl><dt>
 
-          <code><a href="filter.survey_base.html">filter(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="filter.survey_base.html">subset(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="filter.survey_base.html">filter.survey_base()</a></code> <code><a href="filter.survey_base.html">filter_out.survey_base()</a></code>
 
         </dt>
-        <dd>Filter survey data using domain estimation</dd>
+        <dd>Keep or drop rows using domain estimation</dd>
 
         <dt>
 
-          <code><a href="filter_out.survey_base.html">filter_out(<i>&lt;survey_base&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Exclude rows from a survey domain</dd>
-
-        <dt>
-
-          <code><a href="slice.survey_base.html">slice(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.survey_base.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="slice.survey_base.html">slice.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_head.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_tail.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_min.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_max.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_sample.survey_base()</a></code>
 
         </dt>
         <dd>Physically select rows of a survey design object</dd>
 
         <dt>
 
-          <code><a href="arrange.survey_base.html">arrange(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="arrange.survey_base.html">arrange.survey_base()</a></code>
 
         </dt>
-        <dd>Sort rows of a survey design object</dd>
+        <dd>Order rows using column values</dd>
 
         <dt>
 
-          <code><a href="drop_na.survey_base.html">drop_na(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="subset.survey_base.html">subset(<i>&lt;survey_base&gt;</i>)</a></code>
 
         </dt>
-        <dd>Mark rows with missing values as out-of-domain in a survey design object</dd>
+        <dd>Physically remove rows from a survey design object</dd>
+
+        <dt>
+
+          <code><a href="drop_na.survey_base.html">drop_na.survey_base()</a></code>
+
+        </dt>
+        <dd>Mark rows with missing values as out-of-domain</dd>
       </dl></div><div class="section level2">
 
       <h3 id="columns">Columns<a class="anchor" aria-label="anchor" href="#columns"></a></h3>
@@ -90,24 +90,45 @@
 
       <dl><dt>
 
-          <code><a href="select.survey_base.html">select(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="select.survey_base.html">relocate(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="select.survey_base.html">pull(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="select.survey_base.html">glimpse(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="select.survey_base.html">select.survey_base()</a></code>
 
         </dt>
-        <dd>Select, relocate, pull, and glimpse columns of a survey design object</dd>
+        <dd>Keep or drop columns using their names and types</dd>
 
         <dt>
 
-          <code><a href="rename.survey_base.html">rename(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="relocate.survey_base.html">relocate.survey_base()</a></code>
+
+        </dt>
+        <dd>Change column order in a survey design object</dd>
+
+        <dt>
+
+          <code><a href="rename.survey_base.html">rename.survey_base()</a></code>
 
         </dt>
         <dd>Rename columns of a survey design object</dd>
 
         <dt>
 
-          <code><a href="mutate.survey_base.html">mutate(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="mutate.survey_base.html">mutate.survey_base()</a></code>
 
         </dt>
-        <dd>Add or modify columns of a survey design object</dd>
+        <dd>Create, modify, and delete columns of a survey design object</dd>
+
+        <dt>
+
+          <code><a href="pull.survey_base.html">pull.survey_base()</a></code>
+
+        </dt>
+        <dd>Extract a column from a survey design object</dd>
+
+        <dt>
+
+          <code><a href="glimpse.survey_base.html">glimpse.survey_base()</a></code>
+
+        </dt>
+        <dd>Get a glimpse of a survey design object</dd>
       </dl></div><div class="section level2">
 
       <h3 id="groups">Groups<a class="anchor" aria-label="anchor" href="#groups"></a></h3>
@@ -120,7 +141,7 @@
 
       <dl><dt>
 
-          <code><a href="group_by.survey_base.html">group_by(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="group_by.survey_base.html">ungroup(<i>&lt;survey_base&gt;</i>)</a></code>
+          <code><a href="group_by.survey_base.html">group_by.survey_base()</a></code> <code><a href="group_by.survey_base.html">ungroup.survey_base()</a></code>
 
         </dt>
         <dd>Group and ungroup a survey design object</dd>

@@ -1,139 +1,192 @@
-# Select, relocate, pull, and glimpse columns of a survey design object
+# Keep or drop columns using their names and types
 
-- [`select()`](https://dplyr.tidyverse.org/reference/select.html)
-  chooses which columns to keep, **always retaining design variables**
-  (weights, strata, PSU, FPC, replicate weights) even when not
-  explicitly selected. The user's selection is recorded in
-  `@variables$visible_vars` so
-  [`print()`](https://rdrr.io/r/base/print.html) hides the design
-  columns.
+[`select()`](https://dplyr.tidyverse.org/reference/select.html) keeps
+the named columns and drops all others, using the [tidyselect
+mini-language](https://tidyselect.r-lib.org/reference/language.html) to
+describe column sets. Design variables (weights, strata, PSU, FPC,
+replicate weights) are **always retained** even when not explicitly
+selected — they are required for variance estimation. After
+[`select()`](https://dplyr.tidyverse.org/reference/select.html),
+[`print()`](https://rdrr.io/r/base/print.html) shows only the columns
+you selected; design variables remain in the object but are hidden from
+display.
 
-- [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html)
-  reorders `visible_vars` when set; reorders `@data` otherwise.
-
-- [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) extracts a
-  column as a plain vector (terminal — result is not a survey object).
-
-- [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html) prints
-  a concise column summary, respecting `visible_vars`.
+[`select()`](https://dplyr.tidyverse.org/reference/select.html) is
+irreversible: dropped columns are permanently removed from the survey
+object and cannot be recovered within the same pipeline.
 
 ## Usage
 
 ``` r
-# S3 method for class 'survey_base'
-select(.data, ...)
-
-# S3 method for class 'survey_base'
-relocate(.data, ..., .before = NULL, .after = NULL)
-
-# S3 method for class 'survey_base'
-pull(.data, var = -1, name = NULL, ...)
-
-# S3 method for class 'survey_base'
-glimpse(x, width = NULL, ...)
+select.survey_base(.data, ...)
 ```
 
 ## Arguments
 
 - .data:
 
-  A survey design object.
+  A
+  [`survey_base`](https://jdenn0514.github.io/surveycore/reference/survey_base.html)
+  object.
 
 - ...:
 
   \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
-  Columns to select / reorder. For
-  [`pull()`](https://dplyr.tidyverse.org/reference/pull.html), the
-  column to extract.
-
-- .before, .after:
-
-  \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
-  Destination of relocated columns (passed to
-  [`dplyr::relocate()`](https://dplyr.tidyverse.org/reference/relocate.html)).
-
-- var:
-
-  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Column to pull. Defaults to the last column.
-
-- name:
-
-  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Optional column to use as names for the returned vector.
-
-- x:
-
-  A survey design object (for
-  [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html)).
-
-- width:
-
-  Width of the output, passed to
-  [`dplyr::glimpse()`](https://pillar.r-lib.org/reference/glimpse.html).
+  One or more unquoted column names or tidy-select expressions.
 
 ## Value
 
-- [`select()`](https://dplyr.tidyverse.org/reference/select.html),
-  [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html):
-  the survey object with updated `@data` and/or
-  `@variables$visible_vars`.
+An object of the same type as `.data` with the following properties:
 
-- [`pull()`](https://dplyr.tidyverse.org/reference/pull.html): a plain
-  vector (not a survey object).
+- Rows are not modified.
 
-- [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html): `x`
-  invisibly.
+- Non-selected, non-design columns are permanently removed.
 
-## Functions
+- Design variables are always retained.
 
-- `relocate(survey_base)`: Reorder columns.
+- Survey design attributes are preserved.
 
-- `pull(survey_base)`: Extract a column as a vector.
+## Details
 
-- `glimpse(survey_base)`: Print a concise column summary.
+### Design variable preservation
+
+Regardless of what you select, the following are always kept in the
+survey object: weights, strata, PSUs, FPC columns, replicate weights,
+and the domain column (if set by
+[`filter()`](https://dplyr.tidyverse.org/reference/filter.html)). They
+are hidden from [`print()`](https://rdrr.io/r/base/print.html) output
+but remain available for variance estimation.
+
+### Metadata
+
+Variable labels, value labels, and other metadata for dropped columns
+are removed. Metadata for retained columns is preserved.
 
 ## See also
 
-[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-to add columns,
-[`dplyr::rename()`](https://dplyr.tidyverse.org/reference/rename.html)
-to rename them
+[`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html) to
+reorder columns,
+[`rename()`](https://dplyr.tidyverse.org/reference/rename.html) to
+rename them,
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) to add
+new ones
+
+Other selecting:
+[`glimpse.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.survey_base.md),
+[`pull.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/pull.survey_base.md),
+[`relocate.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/relocate.survey_base.md)
 
 ## Examples
 
 ``` r
-library(dplyr)
-df <- data.frame(y1 = rnorm(50), y2 = rnorm(50),
-                 wt = runif(50, 1, 5), g = sample(c("A","B"), 50, TRUE))
-d  <- surveycore::as_survey(df, weights = wt)
+library(surveytidy)
+library(surveycore)
+d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# select() keeps design vars even though only y1, y2 are named
-d2 <- select(d, y1, y2)
-names(d2@data)               # includes wt (design var)
-#> [1] "y1" "y2" "wt"
-d2@variables$visible_vars    # c("y1", "y2")
-#> [1] "y1" "y2"
+# Select by name
+select(d, gender, agecat)
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 2
+#>    gender agecat
+#>     <dbl>  <dbl>
+#>  1      2      4
+#>  2      1      4
+#>  3      2      4
+#>  4      1      2
+#>  5      1      4
+#>  6      1      4
+#>  7      1      3
+#>  8      2      4
+#>  9      2      3
+#> 10      2      2
+#> # ℹ 5,012 more rows
+#> 
+#> ℹ Design variables preserved but hidden: weight and stratum.
+#> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# relocate() moves y2 before y1 in the visible columns
-d3 <- relocate(d2, y2, .before = y1)
+# Select by name pattern
+select(d, dplyr::starts_with("smuse_"))
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 11
+#>    smuse_fb smuse_yt smuse_x smuse_ig smuse_sc smuse_wa smuse_tt smuse_rd
+#>       <dbl>    <dbl>   <dbl>    <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1        2        1       2        2        2        2        2        1
+#>  2        1        1       2        1        2        2        1        2
+#>  3        1        1       1        1        2        1        2        2
+#>  4        2        1       2        2        2        2        2        2
+#>  5        1        1       1        1        1        2        2        2
+#>  6       NA       NA      NA       NA       NA       NA       NA       NA
+#>  7        1        1       2        1        2        1        2        2
+#>  8        1        2       1        2        2        2        2        2
+#>  9        1        1       2        2        1        2        2        2
+#> 10        1        1       2        1        1        1        2        2
+#> # ℹ 5,012 more rows
+#> # ℹ 3 more variables: smuse_bsk <dbl>, smuse_th <dbl>, smuse_ts <dbl>
+#> 
+#> ℹ Design variables preserved but hidden: weight and stratum.
+#> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# pull() returns a plain numeric vector
-pull(d, y1)
-#>  [1]  1.18779227 -0.51754221 -0.25956025 -0.32806467  0.07343239 -0.24786302
-#>  [7] -1.37386226 -0.04044582  0.42153824  0.20159751 -1.69719192  0.64228768
-#> [13] -0.99523961  0.96381390 -1.65603723  1.07086109 -0.10902636  1.89918639
-#> [19] -1.13703073 -0.27971976 -0.89412905  0.13670185 -0.74916542  0.51819908
-#> [25] -0.19233721  0.02880981  0.35859089 -0.02899503  1.14704207  0.37358894
-#> [31]  0.32333921 -0.82981932  1.39446258 -0.19154358  0.27227702 -1.08165901
-#> [37] -2.32939936 -0.54962596 -0.07257999  1.03228840  0.21513853 -0.49434012
-#> [43]  1.51213828 -0.57946326  1.67478963 -1.00098026  1.22270284  1.07718817
-#> [49] -0.61194546  0.50686697
+# Select by type
+select(d, dplyr::where(is.numeric))
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 63
+#>    respid  mode language languageinitial stratum econ1mod econ1bmod comtype2
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl>    <dbl>     <dbl>    <dbl>
+#>  1   1470     2        1              NA      10        4         2        3
+#>  2   2374     2        1              NA       7        3         2        1
+#>  3   1177     3        1              10       5        2         1        3
+#>  4  15459     2        1              NA      10        3         3        3
+#>  5   9849     1        1               9       9        2         1        2
+#>  6   8178     3        1               9      10        2         2        1
+#>  7   3682     1        1               9       4        3         2        1
+#>  8   6999     2        1              NA      10        3         3        3
+#>  9   9945     2        1              NA      10        3         2        3
+#> 10   1901     1        1               9      10        1         1        2
+#> # ℹ 5,012 more rows
+#> # ℹ 55 more variables: unity <dbl>, crimesafe <dbl>, govprotct <dbl>,
+#> #   moregunimpact <dbl>, fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>,
+#> #   eminuse <dbl>, intmob <dbl>, intfreq <dbl>, intfreq_collapsed <dbl>,
+#> #   home4nw2 <dbl>, bbhome <dbl>, smuse_fb <dbl>, smuse_yt <dbl>,
+#> #   smuse_x <dbl>, smuse_ig <dbl>, smuse_sc <dbl>, smuse_wa <dbl>,
+#> #   smuse_tt <dbl>, smuse_rd <dbl>, smuse_bsk <dbl>, smuse_th <dbl>, …
 
-# glimpse() respects visible_vars
-glimpse(d2)
-#> Rows: 50
-#> Columns: 2
-#> $ y1 <dbl> 1.18779227, -0.51754221, -0.25956025, -0.32806467, 0.07343239, -0.2…
-#> $ y2 <dbl> 0.46006837, 1.48439186, 0.88196323, -0.53670224, 1.28555371, 0.5878…
+# Drop columns with !
+select(d, !dplyr::starts_with("smuse_"))
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 5022
+#> 
+#> # A tibble: 5,022 × 54
+#>    respid  mode language languageinitial stratum interview_start interview_end
+#>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#>  1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#>  2   2374     2        1              NA       7 2025-05-01      2025-05-01   
+#>  3   1177     3        1              10       5 2025-03-04      2025-03-04   
+#>  4  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#>  5   9849     1        1               9       9 2025-02-22      2025-02-22   
+#>  6   8178     3        1               9      10 2025-03-10      2025-03-10   
+#>  7   3682     1        1               9       4 2025-02-27      2025-02-27   
+#>  8   6999     2        1              NA      10 2025-05-12      2025-05-12   
+#>  9   9945     2        1              NA      10 2025-05-09      2025-05-09   
+#> 10   1901     1        1               9      10 2025-03-01      2025-03-01   
+#> # ℹ 5,012 more rows
+#> # ℹ 47 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   radio <dbl>, device1a <dbl>, smart2 <dbl>, nhisll <dbl>, relig <dbl>,
+#> #   religcat1 <dbl>, born <dbl>, attendper <dbl>, attendonline2 <dbl>, …
 ```

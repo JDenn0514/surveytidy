@@ -11,13 +11,17 @@
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.html</loc></url>
-<url><loc>https://jdenn0514.github.io/surveytidy/reference/filter_out.survey_base.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/glimpse.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/index.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/pull.survey_base.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/reexports.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/relocate.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/select.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/subset.survey_base.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/surveytidy-package.html</loc></url>
 </urlset>
 
