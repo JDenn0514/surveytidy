@@ -51,7 +51,9 @@
       "Bash(R --quiet --vanilla:*)",
       "Bash(gh api:*)",
       "Bash(gh repo view:*)",
-      "Bash(gh repo edit:*)"
+      "Bash(gh repo edit:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh run:*)"
     ]
   }
 }
