@@ -90,6 +90,7 @@ domain-aware row marking (preferred for subpopulation analyses),
 row sorting
 
 Other row operations:
+[`distinct.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/distinct.survey_base.md),
 [`drop_na.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
 
 ## Examples
@@ -177,16 +178,16 @@ slice_sample(d, n = 50)
 #> # A tibble: 50 × 65
 #>    respid  mode language languageinitial stratum interview_start interview_end
 #>     <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
-#>  1  11292     2        1              NA       9 2025-05-08      2025-05-08   
-#>  2  17475     1        1               9      10 2025-03-16      2025-03-16   
-#>  3  15492     1        1               9      10 2025-02-26      2025-02-26   
-#>  4  18209     2        1              NA      10 2025-05-05      2025-05-05   
-#>  5   3575     1        2               9       9 2025-02-26      2025-02-26   
-#>  6   4447     2        1              NA      10 2025-05-05      2025-05-05   
-#>  7  10054     1        1               9      10 2025-02-23      2025-02-23   
-#>  8   4907     1        1               9      10 2025-02-08      2025-02-08   
-#>  9  10520     1        1               9      10 2025-02-24      2025-02-24   
-#> 10   2483     1        1               9      10 2025-02-25      2025-02-25   
+#>  1  17475     1        1               9      10 2025-03-16      2025-03-16   
+#>  2  15492     1        1               9      10 2025-02-26      2025-02-26   
+#>  3  18209     2        1              NA      10 2025-05-05      2025-05-05   
+#>  4   3575     1        2               9       9 2025-02-26      2025-02-26   
+#>  5   4447     2        1              NA      10 2025-05-05      2025-05-05   
+#>  6  10054     1        1               9      10 2025-02-23      2025-02-23   
+#>  7   4907     1        1               9      10 2025-02-08      2025-02-08   
+#>  8  10520     1        1               9      10 2025-02-24      2025-02-24   
+#>  9   2483     1        1               9      10 2025-02-25      2025-02-25   
+#> 10  13027     2        1              NA      10 2025-05-27      2025-05-27   
 #> # ℹ 40 more rows
 #> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
 #> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,

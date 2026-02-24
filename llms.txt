@@ -435,6 +435,8 @@ variance estimates.
 - [`filter.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
   [`filter_out.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/filter.survey_base.md)
   : Keep or drop rows using domain estimation
+- [`distinct.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/distinct.survey_base.md)
+  : Remove duplicate rows from a survey design object
 - [`drop_na.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.survey_base.md)
   : Mark rows with missing values as out-of-domain
 - [`arrange.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/arrange.survey_base.md)

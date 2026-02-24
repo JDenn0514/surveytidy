@@ -6,6 +6,7 @@ to see their documentation.
 - dplyr:
 
   [`arrange`](https://dplyr.tidyverse.org/reference/arrange.html),
+  [`distinct`](https://dplyr.tidyverse.org/reference/distinct.html),
   [`filter`](https://dplyr.tidyverse.org/reference/filter.html),
   [`filter_out`](https://dplyr.tidyverse.org/reference/filter.html),
   [`glimpse`](https://pillar.r-lib.org/reference/glimpse.html),

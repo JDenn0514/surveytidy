@@ -60,6 +60,7 @@ too. These are equivalent:
 domain-aware row marking
 
 Other row operations:
+[`distinct.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/distinct.survey_base.md),
 [`slice.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/slice.survey_base.md)
 
 ## Examples

@@ -124,6 +124,7 @@ design weights directly.</p>
     <div class="dont-index"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> for domain-aware row marking (preferred for
 subpopulation analyses), <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code> for row sorting</p>
 <p>Other row operations:
+<code><a href="distinct.survey_base.html">distinct.survey_base()</a></code>,
 <code><a href="drop_na.survey_base.html">drop_na.survey_base()</a></code></p></div>
     </div>
 
@@ -211,16 +212,16 @@ subpopulation analyses), <code><a href="https://dplyr.tidyverse.org/reference/ar
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 50 × 65</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    respid  mode language languageinitial stratum interview_start interview_end</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  <span style="text-decoration: underline;">11</span>292     2        1              <span style="color: #BB0000;">NA</span>       9 2025-05-08      2025-05-08   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  <span style="text-decoration: underline;">17</span>475     1        1               9      10 2025-03-16      2025-03-16   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  <span style="text-decoration: underline;">15</span>492     1        1               9      10 2025-02-26      2025-02-26   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  <span style="text-decoration: underline;">18</span>209     2        1              <span style="color: #BB0000;">NA</span>      10 2025-05-05      2025-05-05   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">3</span>575     1        2               9       9 2025-02-26      2025-02-26   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">4</span>447     2        1              <span style="color: #BB0000;">NA</span>      10 2025-05-05      2025-05-05   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  <span style="text-decoration: underline;">10</span>054     1        1               9      10 2025-02-23      2025-02-23   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">4</span>907     1        1               9      10 2025-02-08      2025-02-08   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  <span style="text-decoration: underline;">10</span>520     1        1               9      10 2025-02-24      2025-02-24   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>483     1        1               9      10 2025-02-25      2025-02-25   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  <span style="text-decoration: underline;">17</span>475     1        1               9      10 2025-03-16      2025-03-16   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  <span style="text-decoration: underline;">15</span>492     1        1               9      10 2025-02-26      2025-02-26   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  <span style="text-decoration: underline;">18</span>209     2        1              <span style="color: #BB0000;">NA</span>      10 2025-05-05      2025-05-05   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">3</span>575     1        2               9       9 2025-02-26      2025-02-26   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">4</span>447     2        1              <span style="color: #BB0000;">NA</span>      10 2025-05-05      2025-05-05   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  <span style="text-decoration: underline;">10</span>054     1        1               9      10 2025-02-23      2025-02-23   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">4</span>907     1        1               9      10 2025-02-08      2025-02-08   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  <span style="text-decoration: underline;">10</span>520     1        1               9      10 2025-02-24      2025-02-24   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>483     1        1               9      10 2025-02-25      2025-02-25   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  <span style="text-decoration: underline;">13</span>027     2        1              <span style="color: #BB0000;">NA</span>      10 2025-05-27      2025-05-27   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 40 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 58 more variables: econ1mod &lt;dbl&gt;, econ1bmod &lt;dbl&gt;, comtype2 &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   unity &lt;dbl&gt;, crimesafe &lt;dbl&gt;, govprotct &lt;dbl&gt;, moregunimpact &lt;dbl&gt;,</span></span>
