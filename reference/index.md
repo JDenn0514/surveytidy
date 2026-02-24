@@ -46,6 +46,7 @@ metadata to match the new name.
 - [`relocate.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/relocate.survey_base.md)
   : Change column order in a survey design object
 - [`rename.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.md)
+  [`rename_with.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rename.survey_base.md)
   : Rename columns of a survey design object
 - [`mutate.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/mutate.survey_base.md)
   : Create, modify, and delete columns of a survey design object

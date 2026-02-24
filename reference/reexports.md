@@ -15,6 +15,7 @@ to see their documentation.
   [`pull`](https://dplyr.tidyverse.org/reference/pull.html),
   [`relocate`](https://dplyr.tidyverse.org/reference/relocate.html),
   [`rename`](https://dplyr.tidyverse.org/reference/rename.html),
+  [`rename_with`](https://dplyr.tidyverse.org/reference/rename.html),
   [`select`](https://dplyr.tidyverse.org/reference/select.html),
   [`slice`](https://dplyr.tidyverse.org/reference/slice.html),
   [`slice_head`](https://dplyr.tidyverse.org/reference/slice.html),
