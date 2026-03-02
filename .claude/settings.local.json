@@ -53,7 +53,10 @@
       "Bash(gh repo view:*)",
       "Bash(gh repo edit:*)",
       "Bash(gh pr:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(git:*)",
+      "Bash(air format:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

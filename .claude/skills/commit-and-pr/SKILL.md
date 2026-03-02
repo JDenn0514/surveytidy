@@ -166,7 +166,7 @@ skip to Step 8 (Monitor CI).
 
 ## Step 6: Draft and Approve PR
 
-PR template: see `github-strategy.md §6`.
+PR template: see `refs/feature-pr-template.md`.
 
 Draft a PR title (Conventional Commit format) and body following that template.
 **Show the draft to the user before creating.** Ask for approval. Revise if

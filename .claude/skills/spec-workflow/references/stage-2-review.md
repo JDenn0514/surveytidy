@@ -126,27 +126,55 @@ Options:
 
 ---
 
+## If a Review File Already Exists
+
+Before writing any output, check for `plans/spec-review-phase-{X}.md` (where
+`{X}` is the phase number from the spec filename).
+
+**If it exists:**
+1. Read the full existing file
+2. Complete your fresh review of the current spec
+3. In the new pass section, list every previously flagged issue with a status:
+   - ✅ Resolved — the spec was updated to address it
+   - ⚠️ Still open — the spec was not changed
+4. **Append** the new pass section to the bottom of the existing file — never
+   overwrite or delete prior content
+
+**If it does not exist:** create the file with Pass 1.
+
+---
+
 ## Output Structure
 
 Organize all issues by spec section. If a section has no issues, say
 "No issues found."
 
 ```markdown
-## Spec Review: [Document name or Phase]
+## Spec Review: Phase [X] — Pass [N] ([YYYY-MM-DD])
 
-### Section: [First major section name]
+### Prior Issues (Pass [N-1])
+_Omit this section on Pass 1._
 
-**Issue 1: [title]**
+| # | Title | Status |
+|---|---|---|
+| 1 | [title] | ✅ Resolved |
+| 2 | [title] | ⚠️ Still open |
+
+### New Issues
+
+#### Section: [First major section name]
+
+**Issue [N]: [title]**
 Severity: BLOCKING
 ...
 
-### Section: [Next section name]
+#### Section: [Next section name]
 
-No issues found.
+No new issues found.
 
 ---
 
-## Summary
+## Summary (Pass [N])
 
 | Severity | Count |
 |---|---|
@@ -181,10 +209,9 @@ honest, not performatively negative.
 ## After Completing the Review
 
 1. Ask for the phase number if not obvious from the spec filename.
-2. Save the full review output to `plans/spec-review-phase-{X}.md`.
+2. Append the new pass section to `plans/spec-review-phase-{X}.md` (create on Pass 1).
 3. End the session with:
 
-   > "{N} issues found ({X} blocking, {Y} required, {Z} suggestions).
-   > Start a new session with `/spec-workflow stage 3` to resolve these
-   > interactively. The issue list has been saved to
-   > `plans/spec-review-phase-{X}.md`."
+   > "Pass [N] complete: {N} new issues ({X} blocking, {Y} required, {Z}
+   > suggestions). Start a new session with `/spec-workflow stage 3` to resolve
+   > these interactively. Review appended to `plans/spec-review-phase-{X}.md`."
