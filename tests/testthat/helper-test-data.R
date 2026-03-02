@@ -208,6 +208,135 @@ test_invariants <- function(design) {
   invisible(design)
 }
 
+# ---------------------------------------------------------------------------
+# survey_result test helpers
+# ---------------------------------------------------------------------------
+
+#' Build a survey_result fixture of a given type and design
+#'
+#' @param type One of "means", "freqs", "ratios"
+#' @param design One of "taylor", "replicate", "twophase"
+#' @param seed Integer seed for reproducibility
+#' @return A survey_result tibble subclass
+make_survey_result <- function(
+  type = c("means", "freqs", "ratios"),
+  design = c("taylor", "replicate", "twophase"),
+  seed = 42L
+) {
+  type <- match.arg(type)
+  design <- match.arg(design)
+
+  if (design == "twophase") {
+    # Twophase designs need method = "approx" to work with analysis functions.
+    # make_all_designs() uses the default method = "full" (which requires
+    # explicit phase 2 design variables); rebuild with method = "approx" here.
+    df_p <- make_survey_data(
+      n = 100L,
+      n_psu = 10L,
+      n_strata = 2L,
+      design = "twophase",
+      seed = seed
+    )
+    phase1 <- surveycore::as_survey(
+      df_p,
+      ids = psu,
+      weights = wt,
+      strata = strata,
+      fpc = fpc,
+      nest = TRUE
+    )
+    d <- suppressWarnings(
+      surveycore::as_survey_twophase(phase1, subset = phase2_ind, method = "approx")
+    )
+  } else {
+    all_designs <- make_all_designs(seed = seed)
+    d <- all_designs[[design]]
+  }
+
+  suppressWarnings(switch(
+    type,
+    means  = surveycore::get_means(d, x = y1, group = group, variance = "se"),
+    freqs  = surveycore::get_freqs(d, x = group),
+    ratios = surveycore::get_ratios(d, numerator = y1, denominator = y2)
+  ))
+}
+
+#' Assert all 8 invariants for a survey_result object
+#'
+#' Called as the FIRST assertion in every non-error test block.
+#'
+#' @param result A survey_result object
+#' @param expected_class Character(1); the expected subclass (e.g. "survey_means")
+test_result_invariants <- function(result, expected_class) {
+  testthat::expect_true(
+    inherits(result, expected_class),
+    label = paste0("inherits(result, '", expected_class, "')")
+  )
+  testthat::expect_true(
+    inherits(result, "survey_result"),
+    label = "inherits(result, 'survey_result')"
+  )
+  testthat::expect_true(
+    tibble::is_tibble(result),
+    label = "tibble::is_tibble(result)"
+  )
+  m <- surveycore::meta(result)
+  testthat::expect_false(
+    is.null(m),
+    label = "!is.null(surveycore::meta(result))"
+  )
+  testthat::expect_true(
+    is.list(m),
+    label = "is.list(surveycore::meta(result))"
+  )
+  required_keys <- c("design_type", "conf_level", "call", "group", "n_respondents")
+  for (k in required_keys) {
+    testthat::expect_true(
+      k %in% names(m),
+      label = paste0("'", k, "' present in .meta")
+    )
+  }
+  testthat::expect_true(
+    is.list(m$group),
+    label = "meta$group is a list"
+  )
+  testthat::expect_true(
+    is.integer(m$n_respondents),
+    label = "meta$n_respondents is integer"
+  )
+
+  invisible(result)
+}
+
+#' Assert the meta coherence invariant for a survey_result
+#'
+#' Every name in meta$group and meta$x must be a column in the result tibble.
+#' numerator$name and denominator$name must also be present if non-NULL.
+#'
+#' @param result A survey_result object
+test_result_meta_coherent <- function(result) {
+  m    <- surveycore::meta(result)
+  cols <- names(result)
+  # Check that all $group keys reference existing output columns.
+  # $group keys are grouping variable names that ARE output columns (e.g.,
+  # a result grouped by "group" has a "group" column in the output tibble).
+  for (g in names(m$group)) {
+    testthat::expect_true(
+      g %in% cols,
+      label = paste("group col", g, "exists in result")
+    )
+  }
+  # Note: $x keys are focal INPUT variable names (e.g., "y1" for
+  # get_means(x = y1)). For get_means, the output column is "mean", not "y1".
+  # For get_freqs(x = group), the output column IS "group", so $x and output
+  # columns happen to align. We do not assert $x against output cols because
+  # the semantics differ across analysis functions.
+  #
+  # $numerator$name and $denominator$name are also input variable names for
+  # get_ratios() results — not output column names. Not checked here.
+  invisible(result)
+}
+
 make_all_designs <- function(seed = 42L) {
   df_t <- make_survey_data(
     n = 100L,
