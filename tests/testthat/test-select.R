@@ -167,6 +167,35 @@ test_that("select() works for all three design types", {
   }
 })
 
+test_that("select() preserves weight column on survey_calibrated without explicit selection", {
+  # Regression: .get_design_vars_flat() has no survey_calibrated branch and
+  # returned character(0L), so the weight column was not protected and was
+  # physically dropped, causing S7 validator to error.
+  df <- data.frame(y1 = 1:5, y2 = letters[1:5], cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9))
+  d <- surveycore::as_survey_calibrated(df, weights = cal_wt)
+
+  # Should not error even though cal_wt is not explicitly selected
+  result <- select(d, y1)
+
+  expect_true("cal_wt" %in% names(result@data))
+  expect_false("y2" %in% names(result@data))
+  expect_identical(result@variables$visible_vars, "y1")
+  test_invariants(result)
+})
+
+test_that("dplyr_reconstruct() catches removed weight column on survey_calibrated", {
+  # Regression: same gap — dplyr_reconstruct() used .get_design_vars_flat()
+  # directly, which returned character(0L) for calibrated designs.
+  df <- data.frame(y1 = 1:5, cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9))
+  d <- surveycore::as_survey_calibrated(df, weights = cal_wt)
+
+  bad <- d@data[, "y1", drop = FALSE] # cal_wt removed
+  expect_error(
+    dplyr_reconstruct(bad, d),
+    class = "surveycore_error_design_var_removed"
+  )
+})
+
 # ── dplyr_reconstruct() ───────────────────────────────────────────────────────
 
 test_that("dplyr_reconstruct() errors when a design variable is removed", {
