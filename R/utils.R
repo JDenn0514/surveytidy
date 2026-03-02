@@ -31,16 +31,33 @@
 
 # ── Column protection ─────────────────────────────────────────────────────────
 
+# Returns the design-variable column names for any survey type.
+#
+# surveycore::.get_design_vars_flat() handles survey_taylor, survey_replicate,
+# and survey_twophase but has no branch for survey_calibrated (returns
+# character(0L) for that class). survey_calibrated carries only a weights
+# column — no ids, strata, fpc, or repweights.
+#
+# This helper is the single authoritative source used by .protected_cols()
+# and dplyr_reconstruct.survey_base().
+.survey_design_var_names <- function(design) {
+  if (S7::S7_inherits(design, surveycore::survey_calibrated)) {
+    unique(c(design@variables$weights))
+  } else {
+    surveycore::.get_design_vars_flat(design)
+  }
+}
+
 # Returns all column names that must never be removed from @data.
 # Used by select(), rename(), mutate(), arrange(), and group_by() to enforce
 # design variable protection.
 #
 # Protected columns are:
-#   - All design variable columns (.get_design_vars_flat() from surveycore)
+#   - All design variable columns (.survey_design_var_names())
 #   - The domain indicator column (SURVEYCORE_DOMAIN_COL), if present
 .protected_cols <- function(design) {
   c(
-    surveycore::.get_design_vars_flat(design),
+    .survey_design_var_names(design),
     surveycore::SURVEYCORE_DOMAIN_COL
   )
 }
@@ -57,7 +74,7 @@
 # Registered in .onLoad() — see R/00-zzz.R.
 #' @noRd
 dplyr_reconstruct.survey_base <- function(data, template) {
-  design_vars <- surveycore::.get_design_vars_flat(template)
+  design_vars <- .survey_design_var_names(template)
   missing_vars <- setdiff(design_vars, names(data))
   if (length(missing_vars) > 0L) {
     cli::cli_abort(
