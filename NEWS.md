@@ -1,3 +1,18 @@
+# surveytidy (development version)
+
+## Verb support for `survey_result` objects
+
+* `filter()`, `arrange()`, `mutate()`, `slice()`, `slice_head()`,
+  `slice_tail()`, `slice_min()`, `slice_max()`, `slice_sample()`, and
+  `drop_na()` are now registered for `survey_result` objects (the S3 base class
+  for all surveycore analysis outputs: `survey_means`, `survey_freqs`,
+  `survey_totals`, `survey_quantiles`, `survey_corr`, `survey_ratios`).
+  Previously, applying dplyr verbs to these objects could silently strip the
+  class and `.meta` attribute. Now both are preserved, and `mutate()` keeps
+  `meta$group` coherent when `.keep` drops grouping columns.
+
+---
+
 # surveytidy 0.1.0
 
 First release. Implements a complete set of dplyr and tidyr verbs for survey

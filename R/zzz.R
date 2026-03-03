@@ -207,4 +207,47 @@
     get("drop_na.survey_base", envir = ns),
     envir = asNamespace("tidyr")
   )
+
+  # ── survey_result verbs (PR 1 — passthrough) ──────────────────────────────
+
+  registerS3method(
+    "filter", "survey_result",
+    get("filter.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "arrange", "survey_result",
+    get("arrange.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "mutate", "survey_result",
+    get("mutate.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice", "survey_result",
+    get("slice.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice_head", "survey_result",
+    get("slice_head.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice_tail", "survey_result",
+    get("slice_tail.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice_min", "survey_result",
+    get("slice_min.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice_max", "survey_result",
+    get("slice_max.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "slice_sample", "survey_result",
+    get("slice_sample.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "drop_na", "survey_result",
+    get("drop_na.survey_result", envir = ns), envir = asNamespace("tidyr")
+  )
 }
