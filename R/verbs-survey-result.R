@@ -183,3 +183,103 @@ drop_na.survey_result <- function(data, ...) {
   old_meta <- attr(data, ".meta")
   NextMethod() |> .restore_survey_result(old_class, old_meta)
 }
+
+# ── PR 2: Meta-updating verbs ──────────────────────────────────────────────
+#
+# These verbs actively update .meta to reflect column-level changes:
+#   select.survey_result  — subset columns + prune stale $group entries
+#   rename.survey_result  — rename columns + update $group/$x/$numerator/$denominator keys
+#   rename_with.survey_result — apply .fn to column names + propagate to meta keys
+
+# select: subset columns and prune meta$group for dropped columns.
+# Inline renames (select(r, grp = group)) are handled by applying the rename
+# map before subsetting so that .apply_result_rename_map can update meta keys.
+#' @noRd
+select.survey_result <- function(.data, ...) {
+  tbl <- tibble::as_tibble(.data)
+  old_class <- class(.data)
+
+  # Step 1: Resolve selection → named integer: output_name → column position
+  selected_cols <- tidyselect::eval_select(rlang::expr(c(...)), tbl)
+
+  # Step 2: Extract original and output column names
+  original_names <- names(tbl)[unname(selected_cols)]
+  output_names <- names(selected_cols)
+
+  # Step 3: Detect and apply any inline renames (e.g., select(r, grp = group))
+  rename_mask <- original_names != output_names
+  if (any(rename_mask)) {
+    rename_map <- stats::setNames(
+      output_names[rename_mask],
+      original_names[rename_mask]
+    )
+    .data <- .apply_result_rename_map(.data, rename_map)
+  }
+
+  # Step 4: Subset to selected columns
+  result <- .data[, output_names, drop = FALSE]
+
+  # Step 5: Prune meta for dropped columns ($group keys only — $x keys are
+  # input variable names that don't correspond to output columns for most
+  # result types, so pruning by column presence would be incorrect)
+  new_meta <- .prune_result_meta(attr(.data, ".meta"), output_names)
+
+  # Step 6: Assign and restore
+  attr(result, ".meta") <- new_meta
+  class(result) <- old_class
+  result
+}
+
+# rename: rename columns and propagate to all meta key references.
+#' @noRd
+rename.survey_result <- function(.data, ...) {
+  tbl <- tibble::as_tibble(.data)
+
+  # Build rename map: eval_rename returns named integer (new_name → position)
+  # Convert to c(old_name = "new_name") format for .apply_result_rename_map
+  map <- tidyselect::eval_rename(rlang::expr(c(...)), tbl)
+  rename_map <- stats::setNames(names(map), names(tbl)[map])
+
+  .apply_result_rename_map(.data, rename_map)
+}
+
+# rename_with: apply .fn to selected column names and propagate to meta keys.
+#' @noRd
+rename_with.survey_result <- function(.data, .fn, .cols = dplyr::everything(), ...) {
+  tbl <- tibble::as_tibble(.data)
+
+  # Step 1: Resolve .cols
+  resolved_cols <- tidyselect::eval_select(rlang::enquo(.cols), tbl)
+  old_names <- names(resolved_cols)
+
+  # Zero-match .cols — no-op
+  if (length(old_names) == 0L) return(.data)
+
+  # Step 2: Apply .fn
+  new_names <- .fn(old_names, ...)
+
+  # Step 3: Validate all four bad-output conditions
+  # Build the full column list with renames applied (for duplicate check)
+  full_new_names <- names(tbl)
+  full_new_names[match(old_names, full_new_names)] <- new_names
+
+  if (
+    !is.character(new_names) ||
+      length(new_names) != length(old_names) ||
+      anyNA(new_names) ||
+      anyDuplicated(full_new_names) > 0L
+  ) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .fn} must return a character vector the same length as
+               its input with no {.code NA} or duplicate names.",
+        "i" = "Got class {.cls {class(new_names)}} of length {length(new_names)}."
+      ),
+      class = "surveytidy_error_rename_fn_bad_output"
+    )
+  }
+
+  # Step 4: Build rename map and delegate
+  rename_map <- stats::setNames(new_names, old_names)
+  .apply_result_rename_map(.data, rename_map)
+}

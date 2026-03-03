@@ -17,7 +17,7 @@ No new error/warning classes are introduced.
 ## PR Map
 
 - [x] PR 1: `feature/survey-result-passthrough` — passthrough verbs + full test infrastructure
-- [ ] PR 2: `feature/survey-result-meta` — meta-updating verbs (`select`, `rename`, `rename_with`)
+- [x] PR 2: `feature/survey-result-meta` — meta-updating verbs (`select`, `rename`, `rename_with`)
 
 ---
 

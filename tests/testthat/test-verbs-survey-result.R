@@ -312,3 +312,320 @@ test_that("drop_na.survey_result with no NAs returns all rows unchanged", {
   expect_equal(nrow(result), nrow(r_no_na))
   expect_identical(surveycore::meta(result), surveycore::meta(r_no_na))
 })
+
+# ── PR 2: Meta-updating verbs ──────────────────────────────────────────────
+
+# Section 5: rename() — group key updated.
+
+test_that("rename.survey_result updates meta$group key when group column renamed", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::rename(r, grp = group)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_true("grp" %in% names(surveycore::meta(result)$group))
+  expect_false("group" %in% names(surveycore::meta(result)$group))
+  expect_true("grp" %in% names(result))
+})
+
+# Section 6: rename() — x key updated.
+# Uses result_freqs where the $x key "group" IS an output column (unlike
+# result_means where $x = "y1" which is an input-only variable).
+
+test_that("rename.survey_result updates meta$x key when focal column renamed (freqs)", {
+  r <- make_survey_result(type = "freqs")
+  # freqs: $x = list(group = ...) and "group" IS an output column
+  result <- dplyr::rename(r, outcome = group)
+
+  test_result_invariants(result, "survey_freqs")
+  test_result_meta_coherent(result)
+  expect_true("outcome" %in% names(surveycore::meta(result)$x))
+  expect_false("group" %in% names(surveycore::meta(result)$x))
+})
+
+# Section 7: rename() — non-meta column rename leaves meta unchanged.
+
+test_that("rename.survey_result leaves meta unchanged when renaming non-meta column", {
+  r <- make_survey_result(type = "means")
+  orig_meta <- surveycore::meta(r)
+
+  result <- dplyr::rename(r, std_error = se)
+
+  test_result_invariants(result, "survey_means")
+  expect_identical(surveycore::meta(result), orig_meta)
+  expect_true("std_error" %in% names(result))
+  expect_false("se" %in% names(result))
+})
+
+# Section 8: rename() — ratios numerator$name updated.
+# Note: $numerator$name = "y1" is an INPUT variable name, not an output
+# column. The output columns are ratio, ci_low, ci_high, n. Renaming an
+# output column does not affect $numerator$name. We verify $numerator$name
+# is preserved when a non-meta output column is renamed.
+
+test_that("rename.survey_result preserves numerator$name when renaming non-meta column", {
+  r <- make_survey_result(type = "ratios")
+  orig_num_name <- surveycore::meta(r)$numerator$name
+
+  result <- dplyr::rename(r, estimate = ratio)
+
+  test_result_invariants(result, "survey_ratios")
+  expect_identical(surveycore::meta(result)$numerator$name, orig_num_name)
+  expect_true("estimate" %in% names(result))
+})
+
+# Section 9: rename() — ratios denominator$name preserved when renaming non-meta column.
+
+test_that("rename.survey_result preserves denominator$name when renaming non-meta column", {
+  r <- make_survey_result(type = "ratios")
+  orig_denom_name <- surveycore::meta(r)$denominator$name
+
+  result <- dplyr::rename(r, ci_lower = ci_low)
+
+  test_result_invariants(result, "survey_ratios")
+  expect_identical(surveycore::meta(result)$denominator$name, orig_denom_name)
+  expect_true("ci_lower" %in% names(result))
+})
+
+# Section 10: rename_with() — applies .fn to all columns and updates meta.
+
+test_that("rename_with.survey_result applies .fn to all columns and updates meta$group", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::rename_with(r, toupper)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  # All column names are upper-cased
+  expect_true(all(names(result) == toupper(names(r))))
+  # meta$group key "group" → "GROUP"
+  expect_true("GROUP" %in% names(surveycore::meta(result)$group))
+  expect_false("group" %in% names(surveycore::meta(result)$group))
+})
+
+# Section 11: rename_with() — .cols limits scope of rename.
+
+test_that("rename_with.survey_result with .cols only renames selected columns", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::rename_with(r, toupper, .cols = c(mean, se))
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  # Only mean and se are upper-cased; group and n unchanged
+  expect_true("MEAN" %in% names(result))
+  expect_true("SE" %in% names(result))
+  expect_true("group" %in% names(result))
+  expect_true("n" %in% names(result))
+  # meta$group key "group" unchanged (group not in .cols)
+  expect_true("group" %in% names(surveycore::meta(result)$group))
+  # meta$x key "y1" unchanged (y1 is input var name, not in .cols)
+  expect_identical(
+    names(surveycore::meta(result)$x),
+    names(surveycore::meta(r)$x)
+  )
+})
+
+# Section 12: rename_with() — invalid .fn output triggers error (parameterized, dual pattern).
+
+test_that("rename_with.survey_result errors for all invalid .fn outputs", {
+  result_means <- make_survey_result(type = "means")
+  bad_fns <- list(
+    "non-character output" = function(x) seq_along(x),
+    "wrong-length output"  = function(x) x[1],
+    "NA in output"         = function(x) {
+      x[1] <- NA_character_
+      x
+    },
+    "duplicate names"      = function(x) rep(x[1], length(x))
+  )
+  for (label in names(bad_fns)) {
+    fn <- bad_fns[[label]]
+    expect_error(
+      dplyr::rename_with(result_means, fn),
+      class = "surveytidy_error_rename_fn_bad_output"
+    )
+    expect_snapshot(error = TRUE, dplyr::rename_with(result_means, fn))
+  }
+})
+
+# Section 13: select() — group entry removed when group col dropped.
+
+test_that("select.survey_result removes meta$group entry when group column dropped", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::select(r, mean, se)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_equal(length(surveycore::meta(result)$group), 0L)
+  expect_false("group" %in% names(result))
+})
+
+# Section 14: select() — group col kept; estimate cols dropped; meta$group preserved.
+# Note: $x for means = "y1" (input variable name, not an output column).
+# $x is preserved regardless of which output columns are selected.
+
+test_that("select.survey_result keeps meta$group when group column retained", {
+  r <- make_survey_result(type = "means")
+  orig_group_meta <- surveycore::meta(r)$group
+
+  result <- dplyr::select(r, group)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  # group column is kept; meta$group entry is preserved
+  expect_identical(surveycore::meta(result)$group, orig_group_meta)
+  expect_true("group" %in% names(result))
+})
+
+# Section 15: select() — kept group column preserves meta$group sub-key.
+
+test_that("select.survey_result preserves meta$group sub-key when group retained", {
+  r <- make_survey_result(type = "means")
+
+  result <- dplyr::select(r, group, mean, se)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  # group column is kept → meta$group$group is identical to original
+  expect_identical(
+    surveycore::meta(result)$group$group,
+    surveycore::meta(r)$group$group
+  )
+  expect_false("n" %in% names(result))
+})
+
+# Section 16: select() — non-group, non-x column removal does not affect group/x meta.
+
+test_that("select.survey_result(-se) leaves meta$group and meta$x unchanged", {
+  r <- make_survey_result(type = "means")
+
+  result <- dplyr::select(r, -se)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_identical(surveycore::meta(result)$group, surveycore::meta(r)$group)
+  expect_identical(surveycore::meta(result)$x, surveycore::meta(r)$x)
+  expect_false("se" %in% names(result))
+})
+
+# Section 16b: select() with inline rename syntax — meta preserved under new name.
+
+test_that("select.survey_result with inline rename updates meta$group key", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::select(r, grp = group)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_true("grp" %in% names(surveycore::meta(result)$group))
+  expect_false("group" %in% names(surveycore::meta(result)$group))
+  expect_true("grp" %in% names(result))
+})
+
+# Section 17: rename() on result_freqs — updates $x key; empty $group path unchanged.
+
+test_that("rename.survey_result on freqs updates $x key; empty $group is unchanged", {
+  r <- make_survey_result(type = "freqs")
+  # freqs: $group = list() (empty), $x = list(group = ...)
+  result <- dplyr::rename(r, grp = group)
+
+  test_result_invariants(result, "survey_freqs")
+  test_result_meta_coherent(result)
+  expect_true("grp" %in% names(surveycore::meta(result)$x))
+  expect_false("group" %in% names(surveycore::meta(result)$x))
+  expect_equal(length(surveycore::meta(result)$group), 0L)
+})
+
+# Section 18: select() on result_freqs — removes focal col; meta$group unchanged (empty).
+# Note: meta$x for freqs = "group" which IS an output column.
+# After dropping "group", meta$group is still empty (no change to empty list).
+
+test_that("select.survey_result on freqs removes group col; meta$group stays empty", {
+  r <- make_survey_result(type = "freqs")
+  # freqs columns: group, pct, n; $group = list(), $x = list(group = ...)
+  result <- dplyr::select(r, pct, n)
+
+  test_result_invariants(result, "survey_freqs")
+  test_result_meta_coherent(result)
+  # group column dropped → $group stays empty (it was already empty for freqs)
+  expect_equal(length(surveycore::meta(result)$group), 0L)
+  expect_false("group" %in% names(result))
+})
+
+# Section 19: chained meta-updating verbs — rename then select.
+
+test_that("rename then select on survey_means chains meta updates correctly", {
+  r <- make_survey_result(type = "means")
+  result <- r |>
+    dplyr::rename(grp = group) |>
+    dplyr::select(grp, mean)
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_true("grp" %in% names(surveycore::meta(result)$group))
+  expect_false("group" %in% names(surveycore::meta(result)$group))
+  expect_true("grp" %in% names(result))
+  expect_true("mean" %in% names(result))
+})
+
+# Section 20: rename_with() — .cols resolving to zero columns is a no-op.
+
+test_that("rename_with.survey_result with zero-match .cols is a no-op", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::rename_with(r, toupper, .cols = dplyr::starts_with("zzz"))
+
+  test_result_invariants(result, "survey_means")
+  expect_identical(names(result), names(r))
+  expect_identical(surveycore::meta(result), surveycore::meta(r))
+})
+
+# Section 21: rename() — identity rename is a no-op.
+
+test_that("rename.survey_result identity rename leaves result unchanged", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::rename(r, group = group)
+
+  test_result_invariants(result, "survey_means")
+  expect_identical(names(result), names(r))
+  expect_identical(surveycore::meta(result), surveycore::meta(r))
+})
+
+# Section 22: rename_with() — ... forwarded to .fn.
+
+test_that("rename_with.survey_result forwards ... to .fn", {
+  r <- make_survey_result(type = "means")
+  # gsub renames: "mean" -> "avg"; other columns unchanged
+  result <- dplyr::rename_with(r, gsub, pattern = "mean", replacement = "avg")
+
+  test_result_invariants(result, "survey_means")
+  test_result_meta_coherent(result)
+  expect_true("avg" %in% names(result))
+  expect_false("mean" %in% names(result))
+  # meta$group key "group" unchanged (group does not contain "mean")
+  expect_true("group" %in% names(surveycore::meta(result)$group))
+  # meta$x key "y1" unchanged (y1 is input variable, "mean" not in $x keys)
+  expect_identical(
+    names(surveycore::meta(result)$x),
+    names(surveycore::meta(r)$x)
+  )
+})
+
+# Section 27: zero-column select() — degenerate result; invariants pass.
+
+test_that("select.survey_result with zero matching columns returns 0-column result", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::select(r, dplyr::starts_with("zzz"))
+
+  test_result_invariants(result, "survey_means")
+  expect_equal(ncol(result), 0L)
+  expect_equal(length(surveycore::meta(result)$group), 0L)
+})
+
+# Section 28: select(everything()) — all columns kept; meta identical to input.
+
+test_that("select.survey_result(everything()) keeps all columns and meta unchanged", {
+  r <- make_survey_result(type = "means")
+  result <- dplyr::select(r, dplyr::everything())
+
+  test_result_invariants(result, "survey_means")
+  expect_identical(names(result), names(r))
+  expect_identical(surveycore::meta(result), surveycore::meta(r))
+})
