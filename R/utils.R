@@ -116,3 +116,77 @@ dplyr_reconstruct.survey_base <- function(data, template) {
     class = "surveycore_warning_physical_subset"
   )
 }
+
+
+# ── survey_result helpers ──────────────────────────────────────────────────────
+
+# Restore class and .meta after NextMethod() strips them.
+# Called by all survey_result passthrough verb methods.
+.restore_survey_result <- function(result, old_class, old_meta) {
+  attr(result, ".meta") <- old_meta
+  class(result) <- old_class
+  result
+}
+
+# Remove meta entries for columns that are no longer present in the result.
+# Called by mutate.survey_result (.keep variants) and select.survey_result.
+#
+# meta : the .meta list
+# kept_cols : character vector of column names remaining after the operation
+#
+# IMPORTANT: Only $group entries are pruned based on output column presence.
+# $group keys are grouping variable names that ARE output columns
+# (e.g., "group" for a result grouped by the "group" variable).
+#
+# $x keys are input focal variable names (e.g., "y1" for get_means()),
+# NOT output column names (the estimate column is named "mean", not "y1").
+# Pruning $x by output column presence would always null it out for
+# get_means() results, which is wrong. $x is left unchanged.
+#
+# $numerator/$denominator are input variable names, same situation as $x.
+# They are never pruned here.
+.prune_result_meta <- function(meta, kept_cols) {
+  # Prune group entries not in kept_cols (group keys ARE output column names)
+  meta$group <- meta$group[names(meta$group) %in% kept_cols]
+  meta
+}
+
+# Apply a rename map to both tibble column names and .meta key references.
+#
+# rename_map : named character vector, c(old_name = "new_name")
+.apply_result_rename_map <- function(result, rename_map) {
+  if (length(rename_map) == 0L) return(result)
+
+  old_names <- names(rename_map)
+  new_names <- unname(rename_map)
+
+  # 1. Rename tibble columns
+  col_pos <- match(old_names, names(result))
+  names(result)[col_pos[!is.na(col_pos)]] <- new_names[!is.na(col_pos)]
+
+  # 2. Update .meta
+  m <- attr(result, ".meta")
+
+  # group keys
+  for (i in seq_along(old_names)) {
+    idx <- match(old_names[i], names(m$group))
+    if (!is.na(idx)) names(m$group)[idx] <- new_names[i]
+  }
+
+  # x keys
+  if (!is.null(m$x)) {
+    for (i in seq_along(old_names)) {
+      idx <- match(old_names[i], names(m$x))
+      if (!is.na(idx)) names(m$x)[idx] <- new_names[i]
+    }
+  }
+
+  # numerator / denominator $name (get_ratios results only)
+  if (!is.null(m$numerator$name) && m$numerator$name %in% old_names)
+    m$numerator$name <- new_names[match(m$numerator$name, old_names)]
+  if (!is.null(m$denominator$name) && m$denominator$name %in% old_names)
+    m$denominator$name <- new_names[match(m$denominator$name, old_names)]
+
+  attr(result, ".meta") <- m
+  result
+}

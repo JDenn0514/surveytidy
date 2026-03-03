@@ -72,6 +72,11 @@
 #' d |> rowwise() |> ungroup()
 #'
 #' @family grouping
+#' @name rowwise
+NULL
+
+#' @rdname rowwise
+#' @method rowwise survey_base
 rowwise.survey_base <- function(data, ...) {
   if (...length() == 0L) {
     id_cols <- character(0)

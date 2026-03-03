@@ -15,6 +15,7 @@
 #
 # Functions defined here:
 #   select.survey_base()   — column selection with design-var preservation
+#   select.survey_result() — column selection with .meta pruning
 #   relocate.survey_base() — column reordering (via visible_vars or @data)
 #   pull.survey_base()     — extract a column as a vector
 #   glimpse.survey_base()  — print a concise column summary
@@ -46,7 +47,8 @@
 #' Variable labels, value labels, and other metadata for dropped columns
 #' are removed. Metadata for retained columns is preserved.
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`tidy-select`][tidyselect::language]> One or more unquoted
 #'   column names or tidy-select expressions.
 #'
@@ -78,6 +80,11 @@
 #' @family selecting
 #' @seealso [relocate()] to reorder columns, [rename()] to rename them,
 #'   [mutate()] to add new ones
+#' @name select
+NULL
+
+#' @rdname select
+#' @method select survey_base
 select.survey_base <- function(.data, ...) {
   # Step 1: resolve the user's column selection
   user_pos <- tidyselect::eval_select(rlang::expr(c(...)), .data@data)
@@ -124,6 +131,43 @@ select.survey_base <- function(.data, ...) {
   }
 
   .data
+}
+
+#' @rdname select
+#' @method select survey_result
+select.survey_result <- function(.data, ...) {
+  tbl <- tibble::as_tibble(.data)
+  old_class <- class(.data)
+
+  # Step 1: Resolve selection → named integer: output_name → column position
+  selected_cols <- tidyselect::eval_select(rlang::expr(c(...)), tbl)
+
+  # Step 2: Extract original and output column names
+  original_names <- names(tbl)[unname(selected_cols)]
+  output_names <- names(selected_cols)
+
+  # Step 3: Detect and apply any inline renames (e.g., select(r, grp = group))
+  rename_mask <- original_names != output_names
+  if (any(rename_mask)) {
+    rename_map <- stats::setNames(
+      output_names[rename_mask],
+      original_names[rename_mask]
+    )
+    .data <- .apply_result_rename_map(.data, rename_map)
+  }
+
+  # Step 4: Subset to selected columns
+  result <- .data[, output_names, drop = FALSE]
+
+  # Step 5: Prune meta for dropped columns ($group keys only — $x keys are
+  # input variable names that don't correspond to output columns for most
+  # result types, so pruning by column presence would be incorrect)
+  new_meta <- .prune_result_meta(attr(.data, ".meta"), output_names)
+
+  # Step 6: Assign and restore
+  attr(result, ".meta") <- new_meta
+  class(result) <- old_class
+  result
 }
 
 
@@ -180,6 +224,11 @@ select.survey_base <- function(.data, ...) {
 #'
 #' @family selecting
 #' @seealso [select()] to keep or drop columns, [rename()] to rename them
+#' @name relocate
+NULL
+
+#' @rdname relocate
+#' @method relocate survey_base
 relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
   # Capture .before and .after as quosures to avoid evaluating NSE expressions
   # (e.g. .before = y1) in the wrong environment. rlang::inject() then inlines
@@ -224,6 +273,7 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 
 # pull() is a terminal operation — the result is a plain vector, not a survey
 # object. No invariant checks, @groups, or @metadata considerations apply.
+
 #' Extract a column from a survey design object
 #'
 #' @description
@@ -255,6 +305,11 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 #'
 #' @family selecting
 #' @seealso [select()] to keep columns in the survey object
+#' @name pull
+NULL
+
+#' @rdname pull
+#' @method pull survey_base
 pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
   dplyr::pull(.data@data, var = {{ var }}, name = {{ name }}, ...)
 }
@@ -291,6 +346,11 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 #'
 #' @family selecting
 #' @seealso [select()] to control which columns are visible
+#' @name glimpse
+NULL
+
+#' @rdname glimpse
+#' @method glimpse survey_base
 glimpse.survey_base <- function(x, width = NULL, ...) {
   if (!is.null(x@variables$visible_vars)) {
     dplyr::glimpse(x@data[, x@variables$visible_vars, drop = FALSE], width, ...)

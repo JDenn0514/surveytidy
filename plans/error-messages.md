@@ -19,7 +19,7 @@ Naming convention:
 | `surveytidy_error_filter_by_unsupported` | `R/filter.R` | `.by` argument passed to `filter()` — not supported; use `group_by()` instead |
 | `surveytidy_error_subset_empty_result` | `R/filter.R`, `R/slice.R` | `subset()` or `slice_*()` produces a 0-row result |
 | `surveycore_error_design_var_removed` | `R/utils.R` | `dplyr_reconstruct()` detects that a required design variable was removed from `@data` |
-| `surveytidy_error_rename_fn_bad_output` | `R/rename.R` | `.fn` in `rename_with()` returns a vector of the wrong length, duplicate names, or non-character output |
+| `surveytidy_error_rename_fn_bad_output` | `R/rename.R`, `R/verbs-survey-result.R` | `.fn` in `rename_with()` returns a vector of the wrong length, duplicate names, or non-character output |
 
 ---
 
