@@ -14,6 +14,10 @@
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/zzz.R for the registration calls.
+#
+# Functions defined here:
+#   mutate.survey_base()   — column computation with design-var preservation
+#   mutate.survey_result() — class/meta preservation for survey_result
 
 # ── mutate() ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +56,8 @@
 #' * Conditional: [dplyr::if_else()], [dplyr::case_when()], [dplyr::case_match()]
 #' * Missing values: [dplyr::na_if()], [dplyr::coalesce()]
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Name-value pairs.
 #'   The name gives the output column name; the value is an expression
 #'   evaluated against the survey data. Use `NULL` to delete a non-design
@@ -96,6 +101,11 @@
 #'
 #' @family modification
 #' @seealso [rename()] to rename columns, [select()] to drop columns
+#' @name mutate
+NULL
+
+#' @rdname mutate
+#' @method mutate survey_base
 mutate.survey_base <- function(
   .data,
   ...,
@@ -224,4 +234,15 @@ mutate.survey_base <- function(
   # Step 7: Assign updated @data and return
   .data@data <- new_data
   .data
+}
+
+#' @rdname mutate
+#' @method mutate survey_result
+mutate.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  result <- NextMethod() |> .restore_survey_result(old_class, old_meta)
+  new_meta <- .prune_result_meta(attr(result, ".meta"), names(result))
+  attr(result, ".meta") <- new_meta
+  result
 }

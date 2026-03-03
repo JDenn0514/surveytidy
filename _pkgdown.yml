@@ -42,11 +42,11 @@ reference:
       `slice_*()`) is also available but issues a warning because removing rows
       can bias variance estimates.
     contents:
-      - filter.survey_base
-      - distinct.survey_base
-      - drop_na.survey_base
-      - arrange.survey_base
-      - slice.survey_base
+      - filter
+      - distinct
+      - drop_na
+      - arrange
+      - slice
       - subset.survey_base
 
   - subtitle: "Columns"
@@ -56,13 +56,12 @@ reference:
       explicitly selected. `rename()` automatically updates the survey design
       specification and variable metadata to match the new name.
     contents:
-      - select.survey_base
-      - relocate.survey_base
-      - rename.survey_base
-      - rename_with.survey_base
-      - mutate.survey_base
-      - pull.survey_base
-      - glimpse.survey_base
+      - select
+      - relocate
+      - rename
+      - mutate
+      - pull
+      - glimpse
 
   - subtitle: "Groups"
     desc: >
@@ -71,8 +70,8 @@ reference:
       computation. Unlike dplyr, the underlying data is not modified — groups
       are stored on the survey object and applied when needed.
     contents:
-      - group_by.survey_base
-      - rowwise.survey_base
+      - group_by
+      - rowwise
 
   - subtitle: "Predicates"
     desc: >

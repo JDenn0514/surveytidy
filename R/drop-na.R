@@ -8,6 +8,10 @@
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/zzz.R for the registration calls.
+#
+# Functions defined here:
+#   drop_na.survey_base()   — domain-aware NA marking
+#   drop_na.survey_result() — class/meta preservation for survey_result
 
 # ── drop_na() ─────────────────────────────────────────────────────────────────
 
@@ -32,7 +36,8 @@
 #' filter(d, !is.na(bpxsy1), ridageyr >= 18)
 #' ```
 #'
-#' @param data A [`survey_base`][surveycore::survey_base] object.
+#' @param data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`tidy-select`][tidyselect::language]> Columns to inspect for
 #'   `NA`. If empty, all columns are checked.
 #'
@@ -59,6 +64,11 @@
 #'
 #' @family row operations
 #' @seealso [filter()] for domain-aware row marking
+#' @name drop_na
+NULL
+
+#' @rdname drop_na
+#' @method drop_na survey_base
 drop_na.survey_base <- function(data, ...) {
   # Resolve which columns to check for NA
   if (...length() == 0L) {
@@ -100,4 +110,12 @@ drop_na.survey_base <- function(data, ...) {
 
   data@data[[domain_col]] <- domain_mask
   data
+}
+
+#' @rdname drop_na
+#' @method drop_na survey_result
+drop_na.survey_result <- function(data, ...) {
+  old_class <- class(data)
+  old_meta <- attr(data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
 }

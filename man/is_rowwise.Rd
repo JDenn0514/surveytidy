@@ -28,8 +28,8 @@ is_rowwise(rowwise(d))  # TRUE
 }
 \seealso{
 Other grouping: 
-\code{\link{group_by.survey_base}()},
+\code{\link{group_by}},
 \code{\link{is_grouped}()},
-\code{\link{rowwise.survey_base}()}
+\code{\link{rowwise}}
 }
 \concept{grouping}

@@ -8,56 +8,74 @@
 # (see R/zzz.R). Re-exporting the generics here makes them available on the
 # search path when surveytidy is loaded.
 #
+# Primary verbs (those with @name NULL stubs in their source files) use
+# @rdname to merge into the per-verb Rd file and avoid a duplicate alias in
+# reexports.Rd. Secondary verbs (slice_*, ungroup, group_vars, rename_with,
+# filter_out) go into reexports.Rd so they don't bring undocumented
+# arguments into the per-verb Rd files.
+#
 # Internal dplyr machinery (dplyr_reconstruct, tidyselect::eval_select) is
 # NOT re-exported — those are imported in R/surveytidy-package.R.
 
 # ── dplyr verbs ───────────────────────────────────────────────────────────────
 
+#' @rdname distinct
 #' @export
 dplyr::distinct
 
+#' @rdname filter
 #' @export
 dplyr::filter
 
 #' @export
 dplyr::filter_out
 
+#' @rdname select
 #' @export
 dplyr::select
 
+#' @rdname mutate
 #' @export
 dplyr::mutate
 
+#' @rdname rename
 #' @export
 dplyr::rename
 
 #' @export
 dplyr::rename_with
 
+#' @rdname relocate
 #' @export
 dplyr::relocate
 
+#' @rdname arrange
 #' @export
 dplyr::arrange
 
+#' @rdname group_by
 #' @export
 dplyr::group_by
 
 #' @export
 dplyr::ungroup
 
+#' @rdname rowwise
 #' @export
 dplyr::rowwise
 
 #' @export
 dplyr::group_vars
 
+#' @rdname pull
 #' @export
 dplyr::pull
 
+#' @rdname glimpse
 #' @export
 dplyr::glimpse
 
+#' @rdname slice
 #' @export
 dplyr::slice
 
@@ -78,5 +96,6 @@ dplyr::slice_sample
 
 # ── tidyr verbs ───────────────────────────────────────────────────────────────
 
+#' @rdname drop_na
 #' @export
 tidyr::drop_na

@@ -10,7 +10,8 @@
 # See R/zzz.R for the registration calls.
 #
 # Functions defined here:
-#   arrange.survey_base() — row sorting
+#   arrange.survey_base()   — row sorting
+#   arrange.survey_result() — class/meta preservation for survey_result
 
 # ── arrange() ─────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,8 @@
 #' The domain column moves with the rows — row reordering does not affect which
 #' rows are in or out of the survey domain.
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Variables, or
 #'   functions of variables. Use [desc()] to sort a variable in descending
 #'   order.
@@ -70,6 +72,11 @@
 #' @family single table verbs
 #' @seealso [filter()] for domain-aware row marking,
 #'   [slice()] for physical row selection
+#' @name arrange
+NULL
+
+#' @rdname arrange
+#' @method arrange survey_base
 arrange.survey_base <- function(.data, ..., .by_group = FALSE, .locale = NULL) {
   # When .by_group = TRUE and @groups is non-empty, prepend the group columns
   # to the sort order. dplyr's native .by_group = TRUE would silently do
@@ -92,4 +99,12 @@ arrange.survey_base <- function(.data, ..., .by_group = FALSE, .locale = NULL) {
   }
   .data@data <- new_data
   .data
+}
+
+#' @rdname arrange
+#' @method arrange survey_result
+arrange.survey_result <- function(.data, ..., .by_group = FALSE) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
 }

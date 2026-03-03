@@ -30,8 +30,8 @@ is_grouped(rowwise(d))          # FALSE (rowwise != grouped)
 }
 \seealso{
 Other grouping: 
-\code{\link{group_by.survey_base}()},
+\code{\link{group_by}},
 \code{\link{is_rowwise}()},
-\code{\link{rowwise.survey_base}()}
+\code{\link{rowwise}}
 }
 \concept{grouping}

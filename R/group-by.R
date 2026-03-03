@@ -116,6 +116,11 @@
 #' d |> group_by(gender, cregion) |> group_vars()
 #'
 #' @family grouping
+#' @name group_by
+NULL
+
+#' @rdname group_by
+#' @method group_by survey_base
 group_by.survey_base <- function(
   .data,
   ...,
@@ -153,7 +158,8 @@ group_by.survey_base <- function(
 
 # ── ungroup() ─────────────────────────────────────────────────────────────────
 
-#' @rdname group_by.survey_base
+#' @rdname group_by
+#' @method ungroup survey_base
 ungroup.survey_base <- function(x, ...) {
   if (...length() == 0L) {
     # No arguments: remove ALL groups and exit rowwise mode
@@ -173,7 +179,8 @@ ungroup.survey_base <- function(x, ...) {
 
 # ── group_vars() ──────────────────────────────────────────────────────────────
 
-#' @rdname group_by.survey_base
+#' @rdname group_by
+#' @method group_vars survey_base
 #' @noRd
 group_vars.survey_base <- function(x) {
   x@groups

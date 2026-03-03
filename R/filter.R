@@ -21,9 +21,10 @@
 # See R/zzz.R for the registration.
 #
 # Functions defined here:
-#   filter.survey_base()   — domain estimation (all verbs route here)
-#   filter_out()           — domain exclusion (complement of filter)
-#   subset.survey_base()   — physical row removal (with warning)
+#   filter.survey_base()    — domain estimation (marks rows in-domain)
+#   filter.survey_result()  — class/meta preservation for survey_result
+#   filter_out()            — domain exclusion (complement of filter)
+#   subset.survey_base()    — physical row removal (with warning)
 #
 # Note: dplyr_reconstruct.survey_base() was moved to R/utils.R on
 # feature/select so it is co-located with the other multi-verb helpers.
@@ -69,7 +70,8 @@
 #' The domain status of each row is stored in the `..surveycore_domain..`
 #' column of `@data`. `TRUE` means in-domain; `FALSE` means out-of-domain.
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`data-masking`][rlang::args_data_masking]> Logical conditions
 #'   evaluated against the survey data. Multiple conditions are combined with
 #'   `&`. `NA` results are treated as `FALSE`.
@@ -111,6 +113,11 @@
 #' @family filtering
 #' @seealso [filter_out()] for excluding rows, [subset()] for physical row
 #'   removal
+#' @name filter
+NULL
+
+#' @rdname filter
+#' @method filter survey_base
 filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   if (!is.null(.by)) {
     cli::cli_abort(
@@ -173,10 +180,19 @@ filter.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   .data
 }
 
+#' @rdname filter
+#' @method filter survey_result
+filter.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
 
 # ── filter_out() ─────────────────────────────────────────────────────────────
 
-#' @rdname filter.survey_base
+#' @rdname filter
+#' @method filter_out survey_base
 filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   if (!is.null(.by)) {
     cli::cli_abort(

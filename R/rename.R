@@ -9,6 +9,12 @@
 #
 # Dispatch wiring: registered in .onLoad() via registerS3method().
 # See R/zzz.R for the registration calls.
+#
+# Functions defined here:
+#   rename.survey_base()        — column renaming with design-var preservation
+#   rename.survey_result()      — column renaming with .meta key updates
+#   rename_with.survey_base()   — function-applied renaming
+#   rename_with.survey_result() — function-applied renaming for survey_result
 
 # ── .apply_rename_map() ───────────────────────────────────────────────────────
 
@@ -194,7 +200,8 @@
 #' `surveytidy_warning_rename_design_var` warning for each renamed design
 #' variable.
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... <[`tidy-select`][tidyselect::language]> Use `new_name = old_name`
 #'   pairs to rename columns. Any number of columns can be renamed in a
 #'   single call.
@@ -236,6 +243,11 @@
 #' @family modification
 #' @seealso [mutate()] to add or modify column values, [select()] to drop
 #'   columns
+#' @name rename
+NULL
+
+#' @rdname rename
+#' @method rename survey_base
 rename.survey_base <- function(.data, ...) {
   # map: named integer vector; names = new names, values = column positions
   map <- tidyselect::eval_rename(rlang::expr(c(...)), .data@data)
@@ -248,10 +260,24 @@ rename.survey_base <- function(.data, ...) {
   .apply_rename_map(.data, rename_map)
 }
 
+#' @rdname rename
+#' @method rename survey_result
+rename.survey_result <- function(.data, ...) {
+  tbl <- tibble::as_tibble(.data)
+
+  # Build rename map: eval_rename returns named integer (new_name → position)
+  # Convert to c(old_name = "new_name") format for .apply_result_rename_map
+  map <- tidyselect::eval_rename(rlang::expr(c(...)), tbl)
+  rename_map <- stats::setNames(names(map), names(tbl)[map])
+
+  .apply_result_rename_map(.data, rename_map)
+}
+
 
 # ── rename_with() ─────────────────────────────────────────────────────────────
 
-#' @rdname rename.survey_base
+#' @rdname rename
+#' @method rename_with survey_base
 #' @param .fn A function (or formula/lambda) applied to selected column names.
 #'   Must return a character vector of the same length as its input, with no
 #'   duplicates and no conflicts with existing non-renamed column names.
@@ -327,4 +353,50 @@ rename_with.survey_base <- function(
   # Step 4: build rename_map and delegate to .apply_rename_map()
   rename_map <- stats::setNames(new_names, old_names)
   .apply_rename_map(.data, rename_map)
+}
+
+#' @rdname rename
+#' @method rename_with survey_result
+rename_with.survey_result <- function(
+  .data,
+  .fn,
+  .cols = dplyr::everything(),
+  ...
+) {
+  tbl <- tibble::as_tibble(.data)
+
+  # Step 1: Resolve .cols
+  resolved_cols <- tidyselect::eval_select(rlang::enquo(.cols), tbl)
+  old_names <- names(resolved_cols)
+
+  # Zero-match .cols — no-op
+  if (length(old_names) == 0L) return(.data)
+
+  # Step 2: Apply .fn
+  new_names <- .fn(old_names, ...)
+
+  # Step 3: Validate all four bad-output conditions
+  # Build the full column list with renames applied (for duplicate check)
+  full_new_names <- names(tbl)
+  full_new_names[match(old_names, full_new_names)] <- new_names
+
+  if (
+    !is.character(new_names) ||
+      length(new_names) != length(old_names) ||
+      anyNA(new_names) ||
+      anyDuplicated(full_new_names) > 0L
+  ) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .fn} must return a character vector the same length as
+               its input with no {.code NA} or duplicate names.",
+        "i" = "Got class {.cls {class(new_names)}} of length {length(new_names)}."
+      ),
+      class = "surveytidy_error_rename_fn_bad_output"
+    )
+  }
+
+  # Step 4: Build rename map and delegate
+  rename_map <- stats::setNames(new_names, old_names)
+  .apply_result_rename_map(.data, rename_map)
 }
