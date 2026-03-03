@@ -10,12 +10,18 @@
 # See R/zzz.R for the registration calls.
 #
 # Functions defined here:
-#   slice.survey_base()          — row selection by position
-#   slice_head.survey_base()     — first n rows
-#   slice_tail.survey_base()     — last n rows
-#   slice_min.survey_base()      — n rows with lowest values of a variable
-#   slice_max.survey_base()      — n rows with highest values of a variable
-#   slice_sample.survey_base()   — random sample of rows
+#   slice.survey_base()            — row selection by position
+#   slice.survey_result()          — class/meta preservation for survey_result
+#   slice_head.survey_base()       — first n rows
+#   slice_head.survey_result()     — class/meta preservation for survey_result
+#   slice_tail.survey_base()       — last n rows
+#   slice_tail.survey_result()     — class/meta preservation for survey_result
+#   slice_min.survey_base()        — n rows with lowest values of a variable
+#   slice_min.survey_result()      — class/meta preservation for survey_result
+#   slice_max.survey_base()        — n rows with highest values of a variable
+#   slice_max.survey_result()      — class/meta preservation for survey_result
+#   slice_sample.survey_base()     — random sample of rows
+#   slice_sample.survey_result()   — class/meta preservation for survey_result
 
 # `check_fn` is a free variable in functions created by .make_slice_method().
 # R CMD check cannot determine from static analysis that it is always defined
@@ -108,8 +114,12 @@ utils::globalVariables("check_fn")
 #' reminder. If you intend probability-proportional sampling, use the
 #' design weights directly.
 #'
-#' @param .data A [`survey_base`][surveycore::survey_base] object.
+#' @param .data A [`survey_base`][surveycore::survey_base] object, or a
+#'   `survey_result` object returned by a surveycore estimation function.
 #' @param ... Passed to the corresponding `dplyr::slice_*()` function.
+#' @param .by Accepted for interface compatibility; not used by survey methods.
+#' @param .preserve Accepted for interface compatibility; not used by survey
+#'   methods.
 #'
 #' @return
 #' An object of the same type as `.data` with the following properties:
@@ -135,33 +145,93 @@ utils::globalVariables("check_fn")
 #' @family row operations
 #' @seealso [filter()] for domain-aware row marking (preferred for
 #'   subpopulation analyses), [arrange()] for row sorting
+#' @name slice
+NULL
+
+#' @rdname slice
+#' @method slice survey_base
 slice.survey_base <- .make_slice_method(
   "slice",
   dplyr::slice
 )
-#' @describeIn slice.survey_base Select first `n` rows.
+#' @rdname slice
+#' @method slice_head survey_base
 slice_head.survey_base <- .make_slice_method(
   "slice_head",
   dplyr::slice_head
 )
-#' @describeIn slice.survey_base Select last `n` rows.
+#' @rdname slice
+#' @method slice_tail survey_base
 slice_tail.survey_base <- .make_slice_method(
   "slice_tail",
   dplyr::slice_tail
 )
-#' @describeIn slice.survey_base Select rows with the smallest values.
+#' @rdname slice
+#' @method slice_min survey_base
 slice_min.survey_base <- .make_slice_method(
   "slice_min",
   dplyr::slice_min
 )
-#' @describeIn slice.survey_base Select rows with the largest values.
+#' @rdname slice
+#' @method slice_max survey_base
 slice_max.survey_base <- .make_slice_method(
   "slice_max",
   dplyr::slice_max
 )
-#' @describeIn slice.survey_base Randomly sample rows.
+#' @rdname slice
+#' @method slice_sample survey_base
 slice_sample.survey_base <- .make_slice_method(
   "slice_sample",
   dplyr::slice_sample,
   check_fn = .check_slice_sample_weight_by
 )
+
+# ── survey_result passthrough variants ────────────────────────────────────────
+
+#' @rdname slice
+#' @method slice survey_result
+slice.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname slice
+#' @method slice_head survey_result
+slice_head.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname slice
+#' @method slice_tail survey_result
+slice_tail.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname slice
+#' @method slice_min survey_result
+slice_min.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname slice
+#' @method slice_max survey_result
+slice_max.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname slice
+#' @method slice_sample survey_result
+slice_sample.survey_result <- function(.data, ...) {
+  old_class <- class(.data)
+  old_meta <- attr(.data, ".meta")
+  NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
