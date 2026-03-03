@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
       <dl></dl></div><div class="section level2">
 
       <h3 id="rows">Rows<a class="anchor" aria-label="anchor" href="#rows"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code>, and <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>) is also available but issues a warning because removing rows can bias variance estimates.</p></div>
+      <div class="section-desc"><p><code><a href="../reference/filter.html">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code>, and <code><a href="../reference/drop_na.html">drop_na()</a></code> use <strong>domain estimation</strong> — rows are marked in or out of the analysis domain without being removed, so variance estimates stay correct. Physical row removal (<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code>, <code>slice_*()</code>) is also available but issues a warning because removing rows can bias variance estimates.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -46,35 +46,35 @@
 
       <dl><dt>
 
-          <code><a href="filter.survey_base.html">filter.survey_base()</a></code> <code><a href="filter.survey_base.html">filter_out.survey_base()</a></code>
+          <code><a href="filter.html">filter_out(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="filter.html">filter()</a></code>
 
         </dt>
         <dd>Keep or drop rows using domain estimation</dd>
 
         <dt>
 
-          <code><a href="distinct.survey_base.html">distinct.survey_base()</a></code>
+          <code><a href="distinct.html">distinct()</a></code>
 
         </dt>
         <dd>Remove duplicate rows from a survey design object</dd>
 
         <dt>
 
-          <code><a href="drop_na.survey_base.html">drop_na.survey_base()</a></code>
+          <code><a href="drop_na.html">drop_na()</a></code>
 
         </dt>
         <dd>Mark rows with missing values as out-of-domain</dd>
 
         <dt>
 
-          <code><a href="arrange.survey_base.html">arrange.survey_base()</a></code>
+          <code><a href="arrange.html">arrange()</a></code>
 
         </dt>
         <dd>Order rows using column values</dd>
 
         <dt>
 
-          <code><a href="slice.survey_base.html">slice.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_head.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_tail.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_min.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_max.survey_base()</a></code> <code><a href="slice.survey_base.html">slice_sample.survey_base()</a></code>
+          <code><a href="slice.html">slice()</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_result&gt;</i>)</a></code>
 
         </dt>
         <dd>Physically select rows of a survey design object</dd>
@@ -88,7 +88,7 @@
       </dl></div><div class="section level2">
 
       <h3 id="columns">Columns<a class="anchor" aria-label="anchor" href="#columns"></a></h3>
-      <div class="section-desc"><p>Select, reorder, rename, create, extract, and inspect columns. Design variables (weights, strata, PSU, FPC) are always retained even when not explicitly selected. <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code> automatically updates the survey design specification and variable metadata to match the new name.</p></div>
+      <div class="section-desc"><p>Select, reorder, rename, create, extract, and inspect columns. Design variables (weights, strata, PSU, FPC) are always retained even when not explicitly selected. <code><a href="../reference/rename.html">rename()</a></code> automatically updates the survey design specification and variable metadata to match the new name.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -97,49 +97,49 @@
 
       <dl><dt>
 
-          <code><a href="select.survey_base.html">select.survey_base()</a></code>
+          <code><a href="select.html">select()</a></code>
 
         </dt>
         <dd>Keep or drop columns using their names and types</dd>
 
         <dt>
 
-          <code><a href="relocate.survey_base.html">relocate.survey_base()</a></code>
+          <code><a href="relocate.html">relocate()</a></code>
 
         </dt>
         <dd>Change column order in a survey design object</dd>
 
         <dt>
 
-          <code><a href="rename.survey_base.html">rename.survey_base()</a></code> <code><a href="rename.survey_base.html">rename_with.survey_base()</a></code>
+          <code><a href="rename.html">rename()</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_result&gt;</i>)</a></code>
 
         </dt>
         <dd>Rename columns of a survey design object</dd>
 
         <dt>
 
-          <code><a href="mutate.survey_base.html">mutate.survey_base()</a></code>
+          <code><a href="mutate.html">mutate()</a></code>
 
         </dt>
         <dd>Create, modify, and delete columns of a survey design object</dd>
 
         <dt>
 
-          <code><a href="pull.survey_base.html">pull.survey_base()</a></code>
+          <code><a href="pull.html">pull()</a></code>
 
         </dt>
         <dd>Extract a column from a survey design object</dd>
 
         <dt>
 
-          <code><a href="glimpse.survey_base.html">glimpse.survey_base()</a></code>
+          <code><a href="glimpse.html">glimpse()</a></code>
 
         </dt>
         <dd>Get a glimpse of a survey design object</dd>
       </dl></div><div class="section level2">
 
       <h3 id="groups">Groups<a class="anchor" aria-label="anchor" href="#groups"></a></h3>
-      <div class="section-desc"><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> stores grouping columns on the survey object for use by grouped operations like <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. <code><a href="https://dplyr.tidyverse.org/reference/rowwise.html" class="external-link">rowwise()</a></code> enables row-by-row computation. Unlike dplyr, the underlying data is not modified — groups are stored on the survey object and applied when needed.</p></div>
+      <div class="section-desc"><p><code><a href="../reference/group_by.html">group_by()</a></code> stores grouping columns on the survey object for use by grouped operations like <code><a href="../reference/mutate.html">mutate()</a></code>. <code><a href="../reference/rowwise.html">rowwise()</a></code> enables row-by-row computation. Unlike dplyr, the underlying data is not modified — groups are stored on the survey object and applied when needed.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -148,14 +148,14 @@
 
       <dl><dt>
 
-          <code><a href="group_by.survey_base.html">group_by.survey_base()</a></code> <code><a href="group_by.survey_base.html">ungroup.survey_base()</a></code>
+          <code><a href="group_by.html">ungroup(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="group_by.html">group_by()</a></code>
 
         </dt>
         <dd>Group and ungroup a survey design object</dd>
 
         <dt>
 
-          <code><a href="rowwise.survey_base.html">rowwise.survey_base()</a></code>
+          <code><a href="rowwise.html">rowwise()</a></code>
 
         </dt>
         <dd>Compute row-wise on a survey design object</dd>

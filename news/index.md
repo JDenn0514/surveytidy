@@ -1,5 +1,139 @@
 # Changelog
 
+## surveytidy 0.2.0
+
+### New verbs
+
+- [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) —
+  the complement of
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md).
+  Marks rows matching the condition as out-of-domain while leaving all
+  other rows in-domain. Like
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md),
+  no rows are removed. Chains with
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  via AND-accumulation on the domain column.
+  `filter_out(d, group == "control")` is often clearer than
+  `filter(d, group != "control")` for exclusion use-cases.
+
+- [`distinct()`](https://jdenn0514.github.io/surveytidy/reference/distinct.md)
+  — removes duplicate rows while always retaining all columns (design
+  variables are never dropped). With no column arguments, deduplicates
+  on non-design columns only (survey-safe default). Always issues
+  `surveycore_warning_physical_subset`.
+
+- [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html) —
+  function-based column renaming. Applies `.fn` to columns selected by
+  `.cols` and propagates renames to `@variables`, `@metadata`,
+  `@groups`, and `visible_vars`. Validates `.fn` output and errors with
+  `surveytidy_error_rename_fn_bad_output` for non-character,
+  wrong-length, or duplicate output.
+
+- [`rowwise()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.md)
+  — enables row-by-row computation in
+  [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  (e.g., `max(c_across(...))`). Rowwise state is stored in
+  `@variables$rowwise` — never in `@groups`, keeping those clean for
+  estimation functions.
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+  and [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  exit rowwise mode, mirroring dplyr behaviour.
+
+### New predicates
+
+- [`is_rowwise()`](https://jdenn0514.github.io/surveytidy/reference/is_rowwise.md)
+  — returns `TRUE` when the survey object is in rowwise mode.
+- [`is_grouped()`](https://jdenn0514.github.io/surveytidy/reference/is_grouped.md)
+  — returns `TRUE` when `@groups` is non-empty.
+- [`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html)
+  — returns the current grouping column names from `@groups`.
+
+### Verb support for `survey_result` objects
+
+- [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md),
+  [`arrange()`](https://jdenn0514.github.io/surveytidy/reference/arrange.md),
+  [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md),
+  [`slice()`](https://jdenn0514.github.io/surveytidy/reference/slice.md),
+  [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html),
+  and
+  [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
+  are now registered for `survey_result` objects (the S3 base class for
+  surveycore analysis outputs: `survey_means`, `survey_freqs`,
+  `survey_totals`, `survey_quantiles`, `survey_corr`, `survey_ratios`).
+  Previously, applying dplyr verbs to these objects could silently strip
+  the class and `.meta` attribute. Now both are preserved, and
+  [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  keeps `meta$group` coherent when `.keep` drops grouping columns.
+
+- [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md),
+  [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md),
+  and
+  [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html)
+  are now registered for `survey_result` objects with active `.meta`
+  updates.
+  [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+  prunes stale `meta$group` entries when grouping columns are dropped
+  and handles inline renames (`select(r, grp = group)`).
+  [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
+  and
+  [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html)
+  propagate column renames to all `.meta` key references (`$group`,
+  `$x`, `$numerator$name`, `$denominator$name`).
+  [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html)
+  errors with `surveytidy_error_rename_fn_bad_output` if `.fn` returns
+  non-character, wrong-length, `NA`, or duplicate names.
+
+### Bug fixes
+
+- [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
+  now performs domain-aware filtering instead of physically removing
+  rows. Previously,
+  [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
+  removed rows with `NA` values, changing which units contributed to
+  variance estimation and producing incorrect standard errors. It now
+  marks incomplete rows as out-of-domain — equivalent to the
+  corresponding `filter(!is.na(col1), ...)` chain — giving correct
+  variance estimates for downstream analyses.
+
+- [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md):
+  the `.by` unsupported-argument error was mis-classified as a
+  `surveycore_error_*`; corrected to
+  `surveytidy_error_filter_by_unsupported`.
+
+### Improvements
+
+- [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
+  and
+  [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html)
+  now update `@groups` when a grouped column is renamed, and correctly
+  update twophase design variable references (`@variables$phase1`,
+  `@variables$phase2`, `@variables$subset`). The domain column
+  (`..surveycore_domain..`) is silently protected from renaming.
+
+- [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  and
+  [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html)
+  support
+  [`if_any()`](https://dplyr.tidyverse.org/reference/across.html) and
+  [`if_all()`](https://dplyr.tidyverse.org/reference/across.html) in
+  conditions.
+
+### Documentation
+
+- Roxygen documentation standardised across all verb files to mirror the
+  dplyr/tidyr reference style, with `@details` subsections for
+  surveytidy-specific behaviour and examples using `nhanes_2017`.
+
+- Rd files consolidated from per-method (e.g., `arrange.survey_base.Rd`)
+  to per-verb (e.g., `arrange.Rd`), fixing the “S3 methods shown with
+  full name” R CMD check NOTE.
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.1.0
 
 First release. Implements a complete set of dplyr and tidyr verbs for
@@ -7,50 +141,50 @@ survey design objects created with the `surveycore` package.
 
 ### New verbs
 
-- [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) —
-  domain-aware filtering. Marks rows in-domain rather than removing
+- [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  — domain-aware filtering. Marks rows in-domain rather than removing
   them, preserving correct variance estimation for subpopulation
   analyses. Chained
-  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) calls
-  AND their conditions together.
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  calls AND their conditions together.
 
-- [`select()`](https://dplyr.tidyverse.org/reference/select.html) —
-  column selection. Physically removes non-selected columns while always
-  retaining design variables (weights, strata, PSU, FPC, replicate
-  weights). Sets `@variables$visible_vars` so
+- [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+  — column selection. Physically removes non-selected columns while
+  always retaining design variables (weights, strata, PSU, FPC,
+  replicate weights). Sets `@variables$visible_vars` so
   [`print()`](https://rdrr.io/r/base/print.html) hides design columns
   the user did not explicitly request.
 
-- [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html) —
-  column reordering. Reorders `visible_vars` when a prior
-  [`select()`](https://dplyr.tidyverse.org/reference/select.html) has
-  been called; reorders `@data` directly otherwise.
+- [`relocate()`](https://jdenn0514.github.io/surveytidy/reference/relocate.md)
+  — column reordering. Reorders `visible_vars` when a prior
+  [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+  has been called; reorders `@data` directly otherwise.
 
-- [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) — extract
-  a column as a plain vector (terminal operation).
+- [`pull()`](https://jdenn0514.github.io/surveytidy/reference/pull.md) —
+  extract a column as a plain vector (terminal operation).
 
-- [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html) —
-  concise column summary, respecting `visible_vars`.
+- [`glimpse()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md)
+  — concise column summary, respecting `visible_vars`.
 
-- [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) — add
-  or modify columns. Re-attaches design variables dropped by
+- [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  — add or modify columns. Re-attaches design variables dropped by
   `.keep = "none"` or `.keep = "used"`. Issues
   `surveytidy_warning_mutate_design_var` when a mutation’s left-hand
   side names a design variable. Respects `@groups` set by
-  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md).
 
-- [`rename()`](https://dplyr.tidyverse.org/reference/rename.html) —
-  rename columns. Automatically keeps `@variables` (design
+- [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
+  — rename columns. Automatically keeps `@variables` (design
   specification) and `@metadata` (variable labels, value labels, etc.)
   in sync with the new column names. Issues
   `surveytidy_warning_rename_design_var` when a design variable is
   renamed.
 
-- [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) —
-  row sorting. The domain column moves correctly with the rows after
+- [`arrange()`](https://jdenn0514.github.io/surveytidy/reference/arrange.md)
+  — row sorting. The domain column moves correctly with the rows after
   sorting. Supports `.by_group = TRUE` using `@groups`.
 
-- [`slice()`](https://dplyr.tidyverse.org/reference/slice.html),
+- [`slice()`](https://jdenn0514.github.io/surveytidy/reference/slice.md),
   [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
   [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
   [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
@@ -61,8 +195,8 @@ survey design objects created with the `surveycore` package.
   `surveytidy_warning_slice_sample_weight_by` to flag that the
   `weight_by` column is independent of the survey design weights.
 
-- [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) —
-  store grouping columns in `@groups`. Does not attach a `grouped_df`
+- [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+  — store grouping columns in `@groups`. Does not attach a `grouped_df`
   attribute to `@data`; grouping is kept on the survey object. Supports
   `.add = TRUE` for incremental grouping and computed expressions (e.g.,
   `group_by(d, above_median = y1 > median(y1))`).
@@ -71,29 +205,29 @@ survey design objects created with the `surveycore` package.
   remove all groups (no arguments) or remove specific columns from
   `@groups` (partial ungroup).
 
-- [`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html) —
-  domain-aware NA handling. Marks rows with `NA` in specified columns
+- [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
+  — domain-aware NA handling. Marks rows with `NA` in specified columns
   (or any column) as out-of-domain without removing them. Equivalent to
   `filter(!is.na(col1), !is.na(col2), ...)` and gives correct variance
   estimates for downstream analyses. Successive
-  [`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html)
+  [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
   calls AND their conditions together.
 
 - [`subset()`](https://rdrr.io/r/base/subset.html) — physical row
   removal with `surveycore_warning_physical_subset`. Prefer
-  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) for
-  subpopulation analyses.
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  for subpopulation analyses.
 
 ### Statistical design
 
 The key design decision in surveytidy is that
-**[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) never
-removes rows**. Removing rows from a survey design changes which units
-contribute to variance estimation and produces incorrect standard errors
-for subpopulation statistics.
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) instead
-writes a logical domain column (`..surveycore_domain..`) to `@data`.
-Phase 1 estimation functions will read this column to restrict
+**[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+never removes rows**. Removing rows from a survey design changes which
+units contribute to variance estimation and produces incorrect standard
+errors for subpopulation statistics.
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+instead writes a logical domain column (`..surveycore_domain..`) to
+`@data`. Phase 1 estimation functions will read this column to restrict
 calculations to the domain while retaining all rows for variance
 estimation.
 

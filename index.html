@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,20 +72,20 @@
 <span><span class="co"># Use familiar dplyr verbs — survey design is preserved automatically</span></span>
 <span><span class="va">young_adults</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># use filter to perform domain estimation (18–29 year olds)</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">agecat</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">agecat</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># keep only the columns of interest</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">agecat</span>, <span class="va">gender</span>, <span class="va">partysum</span>, <span class="va">fin_sit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/select.html">select</a></span><span class="op">(</span><span class="va">agecat</span>, <span class="va">gender</span>, <span class="va">partysum</span>, <span class="va">fin_sit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># group by gender</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># flag respondents reporting financial difficulty</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>struggling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">fin_sit</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span>struggling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">fin_sit</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="key-idea-filter-marks-rows-never-removes-them">Key idea: <code>filter()</code> marks rows, never removes them<a class="anchor" aria-label="anchor" href="#key-idea-filter-marks-rows-never-removes-them"></a>
 </h2>
-<p>The most important statistical feature of surveytidy is that <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> uses <strong>domain estimation</strong> rather than physical subsetting:</p>
+<p>The most important statistical feature of surveytidy is that <code><a href="reference/filter.html">filter()</a></code> uses <strong>domain estimation</strong> rather than physical subsetting:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This keeps all 5,022 rows — variance estimation stays correct</span></span>
-<span><span class="va">republicans</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">republicans</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">republicans</span><span class="op">@</span><span class="va">data</span><span class="op">)</span> <span class="co">#&gt; 5022</span></span>
 <span><span class="co">#&gt; [1] 5022</span></span>
 <span></span>
@@ -95,7 +95,7 @@
 <span><span class="co">#&gt; ℹ This is different from `filter()`, which preserves all rows for correct</span></span>
 <span><span class="co">#&gt;   variance estimation.</span></span>
 <span><span class="co">#&gt; ✔ Use `filter()` for subpopulation analyses instead.</span></span></code></pre></div>
-<p>When you call <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, surveytidy writes a logical column <code>..surveycore_domain..</code> to the data. Phase 1 estimation functions read this column to restrict calculations to the domain while retaining all rows for correct variance estimation. Simply put, this calculates the variance for subpopulations correctly.</p>
+<p>When you call <code><a href="reference/filter.html">filter()</a></code>, surveytidy writes a logical column <code>..surveycore_domain..</code> to the data. Phase 1 estimation functions read this column to restrict calculations to the domain while retaining all rows for correct variance estimation. Simply put, this calculates the variance for subpopulations correctly.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -115,15 +115,15 @@
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Single condition</span></span>
-<span><span class="va">republicans</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">republicans</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Chained filters AND the conditions together</span></span>
 <span><span class="va">rep_women</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">gender</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">gender</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Equivalent — both produce identical domain columns</span></span>
-<span><span class="va">rep_women2</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">gender</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">rep_women2</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">gender</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="selecting-columns">Selecting columns<a class="anchor" aria-label="anchor" href="#selecting-columns"></a>
@@ -131,7 +131,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Design variables (weights, strata) are always kept in @data</span></span>
 <span><span class="co"># even when not selected — they are required for variance estimation</span></span>
-<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">party</span>, <span class="va">gender</span>, <span class="va">agecat</span>, <span class="va">cregion</span><span class="op">)</span></span>
+<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/select.html">select</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">party</span>, <span class="va">gender</span>, <span class="va">agecat</span>, <span class="va">cregion</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Design variables are hidden from print() but still present in @data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">d2</span><span class="op">)</span></span>
@@ -164,7 +164,7 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add new columns</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span></span>
 <span>    economy_poor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">econ1mod</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>    south <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">cregion</span> <span class="op">==</span> <span class="fl">3</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
@@ -195,7 +195,7 @@
 <span><span class="co">#&gt; #   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span></span>
 <span><span class="co"># Modifying a design variable warns you</span></span>
-<span><span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>weight <span class="op">=</span> <span class="va">weight</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span>weight <span class="op">=</span> <span class="va">weight</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: ! mutate() modified design variable(s): weight.</span></span>
 <span><span class="co">#&gt; ℹ The survey design has been updated to reflect the new values.</span></span>
 <span><span class="co">#&gt; ✔ Use `update_design()` if you intend to modify design variables. Modifying</span></span>
@@ -229,8 +229,8 @@
 <span></span>
 <span><span class="co"># Grouped mutate via group_by()</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">partysum</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>econ_rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rank.html" class="external-link">rank</a></span><span class="op">(</span><span class="va">econ1mod</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">partysum</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span>econ_rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rank.html" class="external-link">rank</a></span><span class="op">(</span><span class="va">econ1mod</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Survey Design ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; &lt;survey_taylor&gt; (Taylor series linearization)</span></span>
@@ -264,7 +264,7 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># @variables and @metadata stay in sync automatically</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/rename.html">rename</a></span><span class="op">(</span></span>
 <span>    party_affiliation <span class="op">=</span> <span class="va">partysum</span>,</span>
 <span>    age_group <span class="op">=</span> <span class="va">agecat</span></span>
 <span>  <span class="op">)</span></span>
@@ -300,8 +300,8 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Rows sort; domain column moves with them</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">agecat</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">agecat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Survey Design ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; &lt;survey_taylor&gt; (Taylor series linearization)</span></span>
@@ -330,8 +330,8 @@
 <span></span>
 <span><span class="co"># Sort by group first, then by value within group</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">partysum</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">agecat</span>, .by_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">partysum</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">agecat</span>, .by_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Survey Design ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; &lt;survey_taylor&gt; (Taylor series linearization)</span></span>
@@ -363,8 +363,8 @@
 <h3 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">partysum</span><span class="op">)</span> <span class="co"># set groups</span></span>
-<span><span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">d2</span>, <span class="va">gender</span>, .add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># add to groups</span></span>
+<code class="sourceCode R"><span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">partysum</span><span class="op">)</span> <span class="co"># set groups</span></span>
+<span><span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d2</span>, <span class="va">gender</span>, .add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># add to groups</span></span>
 <span><span class="va">d4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="va">d3</span><span class="op">)</span> <span class="co"># remove all groups</span></span></code></pre></div>
 </div>
 <div class="section level3">

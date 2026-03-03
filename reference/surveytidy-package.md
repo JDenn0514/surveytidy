@@ -3,40 +3,40 @@
 Provides dplyr and tidyr verbs for survey design objects created with
 the `surveycore` package. The key statistical feature is **domain-aware
 filtering**:
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) marks
-rows as in-domain rather than removing them, which is essential for
-correct variance estimation of subpopulation statistics.
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+marks rows as in-domain rather than removing them, which is essential
+for correct variance estimation of subpopulation statistics.
 
 ## Details
 
 ### Key verbs
 
-- [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) —
-  domain estimation (marks rows, never removes them)
+- [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  — domain estimation (marks rows, never removes them)
 
-- [`select()`](https://dplyr.tidyverse.org/reference/select.html) —
-  column selection preserving design variables
+- [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+  — column selection preserving design variables
 
-- [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) —
-  add/modify columns with weight-change warnings
+- [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  — add/modify columns with weight-change warnings
 
-- [`rename()`](https://dplyr.tidyverse.org/reference/rename.html) —
-  auto-updates design variable names and metadata
+- [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
+  — auto-updates design variable names and metadata
 
-- [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) /
-  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) —
+- [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+  / [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) —
   grouped analysis support
 
-- [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) —
-  row sorting preserving domain membership
+- [`arrange()`](https://jdenn0514.github.io/surveytidy/reference/arrange.md)
+  — row sorting preserving domain membership
 
 - [`subset()`](https://rdrr.io/r/base/subset.html) — physical row
   removal with a strong warning
 
 ### Domain estimation vs. physical subsetting
 
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) and
-[`subset()`](https://rdrr.io/r/base/subset.html) have fundamentally
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+and [`subset()`](https://rdrr.io/r/base/subset.html) have fundamentally
 different statistical meanings:
 
 - `filter(.data, condition)` — sets `..surveycore_domain..` to `TRUE`

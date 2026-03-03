@@ -25,7 +25,7 @@ reminder of the statistical implications."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@ reminder of the statistical implications."></head><body>
 to <code>FALSE</code>. <strong>This changes the survey design.</strong> Unless the design was
 explicitly built for the subset population, variance estimates will be
 incorrect.</p>
-<p>For subpopulation analyses, use <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> instead. <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> marks rows
+<p>For subpopulation analyses, use <code><a href="filter.html">filter()</a></code> instead. <code><a href="filter.html">filter()</a></code> marks rows
 as in or out of the domain without removing them, leaving the full design
 intact for variance estimation.</p>
 <p><code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> always emits a <code>surveycore_warning_physical_subset</code> warning as a
@@ -93,7 +93,7 @@ issues <code>surveycore_warning_physical_subset</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> for domain-aware row marking (preferred for
+    <div class="dont-index"><p><code><a href="filter.html">filter()</a></code> for domain-aware row marking (preferred for
 subpopulation analyses)</p></div>
     </div>
 

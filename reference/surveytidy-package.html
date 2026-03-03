@@ -15,7 +15,7 @@ statistics."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ statistics."></head><body>
     <div class="ref-description section level2">
     <p>Provides dplyr and tidyr verbs for survey design objects created with the
 <code>surveycore</code> package. The key statistical feature is <strong>domain-aware
-filtering</strong>: <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> marks rows as in-domain rather than removing them,
+filtering</strong>: <code><a href="filter.html">filter()</a></code> marks rows as in-domain rather than removing them,
 which is essential for correct variance estimation of subpopulation
 statistics.</p>
     </div>
@@ -54,12 +54,12 @@ statistics.</p>
 <div class="section">
 <h3 id="key-verbs">Key verbs<a class="anchor" aria-label="anchor" href="#key-verbs"></a></h3>
 
-<ul><li><p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> — domain estimation (marks rows, never removes them)</p></li>
-<li><p><code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code> — column selection preserving design variables</p></li>
-<li><p><code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code> — add/modify columns with weight-change warnings</p></li>
-<li><p><code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code> — auto-updates design variable names and metadata</p></li>
-<li><p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> / <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> — grouped analysis support</p></li>
-<li><p><code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code> — row sorting preserving domain membership</p></li>
+<ul><li><p><code><a href="filter.html">filter()</a></code> — domain estimation (marks rows, never removes them)</p></li>
+<li><p><code><a href="select.html">select()</a></code> — column selection preserving design variables</p></li>
+<li><p><code><a href="mutate.html">mutate()</a></code> — add/modify columns with weight-change warnings</p></li>
+<li><p><code><a href="rename.html">rename()</a></code> — auto-updates design variable names and metadata</p></li>
+<li><p><code><a href="group_by.html">group_by()</a></code> / <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> — grouped analysis support</p></li>
+<li><p><code><a href="arrange.html">arrange()</a></code> — row sorting preserving domain membership</p></li>
 <li><p><code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> — physical row removal with a strong warning</p></li>
 </ul></div>
 
@@ -67,7 +67,7 @@ statistics.</p>
 <h3 id="domain-estimation-vs-physical-subsetting">Domain estimation vs. physical subsetting<a class="anchor" aria-label="anchor" href="#domain-estimation-vs-physical-subsetting"></a></h3>
 
 
-<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> and <code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> have fundamentally different statistical meanings:</p><ul><li><p><code>filter(.data, condition)</code> — sets <code>..surveycore_domain..</code> to <code>TRUE</code> for
+<p><code><a href="filter.html">filter()</a></code> and <code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> have fundamentally different statistical meanings:</p><ul><li><p><code>filter(.data, condition)</code> — sets <code>..surveycore_domain..</code> to <code>TRUE</code> for
 matching rows. All rows are retained. Variance estimation correctly uses
 the full design.</p></li>
 <li><p><code>subset(.data, condition)</code> — physically removes non-matching rows.

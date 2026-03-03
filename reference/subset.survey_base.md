@@ -8,10 +8,11 @@ design.** Unless the design was explicitly built for the subset
 population, variance estimates will be incorrect.
 
 For subpopulation analyses, use
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) instead.
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) marks
-rows as in or out of the domain without removing them, leaving the full
-design intact for variance estimation.
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+instead.
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+marks rows as in or out of the domain without removing them, leaving the
+full design intact for variance estimation.
 
 [`subset()`](https://rdrr.io/r/base/subset.html) always emits a
 `surveycore_warning_physical_subset` warning as a reminder of the
@@ -49,8 +50,8 @@ Always issues `surveycore_warning_physical_subset`.
 
 ## See also
 
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html) for
-domain-aware row marking (preferred for subpopulation analyses)
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+for domain-aware row marking (preferred for subpopulation analyses)
 
 ## Examples
 

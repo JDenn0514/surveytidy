@@ -32,14 +32,15 @@ metadata handling.
 surveytidy makes survey analysis feel natural to tidyverse users by:
 
 1.  **Domain-aware filtering** —
-    [`filter()`](https://dplyr.tidyverse.org/reference/filter.html)
+    [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
     marks rows in/out of domain without removing them
 2.  **Intelligent metadata handling** —
-    [`select()`](https://dplyr.tidyverse.org/reference/select.html) and
-    [`rename()`](https://dplyr.tidyverse.org/reference/rename.html)
+    [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+    and
+    [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
     update labels automatically
 3.  **Group-by support** —
-    [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+    [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
     sets up stratification for Phase 1 estimation functions
 4.  **Familiar API** — Users never write formula syntax; everything uses
     bare names (tidy-select)
@@ -113,26 +114,28 @@ See `R/zzz.R` for full setup.
 - Type: logical column in `@data`
 - Content: TRUE for in-domain rows, FALSE for out-of-domain rows
 - Never removed; only created/updated by
-  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html)
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
 
 #### visible_vars
 
 - Key in `@variables$visible_vars`
-- Set by [`select()`](https://dplyr.tidyverse.org/reference/select.html)
+- Set by
+  [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
   to the user’s explicit column selection
 - Controls which columns [`print()`](https://rdrr.io/r/base/print.html)
   shows (hides design vars from display)
 - NULL means all columns in `@data` are shown (default)
-- After [`select()`](https://dplyr.tidyverse.org/reference/select.html),
+- After
+  [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md),
   `@data` only contains design vars + user-selected cols; `visible_vars`
   tracks the user’s selection so design vars are hidden from print
 
 #### @groups
 
 - Reserved for Phase 0.5 (now used by
-  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md))
 - Populated by
-  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md),
   cleared by
   [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
 - Will be used by Phase 1 estimation functions
@@ -218,8 +221,8 @@ before adding any new class)
   selects only design variables) — `NULL` means “show all columns in
   @data”
 - Deletes `@metadata` entries for physically removed columns only
-- [`select()`](https://dplyr.tidyverse.org/reference/select.html) is
-  irreversible within a pipeline: removed columns are gone
+- [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
+  is irreversible within a pipeline: removed columns are gone
 
 ### rename() Specifics
 
@@ -264,8 +267,8 @@ block that calls a dplyr or tidyr verb must begin with an explicit
 ```
 
 Use [`library(tidyr)`](https://tidyr.tidyverse.org) instead for
-[`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html) and
-other tidyr verbs.
+[`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md)
+and other tidyr verbs.
 
 ## Working With This Codebase
 

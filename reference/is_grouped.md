@@ -1,7 +1,7 @@
 # Test whether a survey design has active grouping
 
 Returns `TRUE` if the design has one or more grouping columns set via
-[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
+[`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md).
 Returns `FALSE` for ungrouped or rowwise (but not grouped) designs.
 
 ## Usage
@@ -25,9 +25,9 @@ A scalar logical.
 ## See also
 
 Other grouping:
-[`group_by.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/group_by.survey_base.md),
+[`group_by`](https://jdenn0514.github.io/surveytidy/reference/group_by.md),
 [`is_rowwise()`](https://jdenn0514.github.io/surveytidy/reference/is_rowwise.md),
-[`rowwise.survey_base()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.survey_base.md)
+[`rowwise`](https://jdenn0514.github.io/surveytidy/reference/rowwise.md)
 
 ## Examples
 
