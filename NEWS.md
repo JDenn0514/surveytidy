@@ -1,24 +1,86 @@
-# surveytidy (development version)
+# surveytidy 0.2.0
+
+## New verbs
+
+* `filter_out()` — the complement of `filter()`. Marks rows matching the
+  condition as out-of-domain while leaving all other rows in-domain. Like
+  `filter()`, no rows are removed. Chains with `filter()` via AND-accumulation
+  on the domain column. `filter_out(d, group == "control")` is often clearer
+  than `filter(d, group != "control")` for exclusion use-cases.
+
+* `distinct()` — removes duplicate rows while always retaining all columns
+  (design variables are never dropped). With no column arguments, deduplicates
+  on non-design columns only (survey-safe default). Always issues
+  `surveycore_warning_physical_subset`.
+
+* `rename_with()` — function-based column renaming. Applies `.fn` to columns
+  selected by `.cols` and propagates renames to `@variables`, `@metadata`,
+  `@groups`, and `visible_vars`. Validates `.fn` output and errors with
+  `surveytidy_error_rename_fn_bad_output` for non-character, wrong-length, or
+  duplicate output.
+
+* `rowwise()` — enables row-by-row computation in `mutate()` (e.g.,
+  `max(c_across(...))`). Rowwise state is stored in `@variables$rowwise` —
+  never in `@groups`, keeping those clean for estimation functions. `group_by()`
+  and `ungroup()` exit rowwise mode, mirroring dplyr behaviour.
+
+## New predicates
+
+* `is_rowwise()` — returns `TRUE` when the survey object is in rowwise mode.
+* `is_grouped()` — returns `TRUE` when `@groups` is non-empty.
+* `group_vars()` — returns the current grouping column names from `@groups`.
 
 ## Verb support for `survey_result` objects
-
-* `select()`, `rename()`, and `rename_with()` are now registered for
-  `survey_result` objects with active `.meta` updates. `select()` prunes
-  stale `meta$group` entries when grouping columns are dropped and handles
-  inline renames (`select(r, grp = group)`). `rename()` and `rename_with()`
-  propagate column renames to all `.meta` key references (`$group`, `$x`,
-  `$numerator$name`, `$denominator$name`). `rename_with()` errors with
-  `"surveytidy_error_rename_fn_bad_output"` if `.fn` returns non-character,
-  wrong-length, `NA`, or duplicate names.
 
 * `filter()`, `arrange()`, `mutate()`, `slice()`, `slice_head()`,
   `slice_tail()`, `slice_min()`, `slice_max()`, `slice_sample()`, and
   `drop_na()` are now registered for `survey_result` objects (the S3 base class
-  for all surveycore analysis outputs: `survey_means`, `survey_freqs`,
+  for surveycore analysis outputs: `survey_means`, `survey_freqs`,
   `survey_totals`, `survey_quantiles`, `survey_corr`, `survey_ratios`).
   Previously, applying dplyr verbs to these objects could silently strip the
   class and `.meta` attribute. Now both are preserved, and `mutate()` keeps
   `meta$group` coherent when `.keep` drops grouping columns.
+
+* `select()`, `rename()`, and `rename_with()` are now registered for
+  `survey_result` objects with active `.meta` updates. `select()` prunes stale
+  `meta$group` entries when grouping columns are dropped and handles inline
+  renames (`select(r, grp = group)`). `rename()` and `rename_with()` propagate
+  column renames to all `.meta` key references (`$group`, `$x`,
+  `$numerator$name`, `$denominator$name`). `rename_with()` errors with
+  `surveytidy_error_rename_fn_bad_output` if `.fn` returns non-character,
+  wrong-length, `NA`, or duplicate names.
+
+## Bug fixes
+
+* `drop_na()` now performs domain-aware filtering instead of physically removing
+  rows. Previously, `drop_na()` removed rows with `NA` values, changing which
+  units contributed to variance estimation and producing incorrect standard
+  errors. It now marks incomplete rows as out-of-domain — equivalent to the
+  corresponding `filter(!is.na(col1), ...)` chain — giving correct variance
+  estimates for downstream analyses.
+
+* `filter()`: the `.by` unsupported-argument error was mis-classified as a
+  `surveycore_error_*`; corrected to `surveytidy_error_filter_by_unsupported`.
+
+## Improvements
+
+* `rename()` and `rename_with()` now update `@groups` when a grouped column is
+  renamed, and correctly update twophase design variable references
+  (`@variables$phase1`, `@variables$phase2`, `@variables$subset`). The domain
+  column (`..surveycore_domain..`) is silently protected from renaming.
+
+* `filter()` and `filter_out()` support `if_any()` and `if_all()` in
+  conditions.
+
+## Documentation
+
+* Roxygen documentation standardised across all verb files to mirror the
+  dplyr/tidyr reference style, with `@details` subsections for
+  surveytidy-specific behaviour and examples using `nhanes_2017`.
+
+* Rd files consolidated from per-method (e.g., `arrange.survey_base.Rd`) to
+  per-verb (e.g., `arrange.Rd`), fixing the "S3 methods shown with full name"
+  R CMD check NOTE.
 
 ---
 
