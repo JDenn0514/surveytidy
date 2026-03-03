@@ -105,10 +105,19 @@ git branch --show-current
 
 **If on `main`:**
 
+Stop. Feature branches must be cut from `develop`, not `main`. Tell the user:
+
+> "Feature branches should start from `develop`. Please run `git checkout develop`
+> and re-invoke `/r-implement`."
+
+Do not proceed until the user is on `develop` or a feature branch.
+
+**If on `develop`:**
+
 1. Ask the user for the implementation plan path if not already provided
 2. Read the plan and find the first unchecked `- [ ]` section
 3. Determine the branch name from that section's entry
-4. Show: "I'll create branch `feature/X` from `main` — is that right?"
+4. Show: "I'll create branch `feature/X` from `develop` — is that right?"
 5. On confirmation: `git checkout -b feature/X`
 6. Continue to Step 2
 

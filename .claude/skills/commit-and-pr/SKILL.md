@@ -51,12 +51,12 @@ Run these first, before anything else:
 
 ```bash
 git branch --show-current
-git log main..HEAD --oneline
+git log develop..HEAD --oneline
 git status
 ```
 
-**If on `main`: STOP.** Inform the user that implementation work must be on a
-feature branch. Do not proceed.
+**If on `main` or `develop`: STOP.** Inform the user that implementation work
+must be on a feature branch cut from `develop`. Do not proceed.
 
 Create the main tracking task:
 
@@ -83,7 +83,7 @@ Steps:
    Phase 0.5) — ask the user if unclear
 2. Check if `changelog/phase-{X}/{branch-name}.md` exists
 3. **If it does not exist:** create it following `changelog-workflow.md`,
-   using `git log main..HEAD --oneline` to populate the `## Changes` section
+   using `git log develop..HEAD --oneline` to populate the `## Changes` section
 4. **If it exists:** verify it is populated — not empty, no `<!-- TODO -->`
    placeholders, `## Changes` has at least one real bullet
 
@@ -180,6 +180,7 @@ requested. Do NOT create the PR until the user approves.
 git push -u origin <branch-name>
 
 gh pr create \
+  --base develop \
   --title "<approved-title>" \
   --body "$(cat <<'EOF'
 <approved-body>

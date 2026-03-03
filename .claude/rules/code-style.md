@@ -19,7 +19,7 @@
 | Style guide | tidyverse style (via air) |
 | Property access | Direct `@` everywhere; accessor functions for `@data` and `@metadata` only |
 | S7 method file org | Methods grouped by type in dedicated files (`04-methods-print.R`, etc.) |
-| Class membership test | `S7::inherits(x, survey_taylor)` — class object, never a string |
+| Class membership test | `S7::S7_inherits(x, survey_taylor)` — class object, never a string |
 | `@variables` absent keys | All keys always present; unspecified values as `NULL` |
 | Setter return values | `invisible(x)` |
 | Getter return values | Visible (no `invisible()`) |
@@ -166,11 +166,11 @@ S7::method(print, survey_taylor) <- function(x, n = 10, ...) {
 ```
 
 ### Class membership testing
-Always use **`S7::inherits(x, ClassName)`** with the class object — never a string.
+Always use **`S7::S7_inherits(x, ClassName)`** with the class object — never a string.
 
 ```r
 # Correct — class object; rename caught at load time
-if (!S7::inherits(phase1, survey_taylor)) {
+if (!S7::S7_inherits(phase1, survey_taylor)) {
   cli::cli_abort(...)
 }
 
@@ -487,7 +487,60 @@ No exact pins (`==`) — CRAN rejects them.
 
 ## 6. Tooling Configuration
 
+### `air` — formatter (not a linter)
+
+`air` is a **formatter**: it rewrites R files to conform to the style. It is
+NOT `lintr` (which only reports violations). When `air` touches a file, the
+code is correct — do not manually undo its changes.
+
+#### Install
+
+```r
+pak::pak("posit-dev/air")
+```
+
+#### Format-on-save (Positron / VS Code) — RECOMMENDED
+
+Install the air extension, then add to `.vscode/settings.json` in the repo
+root (create it if it doesn't exist):
+
+```json
+{
+  "[r]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Posit.air-vscode"
+  }
+}
+```
+
+After this, every R file is auto-reformatted whenever you save. No manual
+`air format` needed during normal development.
+
+#### Format-on-save (RStudio)
+
+RStudio does not support format-on-save natively. Use the air addin
+(Addins → Format with air) or run from the terminal before committing:
+
+```bash
+air format .
+```
+
+#### Manual formatting
+
+```bash
+# Format the entire package
+air format .
+
+# Format a single file
+air format R/01-filter.R
+```
+
+Run `air format .` before opening a PR. Do not commit air-reformatted files
+in the same commit as functional changes — reformat first, then make the
+functional change.
+
 ### `air.toml` (in package root)
+
 ```toml
 [format]
 line-width = 80
@@ -495,6 +548,7 @@ indent-width = 2
 ```
 
 ### `.editorconfig` (in package root)
+
 ```ini
 root = true
 
@@ -509,14 +563,3 @@ insert_final_newline = true
 [*.{md,yaml,yml}]
 indent_size = 2
 ```
-
-### `air` setup
-```bash
-# Format the entire package
-air format .
-
-# Format a single file
-air format R/03-constructors.R
-```
-
-Run `air format .` before opening a PR. Do not commit `air`-reformatted files in the same commit as functional changes — reformat first, then make the change.
