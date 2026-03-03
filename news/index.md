@@ -1,5 +1,29 @@
 # Changelog
 
+## surveytidy (development version)
+
+### Verb support for `survey_result` objects
+
+- [`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html),
+  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+  [`slice()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html),
+  and [`drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html)
+  are now registered for `survey_result` objects (the S3 base class for
+  all surveycore analysis outputs: `survey_means`, `survey_freqs`,
+  `survey_totals`, `survey_quantiles`, `survey_corr`, `survey_ratios`).
+  Previously, applying dplyr verbs to these objects could silently strip
+  the class and `.meta` attribute. Now both are preserved, and
+  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) keeps
+  `meta$group` coherent when `.keep` drops grouping columns.
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.1.0
 
 First release. Implements a complete set of dplyr and tidyr verbs for

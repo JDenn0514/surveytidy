@@ -31,6 +31,14 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="surveytidy-development-version">surveytidy (development version)<a class="anchor" aria-label="anchor" href="#surveytidy-development-version"></a></h2>
+<div class="section level3">
+<h3 id="verb-support-for-survey_result-objects-development-version">Verb support for <code>survey_result</code> objects<a class="anchor" aria-label="anchor" href="#verb-support-for-survey_result-objects-development-version"></a></h3>
+<ul><li>
+<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_min()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample()</a></code>, and <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na()</a></code> are now registered for <code>survey_result</code> objects (the S3 base class for all surveycore analysis outputs: <code>survey_means</code>, <code>survey_freqs</code>, <code>survey_totals</code>, <code>survey_quantiles</code>, <code>survey_corr</code>, <code>survey_ratios</code>). Previously, applying dplyr verbs to these objects could silently strip the class and <code>.meta</code> attribute. Now both are preserved, and <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code> keeps <code>meta$group</code> coherent when <code>.keep</code> drops grouping columns.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="surveytidy-010">surveytidy 0.1.0<a class="anchor" aria-label="anchor" href="#surveytidy-010"></a></h2>
 <p>First release. Implements a complete set of dplyr and tidyr verbs for survey design objects created with the <code>surveycore</code> package.</p>
 <div class="section level3">
