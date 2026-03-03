@@ -250,4 +250,19 @@
     "drop_na", "survey_result",
     get("drop_na.survey_result", envir = ns), envir = asNamespace("tidyr")
   )
+
+  # ── survey_result verbs (PR 2 — meta-updating) ───────────────────────────
+
+  registerS3method(
+    "select", "survey_result",
+    get("select.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "rename", "survey_result",
+    get("rename.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
+  registerS3method(
+    "rename_with", "survey_result",
+    get("rename_with.survey_result", envir = ns), envir = asNamespace("dplyr")
+  )
 }

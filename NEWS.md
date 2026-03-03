@@ -2,6 +2,15 @@
 
 ## Verb support for `survey_result` objects
 
+* `select()`, `rename()`, and `rename_with()` are now registered for
+  `survey_result` objects with active `.meta` updates. `select()` prunes
+  stale `meta$group` entries when grouping columns are dropped and handles
+  inline renames (`select(r, grp = group)`). `rename()` and `rename_with()`
+  propagate column renames to all `.meta` key references (`$group`, `$x`,
+  `$numerator$name`, `$denominator$name`). `rename_with()` errors with
+  `"surveytidy_error_rename_fn_bad_output"` if `.fn` returns non-character,
+  wrong-length, `NA`, or duplicate names.
+
 * `filter()`, `arrange()`, `mutate()`, `slice()`, `slice_head()`,
   `slice_tail()`, `slice_min()`, `slice_max()`, `slice_sample()`, and
   `drop_na()` are now registered for `survey_result` objects (the S3 base class

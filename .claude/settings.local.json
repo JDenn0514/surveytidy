@@ -56,7 +56,8 @@
       "Bash(gh run:*)",
       "Bash(git:*)",
       "Bash(air format:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(do:*)"
     ]
   }
 }

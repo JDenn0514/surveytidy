@@ -3,8 +3,7 @@
 <!-- Applies to the surveytidy package. Adapted from the surveycore version. -->
 <!-- Read on-demand when creating PRs or setting up CI — not auto-loaded. -->
 
-**Version:** 1.0
-**Created:** February 2025
+**Version:** 2.0
 **Status:** Decided — do not re-litigate without updating this document
 
 ---
@@ -13,83 +12,80 @@
 
 | Decision | Choice |
 |----------|--------|
-| Branching model | GitHub Flow — feature branch + self-PR per component |
-| Branch naming | `feature/`, `fix/`, `docs/`, `chore/` |
-| Long-lived branches | None — `main` is always in-progress |
+| Branching model | `develop` integration branch — features → `develop`; `develop` → `main` for releases |
+| Branch naming | `feature/`, `fix/`, `hotfix/`, `docs/`, `chore/`, `refactor/` |
+| Merge strategy | Squash and merge everywhere |
 | Commit format | Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`) |
-| PR template | Lightweight checklist (see below) |
-| Merge strategy | Squash and merge |
-| PR granularity | One PR per logical unit; one PR per test file |
-| Versioning | `0.0.0.9000` dev → `0.1.0` (Phase 0.5 complete) → `1.0.0` |
-| CI setup | R-CMD-check + test-coverage + pkgdown |
-| NEWS.md | Semi-automated from `git log --oneline` of `feat:` and `fix:` commits |
+| PR granularity | One PR per logical unit of work |
+| Versioning | `X.Y.Z.9000` on `develop`; `X.Y.Z` on `main` after release |
+| CI | R-CMD-check required on `main` and `develop`; all PRs |
+| Release workflow | Use `/merge-main` |
 
 ---
 
-## 1. Branch Protection
+## Workflow Tiers
 
-### Settings (GitHub → Settings → Branches → Branch protection rules for `main`):
-- **Require status checks to pass before merging:** ✅ (R-CMD-check must be green)
-- **Require branches to be up to date before merging:** ✅
-- **Require pull request reviews before merging:** ❌ (solo author; add when collaborators join)
-- **Allow force pushes:** ❌
-- **Allow deletions:** ❌
+Choose the tier based on change size. When in doubt, go one tier higher.
 
-You CAN push directly to `main` for trivial changes (docs, README tweaks), but CI will flag you immediately if the build is broken. All non-trivial changes go through a PR.
+| Tier | When to use | Workflow |
+|------|-------------|----------|
+| **1 — Full** | New phases, new exported verbs, anything where correct behavior is undecided | spec → implementation plan → `/r-implement` → `/commit-and-pr` |
+| **2 — Plan only** | Medium bug fixes, new arguments, edge case additions — behavior obvious, approach isn't | implementation plan → `/r-implement` → `/commit-and-pr` |
+| **3 — Direct** | Clear bug fixes localized to 1–2 functions, test additions, roxygen changes | branch → `/r-implement` → `/commit-and-pr` |
+| **0 — Commit** | Typos, comments, `.gitignore`, README tweaks | direct commit to `develop` (no branch) |
 
 ---
 
-## 2. Branching Model (GitHub Flow)
+## Branching Model
 
-Every non-trivial change lives on a feature branch and merges via a self-PR. Trivial changes (typos, comment fixes, README edits) can push directly to `main`.
+```
+main          ← always stable; every commit is a tagged release
+  ↑
+develop       ← integration branch; all feature work lands here first
+  ↑
+feature/*     ← individual units of work; branch from develop
+hotfix/*      ← urgent fixes only; branch from main
+```
 
-### Branch lifecycle
-```
-main
- └── feature/filter         # create branch
-      └── (commits)
-      └── (CI passes)
-      └── (self-PR opened)
-      └── (checklist checked off)
-      └── (squash merge to main)
-      └── (branch deleted)
-```
+Feature branches always cut from `develop` and merge back to `develop`.
+Never open a feature PR directly against `main`.
+
+Hotfixes branch from `main`, merge to `main`, then also merge to `develop`
+to stay in sync.
 
 ### What gets a branch vs. direct push
+
 | Change type | Branch needed? |
-|-------------|---------------|
+|-------------|----------------|
 | New R source file | Yes |
 | New test file | Yes |
 | Any change to exported function | Yes |
 | README / docs update | No |
 | Comment or typo fix | No |
-| DESCRIPTION metadata | No |
 | `.Rbuildignore` / `.gitignore` | No |
+| Version bump + NEWS.md (release prep) | Direct commit to `develop` |
 
 ---
 
-## 3. Branch Naming
+## Branch Naming
 
 Format: `{type}/{short-description}`
 
-| Prefix | Use for |
-|--------|---------|
-| `feature/` | New functionality (new R file, new exported function) |
-| `fix/` | Bug fix in existing implementation |
-| `docs/` | Documentation-only changes (roxygen, README, vignettes) |
-| `test/` | Test-only additions or fixes |
-| `chore/` | Maintenance (CI config, DESCRIPTION, build tooling) |
-| `refactor/` | Internal restructuring with no behavioral change |
+| Prefix | Target | Use for |
+|--------|--------|---------|
+| `feature/` | `develop` | New functionality |
+| `fix/` | `develop` | Bug fix in existing implementation |
+| `hotfix/` | `main` | Urgent fix that can't wait for next release |
+| `docs/` | `develop` | Documentation-only changes |
+| `test/` | `develop` | Test-only additions or fixes |
+| `chore/` | `develop` | Maintenance (CI config, build tooling) |
+| `refactor/` | `develop` | Internal restructuring, no behavioral change |
 
 ### Examples
+
 ```
-feature/filter
-feature/select
-feature/mutate
-feature/rename
-feature/arrange
-feature/group-by
-feature/drop-na
+feature/survey-result
+feature/phase1-svymean
 fix/filter-domain-accumulation
 test/filter-cross-design
 chore/ci-coverage-workflow
@@ -98,26 +94,14 @@ docs/readme-examples
 
 ---
 
-## 4. PR Granularity
+## Commit Format (Conventional Commits)
 
-**One PR per logical unit of work.** For dplyr verbs: one PR per verb (or tightly related pair). Never bundle multiple unrelated verbs into one PR because it's faster.
-
-Phase-specific PR maps live in each phase's implementation plan (e.g., `plans/phase-0.5-implementation-plan.md`). The implementation plan is the source of truth for branch names and PR scope — not this file.
-
----
-
-## 5. Commit Message Format (Conventional Commits)
-
-### Format
 ```
 {type}({scope}): {short description}
-
-[optional body]
-
-[optional footer(s)]
 ```
 
 ### Types
+
 | Type | Use for |
 |------|---------|
 | `feat` | New exported function, new verb |
@@ -126,12 +110,17 @@ Phase-specific PR maps live in each phase's implementation plan (e.g., `plans/ph
 | `test` | Adding or updating tests (no production code change) |
 | `chore` | CI config, DESCRIPTION, NAMESPACE, build tooling |
 | `refactor` | Internal restructuring with no behavioral change |
-| `perf` | Performance improvement (Phase 3+) |
+| `perf` | Performance improvement |
 
-### Scopes (optional but useful)
-Use the verb or file name as scope: `filter`, `select`, `mutate`, `rename`, `arrange`, `group-by`, `tidyr`, `utils`, `ci`, `context`
+### Scopes
+
+Use the verb or file name as scope:
+
+`filter`, `select`, `mutate`, `rename`, `arrange`, `group-by`, `tidyr`,
+`joins`, `result`, `utils`, `ci`, `context`
 
 ### Examples
+
 ```
 feat(filter): implement domain-aware filter.survey_base
 feat(select): implement select.survey_base with visible_vars
@@ -139,10 +128,11 @@ fix(filter): AND-accumulate domain masks across chained filter() calls
 test(filter): add cross-design oracle tests for domain estimation
 docs(filter): add tidy-select examples to filter.survey_base roxygen
 chore(ci): add test-coverage GitHub Actions workflow
-chore(description): bump version to 0.1.0 for Phase 0.5 release
+chore(description): bump version to 0.2.0 for Phase 1 release
 ```
 
 ### Squash merge commit message
+
 Write it as a conventional commit summarizing the whole PR:
 ```
 feat(filter): implement domain-aware filtering for all design types (#3)
@@ -151,7 +141,7 @@ GitHub auto-appends `(#PR_NUMBER)` if you set the PR title as a conventional com
 
 ---
 
-## 6. PR Template
+## PR Template
 
 `.github/PULL_REQUEST_TEMPLATE.md`:
 
@@ -174,7 +164,7 @@ Changelog entry format (required before every PR) is defined in
 
 ---
 
-## 7. Merge Strategy
+## Merge Strategy
 
 **Squash and merge** on all PRs. Configure in GitHub → Settings → Pull Requests:
 - [x] Allow squash merging
@@ -184,45 +174,64 @@ Changelog entry format (required before every PR) is defined in
 
 ---
 
-## 8. Phase Transitions
+## Versioning
 
-### Tagging convention
-At the completion of each phase:
+| Context | Format | Example |
+|---------|--------|---------|
+| Active development on `develop` | `X.Y.Z.9000` | `0.1.0.9000` |
+| Released on `main` | `X.Y.Z` | `0.1.0` |
 
-```bash
-# Phase 0.5 complete
-git tag -a v0.1.0 -m "Phase 0.5 complete: dplyr/tidyr verbs for survey objects"
-git push origin v0.1.0
-```
+### Phase → version mapping
 
-### Version → phase mapping
 | Tag | DESCRIPTION version | What it means |
 |-----|---------------------|---------------|
-| `v0.0.0-pre` | `0.0.0.9000` | Pre-implementation baseline |
 | `v0.1.0` | `0.1.0` | Phase 0.5 complete — all dplyr/tidyr verbs |
+| `v0.2.0` | `0.2.0` | Phase 1 complete — estimation functions |
+| `v0.3.0` | `0.3.0` | Phase 2 complete — regression |
 | `v1.0.0` | `1.0.0` | Stable API, CRAN submission |
 
 ### Dev version during a phase
+
 Between tags, DESCRIPTION carries the `.9000` suffix:
 ```
-Version: 0.0.0.9000  # during Phase 0.5 development
+Version: 0.1.0.9000  # during Phase 1 development
 ```
 
 ---
 
-## 9. CI/CD Workflows
+## Release Preparation
+
+Use `/merge-main`. It handles: NEWS.md update → version bump → `devtools::check()` →
+PR `develop` → `main` → tag → post-release `.9000` bump.
+
+---
+
+## CI/CD Workflows
 
 ### Active workflows
+
 | Workflow | Trigger |
 |----------|---------|
-| `R-CMD-check.yaml` | Push to any branch, PR to `main` |
-| `test-coverage.yaml` | Push to `main`, PRs |
+| `R-CMD-check.yaml` | Push to any branch, PR to `main` or `develop` |
+| `test-coverage.yaml` | Push to `main` or `develop`, PRs |
 | `pkgdown.yaml` | Push to `main` only |
 
 ### R-CMD-check matrix
+
 ```yaml
 # Matrix: {os: [ubuntu-latest, windows-latest, macos-latest], r: [release, devel]}
 ```
 
-### Required status check for branch protection
-Set `R-CMD-check (ubuntu-latest, release)` as the required status check. Windows and macOS checks are informational.
+### Required status checks for branch protection
+
+Set `R-CMD-check (ubuntu-latest, release)` as the required status check for
+both `main` and `develop`. Windows and macOS checks are informational.
+
+### Branch protection settings
+
+For both `main` and `develop` (GitHub → Settings → Branches):
+- **Require status checks to pass before merging:** ✅
+- **Require branches to be up to date before merging:** ✅
+- **Require pull request reviews before merging:** ❌ (solo author)
+- **Allow force pushes:** ❌
+- **Allow deletions:** ❌
