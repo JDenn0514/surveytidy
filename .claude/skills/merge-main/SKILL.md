@@ -72,6 +72,22 @@ Find the last release tag on `main`:
 git describe --tags --abbrev=0 origin/main
 ```
 
+**Check for hotfix divergence** — run this and report the result:
+
+```bash
+git log origin/develop..origin/main --oneline
+```
+
+**If any commits appear:** `main` has commits that are not in `develop`
+(usually unsynced hotfixes). STOP and tell the user:
+
+> "`main` has N commit(s) not in `develop`: [list them]. These must be
+> merged into `develop` before the release PR, or they will cause a merge
+> conflict. Run `git checkout develop && git merge origin/main` and resolve
+> any conflicts, then push `develop` before continuing."
+
+Do not proceed until `develop` is in sync with `main`.
+
 Show the user what's changed since that tag:
 
 ```bash
