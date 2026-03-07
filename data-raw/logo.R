@@ -12,18 +12,25 @@
 # Export icons as PNG with a transparent background at ~512x512px.
 # =============================================================================
 
+# load the libraries
 library(hexSticker)
 library(cowplot)
+library(sysfonts)
 library(showtext)
 library(ggplot2)
 
-# =============================================================================
-# surveytidy
-#    Icon suggestion: broom, magic wand, or sparkle/clean symbol
-#    Search terms: "broom sweep", "cleaning broom", "magic wand sparkle"
-# =============================================================================
 
-icon_tidy <- ggdraw() + draw_image("man/figures/logo.png", scale = 1.25)
+# load the font
+font_add(
+  family = "MonaNeon",
+  regular = "~/Downloads/Static Fonts/Monaspace Neon/MonaspaceNeon-Semibold.otf",
+  bold = "/Users/jacobdennen/Downloads/Static Fonts/Monaspace Neon/MonaspaceNeon-Bold.otf"
+)
+
+showtext_auto()
+
+# Load the icon
+icon_tidy <- ggdraw() + draw_image("man/figures/icon.png", scale = 1.35)
 
 sticker(
   subplot = icon_tidy,
@@ -37,7 +44,7 @@ sticker(
 
   # ── Package name ──────────────────────────────────────────────────────────
   p_color = "white",
-  p_family = "Inter",
+  p_family = "MonaNeon",
   p_size = 18,
   p_y = 1.43,
 
@@ -46,11 +53,11 @@ sticker(
   h_color = "#226677", # darker teal border
 
   # ── Optional URL at bottom ────────────────────────────────────────────────
-  url = "github.com/you/surveytidy",
+  url = "",
   u_color = "white",
   u_size = 3.5,
 
   # ── Output file ───────────────────────────────────────────────────────────
-  filename = "surveytidy.png",
+  filename = "man/figures/logo.png",
   dpi = 300
 )

@@ -48,7 +48,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jacob Dennen \email{jacob.dennen@example.com}
+\strong{Maintainer}: Jacob Dennen \email{jdenn0514@gmail.com} (\href{https://orcid.org/0000-0003-3006-7364}{ORCID}) [copyright holder]
 
 }
 \keyword{internal}
