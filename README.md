@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# surveytidy
+# surveytidy <a href="https://jdenn0514.github.io/surveytidy/index.html"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
 <!-- badges: start -->
 
@@ -28,6 +28,11 @@ library(dplyr)
 #> 
 #>     intersect, setdiff, setequal, union
 library(surveytidy)
+#> 
+#> Attaching package: 'surveytidy'
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
 
 # Build a survey design from the 2025 Pew NPORS survey
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
