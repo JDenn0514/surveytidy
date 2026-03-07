@@ -343,11 +343,22 @@ NEWS.md section as the release body (optional but recommended).
 
 ## Step 10: Post-release Dev Bump
 
-Switch back to `develop` and bump the version:
+Switch back to `develop`, sync history with `main`, then bump the version:
 
 ```bash
 git checkout develop
 git pull
+```
+
+**Sync `develop` with `main` immediately** — squash merges create a new commit
+on `main` with no git ancestry back to `develop`. If you skip this step, the
+next release PR will have merge conflicts on any file changed in both the
+squash and subsequent `develop` work. Merging right now (before any new commits
+land) is always conflict-free because the branch contents are identical:
+
+```bash
+git merge origin/main --no-edit
+git push origin develop
 ```
 
 Edit `DESCRIPTION`: change `Version: X.Y.Z` to `Version: X.Y.Z.9000`.
