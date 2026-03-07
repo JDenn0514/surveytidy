@@ -16,3 +16,5 @@
 ^\.editorconfig$
 ^air\.toml$
 ^pkgdown$
+^data-raw$
+^surveytidy\.png$
