@@ -17,6 +17,11 @@ library(dplyr)
 #> 
 #>     intersect, setdiff, setequal, union
 library(surveytidy)
+#> 
+#> Attaching package: 'surveytidy'
+#> The following object is masked from 'package:stats':
+#> 
+#>     filter
 
 # Build a survey design from the 2025 Pew NPORS survey
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)

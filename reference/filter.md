@@ -122,6 +122,7 @@ filter(d, agecat >= 3)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 3143 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -150,6 +151,7 @@ filter(d, agecat >= 3, gender == 2)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 1665 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -178,6 +180,7 @@ filter_out(d, agecat == 1)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 4542 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -206,6 +209,7 @@ filter(d, agecat >= 3, gender == 2)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 1665 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -232,6 +236,7 @@ filter(d, agecat >= 3) |> filter(gender == 2)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 1665 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -260,6 +265,7 @@ filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 4846 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -286,6 +292,7 @@ filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 4846 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end

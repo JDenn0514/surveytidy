@@ -1,5 +1,26 @@
 # Changelog
 
+## surveytidy 0.2.1
+
+### Website & branding
+
+- Added package hex logo.
+- Updated pkgdown site colours to a teal theme.
+- `README` now displays the hex logo.
+- `LICENSE.md` updated to credit third-party hex sticker icon (Freepik /
+  Flaticon, CC BY 3.0).
+- `DESCRIPTION` author entry updated with current email, ORCID, and
+  copyright-holder (`cph`) role.
+
+### Infrastructure
+
+- Added a hotfix-sync check to the CI strategy and `merge-main` skill to
+  detect commits on `main` that have not been merged back to `develop`.
+- Archived planning documents for the `survey-result` and
+  dedup-rename-rowwise phases.
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.2.0
 
 ### New verbs

@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>surveytidy — Tidy dplyr/tidyr Verbs for Survey Design Objects • surveytidy</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/Roboto-0.4.10/font.css" rel="stylesheet">
@@ -17,16 +22,17 @@
 ">
 <meta property="og:description" content="dplyr and tidyr verbs for surveycore survey design objects. filter() uses domain estimation so variance estimates stay correct.
 ">
+<meta property="og:image" content="https://jdenn0514.github.io/surveytidy/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-#e5f3f7" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-#CCEEEE" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,8 +54,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="surveytidy">surveytidy<a class="anchor" aria-label="anchor" href="#surveytidy"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="surveytidy-">surveytidy 
+<a class="anchor" aria-label="anchor" href="#surveytidy-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p>surveytidy provides dplyr and tidyr verbs for survey design objects created with the <a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a> package. It makes survey analysis feel natural to tidyverse users. Full documentation is at <a href="https://jdenn0514.github.io/surveytidy/" class="uri">https://jdenn0514.github.io/surveytidy/</a>.</p>
@@ -65,6 +74,11 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'surveytidy'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter</span></span>
 <span></span>
 <span><span class="co"># Build a survey design from the 2025 Pew NPORS survey</span></span>
 <span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span>
@@ -486,7 +500,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Jacob Dennen <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Jacob Dennen <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0003-3006-7364" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 

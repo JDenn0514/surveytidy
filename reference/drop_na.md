@@ -80,6 +80,7 @@ drop_na(d, votegen_post)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 3973 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -108,6 +109,7 @@ drop_na(d, smuse_fb, smuse_yt)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 4846 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
@@ -136,6 +138,7 @@ drop_na(d)
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 626 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end
