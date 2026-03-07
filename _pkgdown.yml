@@ -9,9 +9,9 @@ template:
     heading_font: {google: "Roboto"}
     bg: "#fcfbf9"         # lighten springwood background
     fg: "#000000"         # contrast ratio: 15.76 for text
-    primary: "#14A2FCFF"  # light blue link text
-    navbar-bg: "#e5f3f7"  # change nav bar background
-    navbar-light-hover-color: "#14A2FCFF"
+    primary: "#3399AA"    # teal primary
+    navbar-bg: "#CCEEEE"  # light teal tint
+    navbar-light-hover-color: "#3399AA"
 
 home:
   title: "surveytidy — Tidy dplyr/tidyr Verbs for Survey Design Objects"
@@ -21,7 +21,7 @@ home:
 
 navbar:
   type: "light"
-  bg: "#e5f3f7"  # apparently this plus navbar-bg needs to be set to same color?
+  bg: "#CCEEEE"  # must match navbar-bg
   pill-active: "#000000"
   structure:
     left:  [intro, reference, news]

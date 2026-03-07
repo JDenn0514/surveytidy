@@ -50,8 +50,14 @@ hotfix/*      ← urgent fixes only; branch from main
 Feature branches always cut from `develop` and merge back to `develop`.
 Never open a feature PR directly against `main`.
 
-Hotfixes branch from `main`, merge to `main`, then also merge to `develop`
-to stay in sync.
+Hotfixes branch from `main`, merge to `main`, then **immediately** open a
+second PR from the hotfix branch (or `main`) into `develop` to stay in sync.
+Do not leave `main` ahead of `develop` — this causes merge conflicts at
+release time.
+
+**Required check before any release PR:** run
+`git log origin/develop..origin/main --oneline`. If it shows anything, sync
+`develop` first.
 
 ### What gets a branch vs. direct push
 
