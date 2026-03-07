@@ -12,6 +12,7 @@
       -- Survey Design ---------------------------------------------------------------
       <survey_taylor> (Taylor series linearization)
       Sample size: 100
+      Domain: 0 of 100 rows
       
     Output
       # A tibble: 100 x 9
