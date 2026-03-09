@@ -57,7 +57,9 @@
       "Bash(git:*)",
       "Bash(air format:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(do:*)"
+      "Bash(do:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
     ]
   }
 }

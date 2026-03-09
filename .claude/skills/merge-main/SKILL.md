@@ -10,6 +10,8 @@ description: >
   or edit R source files, test files, or any other source code.
 ---
 
+**Announce at start:** "Running merge-main skill."
+
 # Merge-Main Skill
 
 ## HARD CONSTRAINT — READ THIS FIRST
@@ -122,19 +124,10 @@ Read each file. These are the source material for the NEWS.md section.
 
 ### Draft the new section
 
-Write a draft NEWS.md section. Format:
+Read `refs/news-format.md` for the canonical format and rules.
 
-```markdown
-# surveytidy X.Y.Z
-
-## New features / improvements
-
-- [Summary of `feat:` commits]
-
-## Bug fixes
-
-- [Summary of `fix:` commits]
-```
+Write a draft NEWS.md section following that format, using the changelog files
+as source material.
 
 **Show the draft to the user and ask for approval.** Do not write to NEWS.md
 until the user approves the content. Revise if requested.
@@ -209,25 +202,10 @@ If one already exists: report its URL and skip to Step 7 (Monitor CI).
 
 ### Draft the PR
 
-PR title: `chore(release): bump version to X.Y.Z`
+Read `refs/release-pr-template.md` for the canonical PR title and body format.
 
-PR body:
-
-```markdown
-## What
-
-Release surveytidy X.Y.Z.
-
-## What's in this release
-
-[paste the NEWS.md section content here]
-
-## Checklist
-
-- [ ] `devtools::check()` — 0 errors, 0 warnings
-- [ ] NEWS.md section complete and accurate
-- [ ] DESCRIPTION version bumped to X.Y.Z
-```
+Draft the PR title and body following that template, using the approved NEWS.md
+section as the release content.
 
 **Show the draft to the user before creating.** Ask for approval. Do NOT
 create the PR until the user approves.
