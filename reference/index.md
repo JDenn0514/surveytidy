@@ -88,3 +88,33 @@ These predicates are designed for use by estimation functions in Phase
   : Test whether a survey design is in rowwise mode
 - [`is_grouped()`](https://jdenn0514.github.io/surveytidy/reference/is_grouped.md)
   : Test whether a survey design has active grouping
+
+## Recoding
+
+Survey-aware versions of dplyr’s recoding and conditional functions.
+When called with `.label`, `.value_labels`, `.factor`, or
+`.description`, these functions automatically propagate label metadata
+into `@metadata` via
+[`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md).
+When called without these arguments, the output is identical to the
+corresponding dplyr function.
+
+- [`case_when()`](https://jdenn0514.github.io/surveytidy/reference/case_when.md)
+  : A generalised vectorised if-else
+
+- [`replace_when()`](https://jdenn0514.github.io/surveytidy/reference/replace_when.md)
+  : Partially update a vector using conditional formulas
+
+- [`if_else()`](https://jdenn0514.github.io/surveytidy/reference/if_else.md)
+  : Vectorised if-else
+
+- [`na_if()`](https://jdenn0514.github.io/surveytidy/reference/na_if.md)
+  :
+
+  Convert values to `NA`
+
+- [`recode_values()`](https://jdenn0514.github.io/surveytidy/reference/recode_values.md)
+  : Recode values using an explicit mapping
+
+- [`replace_values()`](https://jdenn0514.github.io/surveytidy/reference/replace_values.md)
+  : Partially update values using an explicit mapping

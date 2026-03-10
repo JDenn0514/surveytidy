@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,6 +181,57 @@
 
         </dt>
         <dd>Test whether a survey design has active grouping</dd>
+      </dl></div><div class="section level2">
+      <h2 id="recoding">Recoding<a class="anchor" aria-label="anchor" href="#recoding"></a></h2>
+
+      <div class="section-desc"><p>Survey-aware versions of dplyr’s recoding and conditional functions. When called with <code>.label</code>, <code>.value_labels</code>, <code>.factor</code>, or <code>.description</code>, these functions automatically propagate label metadata into <code>@metadata</code> via <code><a href="../reference/mutate.html">mutate()</a></code>. When called without these arguments, the output is identical to the corresponding dplyr function.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="case_when.html">case_when()</a></code>
+
+        </dt>
+        <dd>A generalised vectorised if-else</dd>
+
+        <dt>
+
+          <code><a href="replace_when.html">replace_when()</a></code>
+
+        </dt>
+        <dd>Partially update a vector using conditional formulas</dd>
+
+        <dt>
+
+          <code><a href="if_else.html">if_else()</a></code>
+
+        </dt>
+        <dd>Vectorised if-else</dd>
+
+        <dt>
+
+          <code><a href="na_if.html">na_if()</a></code>
+
+        </dt>
+        <dd>Convert values to <code>NA</code></dd>
+
+        <dt>
+
+          <code><a href="recode_values.html">recode_values()</a></code>
+
+        </dt>
+        <dd>Recode values using an explicit mapping</dd>
+
+        <dt>
+
+          <code><a href="replace_values.html">replace_values()</a></code>
+
+        </dt>
+        <dd>Partially update values using an explicit mapping</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

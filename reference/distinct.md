@@ -98,6 +98,10 @@ library(surveytidy)
 library(dplyr)
 #> 
 #> Attaching package: ‘dplyr’
+#> The following objects are masked from ‘package:surveytidy’:
+#> 
+#>     case_when, if_else, na_if, recode_values, replace_values,
+#>     replace_when
 #> The following objects are masked from ‘package:stats’:
 #> 
 #>     filter, lag

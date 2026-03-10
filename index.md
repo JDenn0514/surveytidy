@@ -409,7 +409,7 @@ surveytidy is an add-on layer. surveycore provides:
   `survey_twophase`)
 - Constructors
   ([`as_survey()`](https://jdenn0514.github.io/surveycore/reference/as_survey.html),
-  [`as_survey_rep()`](https://jdenn0514.github.io/surveycore/reference/as_survey_rep.html),
+  `as_survey_rep()`,
   [`as_survey_twophase()`](https://jdenn0514.github.io/surveycore/reference/as_survey_twophase.html))
 - Metadata system (variable labels, value labels, question prefaces)
 

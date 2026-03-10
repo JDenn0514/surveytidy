@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,38 @@
       <small>Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="surveytidy-030">surveytidy 0.3.0<a class="anchor" aria-label="anchor" href="#surveytidy-030"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<div class="section level4">
+<h4 id="survey-aware-recoding-functions-0-3-0">Survey-aware recoding functions<a class="anchor" aria-label="anchor" href="#survey-aware-recoding-functions-0-3-0"></a></h4>
+<p>Six vector-level recoding functions are now available. Each shadows its dplyr equivalent and adds optional arguments for attaching variable labels, value labels, and transformation notes directly inside <code><a href="../reference/mutate.html">mutate()</a></code>. Without any of those arguments, output is identical to dplyr.</p>
+<ul><li><p><code><a href="../reference/case_when.html">case_when()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">dplyr::case_when()</a></code>. Evaluates a sequence of <code>condition ~ value</code> formulas and uses the first match for each element. Use this to create an entirely new vector from conditions. Accepts <code>.label</code> to set a variable label, <code>.value_labels</code> to attach a named vector of value labels, <code>.factor = TRUE</code> to return an ordered factor (levels follow formula order), and <code>.description</code> to record a plain-language note about the transformation.</p></li>
+<li><p><code><a href="../reference/if_else.html">if_else()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">dplyr::if_else()</a></code>. Applies a single binary condition element-wise (<code>true</code>/<code>false</code>/<code>missing</code>). Stricter than base <code><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse()</a></code>: <code>true</code>, <code>false</code>, and <code>missing</code> are cast to a common type. Accepts <code>.label</code>, <code>.value_labels</code>, and <code>.description</code>.</p></li>
+<li><p><code><a href="../reference/na_if.html">na_if()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/na_if.html" class="external-link">dplyr::na_if()</a></code>. Converts specific values to <code>NA</code>. Unlike dplyr’s scalar-only <code>y</code>, this version accepts a vector <code>y</code> and replaces all matching values in a single call. When the input carries value labels, they are inherited automatically; <code>.update_labels = TRUE</code> (the default) removes label entries for the NA’d values, while <code>.update_labels = FALSE</code> retains them (useful for documenting what was set to missing). Also accepts <code>.description</code>.</p></li>
+<li><p><code><a href="../reference/recode_values.html">recode_values()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::recode_values()</a></code>. Replaces values found in <code>from</code> with the corresponding value from <code>to</code>; values not in <code>from</code> are kept unchanged or trigger an error (<code>.unmatched = "error"</code>). Intended for full remapping of every value in a vector. Set <code>.use_labels = TRUE</code> to build the <code>from</code>/<code>to</code> map automatically from the input’s existing value labels (codes become <code>from</code>; label strings become <code>to</code>). Also accepts <code>.label</code>, <code>.value_labels</code>, <code>.factor</code>, and <code>.description</code>.</p></li>
+<li><p><code><a href="../reference/replace_values.html">replace_values()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::replace_values()</a></code>. Replaces values found in <code>from</code> with the corresponding value from <code>to</code>; all other values are left unchanged. Use this for partial in-place replacement of specific values in an existing vector. Automatically inherits both the variable label and value labels from the input; supply <code>.label</code> or <code>.value_labels</code> to override. Also accepts <code>.description</code>.</p></li>
+<li><p><code><a href="../reference/replace_when.html">replace_when()</a></code> — a survey-aware <code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">dplyr::replace_when()</a></code>. Like <code><a href="../reference/case_when.html">case_when()</a></code> but for partial in-place updates: evaluates <code>condition ~ value</code> formulas and replaces only matching elements, leaving all others at their original value. Automatically inherits labels from the input; supply <code>.label</code> or <code>.value_labels</code> to override. Also accepts <code>.description</code>.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="shared-label-arguments-0-3-0">Shared label arguments<a class="anchor" aria-label="anchor" href="#shared-label-arguments-0-3-0"></a></h4>
+<p>All six functions support a common set of label arguments that propagate into <code>@metadata</code> when used inside <code><a href="../reference/mutate.html">mutate()</a></code>:</p>
+<ul><li>
+<code>.label</code> — a character string stored in <code>@metadata@variable_labels</code> as the human-readable variable label for the new column.</li>
+<li>
+<code>.value_labels</code> — a named vector stored in <code>@metadata@value_labels</code>, where names are label strings and values are the corresponding data values.</li>
+<li>
+<code>.description</code> — a plain-language string stored in <code>@metadata@transformations</code> describing how the variable was derived.</li>
+</ul><p><code><a href="../reference/case_when.html">case_when()</a></code> and <code><a href="../reference/recode_values.html">recode_values()</a></code> also accept <code>.factor = TRUE</code>, which returns an ordered factor instead of a character vector (levels follow formula or <code>to</code> order respectively). <code>.factor</code> and <code>.label</code> cannot be combined.</p>
+</div>
+<div class="section level4">
+<h4 id="mutate-enhancements-0-3-0">
+<code>mutate()</code> enhancements<a class="anchor" aria-label="anchor" href="#mutate-enhancements-0-3-0"></a></h4>
+<p><code><a href="../reference/mutate.html">mutate()</a></code> now coordinates label propagation automatically: it pre-attaches label attributes from <code>@metadata</code> before the inner dplyr call so recode functions can see existing labels, reads the label output back from recoded columns, and writes it into <code>@metadata</code> — all without extra user steps. The weight-column warning has also been split into two distinct classes: <code>surveytidy_warning_mutate_weight_col</code> for the weight column and <code>surveytidy_warning_mutate_structural_var</code> for strata, PSU, FPC, and replicate weights.</p>
+<hr></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="surveytidy-021">surveytidy 0.2.1<a class="anchor" aria-label="anchor" href="#surveytidy-021"></a></h2>
 <div class="section level3">
