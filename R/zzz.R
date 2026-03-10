@@ -211,58 +211,84 @@
   # ── survey_result verbs (PR 1 — passthrough) ──────────────────────────────
 
   registerS3method(
-    "filter", "survey_result",
-    get("filter.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "filter",
+    "survey_result",
+    get("filter.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "arrange", "survey_result",
-    get("arrange.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "arrange",
+    "survey_result",
+    get("arrange.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "mutate", "survey_result",
-    get("mutate.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "mutate",
+    "survey_result",
+    get("mutate.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice", "survey_result",
-    get("slice.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice",
+    "survey_result",
+    get("slice.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice_head", "survey_result",
-    get("slice_head.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice_head",
+    "survey_result",
+    get("slice_head.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice_tail", "survey_result",
-    get("slice_tail.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice_tail",
+    "survey_result",
+    get("slice_tail.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice_min", "survey_result",
-    get("slice_min.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice_min",
+    "survey_result",
+    get("slice_min.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice_max", "survey_result",
-    get("slice_max.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice_max",
+    "survey_result",
+    get("slice_max.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "slice_sample", "survey_result",
-    get("slice_sample.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "slice_sample",
+    "survey_result",
+    get("slice_sample.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "drop_na", "survey_result",
-    get("drop_na.survey_result", envir = ns), envir = asNamespace("tidyr")
+    "drop_na",
+    "survey_result",
+    get("drop_na.survey_result", envir = ns),
+    envir = asNamespace("tidyr")
   )
 
   # ── survey_result verbs (PR 2 — meta-updating) ───────────────────────────
 
   registerS3method(
-    "select", "survey_result",
-    get("select.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "select",
+    "survey_result",
+    get("select.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "rename", "survey_result",
-    get("rename.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "rename",
+    "survey_result",
+    get("rename.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
   registerS3method(
-    "rename_with", "survey_result",
-    get("rename_with.survey_result", envir = ns), envir = asNamespace("dplyr")
+    "rename_with",
+    "survey_result",
+    get("rename_with.survey_result", envir = ns),
+    envir = asNamespace("dplyr")
   )
 }

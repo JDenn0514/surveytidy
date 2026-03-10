@@ -22,7 +22,8 @@ Depends:
     R (>= 4.3.0)
 Imports:
     cli (>= 3.6.0),
-    dplyr (>= 1.1.0),
+    dplyr (>= 1.2.0),
+    haven (>= 2.5.0),
     rlang (>= 1.1.0),
     S7 (>= 0.1.0),
     surveycore (>= 0.0.0.9000),

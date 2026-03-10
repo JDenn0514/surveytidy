@@ -59,7 +59,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(do:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "WebFetch(domain:tidyverse.org)"
     ]
   }
 }

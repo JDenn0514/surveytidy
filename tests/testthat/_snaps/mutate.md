@@ -1,10 +1,10 @@
-# mutate() warns when a design variable is modified by name
+# mutate() warns surveytidy_warning_mutate_weight_col when a weight column is modified
 
     Code
       invisible(mutate(d, wt = wt * 1.1))
     Condition
       Warning:
-      ! mutate() modified design variable(s): wt.
-      i The survey design has been updated to reflect the new values.
-      v Use `update_design()` if you intend to modify design variables. Modifying them via `mutate()` may produce unexpected variance estimates.
+      ! mutate() modified weight column wt.
+      i Effective sample size may be affected.
+      v Use `update_design()` to intentionally change design variables.
 

@@ -370,7 +370,9 @@ rename_with.survey_result <- function(
   old_names <- names(resolved_cols)
 
   # Zero-match .cols — no-op
-  if (length(old_names) == 0L) return(.data)
+  if (length(old_names) == 0L) {
+    return(.data)
+  }
 
   # Step 2: Apply .fn
   new_names <- .fn(old_names, ...)

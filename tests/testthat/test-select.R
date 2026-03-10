@@ -171,7 +171,11 @@ test_that("select() preserves weight column on survey_calibrated without explici
   # Regression: .get_design_vars_flat() has no survey_calibrated branch and
   # returned character(0L), so the weight column was not protected and was
   # physically dropped, causing S7 validator to error.
-  df <- data.frame(y1 = 1:5, y2 = letters[1:5], cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9))
+  df <- data.frame(
+    y1 = 1:5,
+    y2 = letters[1:5],
+    cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9)
+  )
   d <- surveycore::as_survey_calibrated(df, weights = cal_wt)
 
   # Should not error even though cal_wt is not explicitly selected

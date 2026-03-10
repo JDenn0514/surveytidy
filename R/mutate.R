@@ -116,69 +116,84 @@ mutate.survey_base <- function(
 ) {
   .keep <- match.arg(.keep)
 
-  # Step 1: Determine base_data and effective_by based on rowwise / grouped
+  # Step 1a: Determine base_data and effective_by based on rowwise / grouped
   # mode. Rowwise mode takes precedence over grouping.
-  #
-  # Rowwise: wrap @data in dplyr::rowwise() so expressions like
-  # max(c_across(starts_with("y"))) compute per-row. effective_by is unused
-  # in this branch.
-  #
-  # Grouped: pass @groups as the effective .by so group_by(d, g) |>
-  # mutate(z = mean(x)) works identically to dplyr's grouped_df behaviour.
-  # Pass the character vector directly (not wrapped in all_of()) — dplyr's .by
-  # accepts character vectors, and all_of() outside a selection context is
-  # deprecated in tidyselect 1.2.0.
-  #
-  # Ungrouped: effective_by is whatever the user passed as .by (usually NULL).
   rowwise_mode <- isTRUE(.data@variables$rowwise)
   id_cols <- .data@variables$rowwise_id_cols %||% character(0)
   group_names <- .data@groups
 
-  if (rowwise_mode) {
-    effective_by <- NULL
-    base_data <- if (length(id_cols) > 0L) {
-      dplyr::rowwise(.data@data, dplyr::all_of(id_cols))
-    } else {
-      dplyr::rowwise(.data@data)
-    }
-  } else if (is.null(.by) && length(group_names) > 0L) {
-    base_data <- .data@data
-    effective_by <- group_names
-  } else {
-    base_data <- .data@data
-    effective_by <- .by
-  }
-
-  # Step 2: Detect design variable modification by name.
-  # Only explicitly-named LHS expressions (e.g., mutate(d, wt = wt * 2)) are
-  # detected. across() and other multi-output expressions are NOT detected —
-  # this limitation is known and accepted for Phase 0.5.
+  # Step 1b: Detect design variable modification by name.
+  # Split into two warning classes:
+  #   - weight column:  surveytidy_warning_mutate_weight_col
+  #   - structural vars (strata, PSU, FPC, repweights):
+  #     surveytidy_warning_mutate_structural_var
+  # Only explicitly-named LHS expressions are detected. across() and other
+  # multi-output expressions are NOT detected — accepted limitation.
   mutations <- rlang::quos(...)
   mutated_names <- names(mutations)
-  protected <- intersect(.protected_cols(.data), names(.data@data))
-  changed_design <- intersect(mutated_names, protected)
 
-  if (length(changed_design) > 0L) {
+  weight_var <- if (S7::S7_inherits(.data, surveycore::survey_twophase)) {
+    .data@variables$phase1$weights
+  } else {
+    .data@variables$weights
+  }
+  structural_vars <- setdiff(.survey_design_var_names(.data), weight_var)
+  structural_vars <- intersect(structural_vars, names(.data@data))
+
+  changed_weight <- intersect(mutated_names, weight_var)
+  changed_structural <- intersect(mutated_names, structural_vars)
+
+  if (length(changed_weight) > 0L) {
     cli::cli_warn(
       c(
-        "!" = "mutate() modified design variable(s): {.field {changed_design}}.",
-        "i" = "The survey design has been updated to reflect the new values.",
-        "v" = paste0(
-          "Use {.fn update_design} if you intend to modify design variables. ",
-          "Modifying them via {.fn mutate} may produce unexpected variance ",
-          "estimates."
+        "!" = "mutate() modified weight column {.field {changed_weight}}.",
+        "i" = "Effective sample size may be affected.",
+        "v" = "Use {.fn update_design} to intentionally change design variables."
+      ),
+      class = "surveytidy_warning_mutate_weight_col"
+    )
+  }
+  if (length(changed_structural) > 0L) {
+    cli::cli_warn(
+      c(
+        "!" = paste0(
+          "mutate() modified structural design variable(s): ",
+          "{.field {changed_structural}}."
+        ),
+        "i" = "Structural recoding can invalidate variance estimates.",
+        "i" = paste0(
+          "Use {.fn subset} or {.fn filter} to restrict the domain; ",
+          "do not recode design variables."
         )
       ),
-      class = "surveytidy_warning_mutate_design_var"
+      class = "surveytidy_warning_mutate_structural_var"
     )
   }
 
-  # Step 3: Run the mutation on @data.
+  # Step 2: Pre-attach label attrs from @metadata so recode functions can
+  # read them via attr(x, "labels") / attr(x, "label").
+  augmented_data <- .attach_label_attrs(.data@data, .data@metadata)
+
+  if (rowwise_mode) {
+    effective_by <- NULL
+    base_data <- if (length(id_cols) > 0L) {
+      dplyr::rowwise(augmented_data, dplyr::all_of(id_cols))
+    } else {
+      dplyr::rowwise(augmented_data)
+    }
+  } else if (is.null(.by) && length(group_names) > 0L) {
+    base_data <- augmented_data
+    effective_by <- group_names
+  } else {
+    base_data <- augmented_data
+    effective_by <- .by
+  }
+
+  # Step 3: Run the mutation on augmented_data (was on @data in Phase 0.5).
   # Capture .before and .after as quosures so NSE column-name expressions
   # (e.g., .before = y2) are forwarded correctly via rlang::inject().
   # Also: dplyr 1.2.0 errors when .before AND .after are both passed explicitly
-  # (even as NULL), and tidyselect warns when effective_by = NULL is passed as
-  # an external variable. Only include each argument when actually needed.
+  # (even as NULL), and tidyselect warns when effective_by = NULL is passed.
   before_quo <- rlang::enquo(.before)
   after_quo <- rlang::enquo(.after)
   has_before <- !rlang::quo_is_null(before_quo)
@@ -198,41 +213,69 @@ mutate.survey_base <- function(
 
   # Strip rowwise_df class after rowwise mutation. dplyr::mutate() on a
   # rowwise_df returns a rowwise_df. If this class leaks into @data, every
-  # subsequent mutate() call on the object will behave row-wise — even after
-  # ungroup() has cleared @variables$rowwise. Stripping here prevents that.
+  # subsequent mutate() call on the object will behave row-wise.
   if (rowwise_mode) {
     new_data <- dplyr::ungroup(new_data)
   }
 
-  # Step 4: Re-attach protected columns that .keep dropped
-  # (e.g., .keep = "none" removes all non-mutated columns, including design vars)
+  # Step 4: Post-detect labelled outputs and update @metadata.
+  updated_metadata <- .extract_labelled_outputs(
+    new_data,
+    .data@metadata,
+    mutated_names
+  )
+
+  # Step 5a: Capture surveytidy_recode attrs for transformation log before
+  # the strip step removes them. Capture the full attr (not just description)
+  # so we can distinguish recode calls (attr set) from non-recode calls
+  # (attr NULL), even when .description was not supplied (description = NULL).
+  recode_attrs <- lapply(mutated_names, function(col) {
+    attr(new_data[[col]], "surveytidy_recode")
+  })
+  names(recode_attrs) <- mutated_names
+
+  # Step 5b: Strip haven attrs and surveytidy_recode attr from @data.
+  new_data <- .strip_label_attrs(new_data)
+
+  # Step 6: Re-attach protected columns that .keep dropped
   protected_in_data <- intersect(.protected_cols(.data), names(.data@data))
   missing_protected <- setdiff(protected_in_data, names(new_data))
   if (length(missing_protected) > 0L) {
     new_data <- cbind(new_data, .data@data[, missing_protected, drop = FALSE])
   }
 
-  # Step 5: Update visible_vars — add new columns, remove dropped columns
+  # Step 7: Update visible_vars — add new columns, remove dropped columns
   new_cols <- setdiff(names(new_data), names(.data@data))
   if (!is.null(.data@variables$visible_vars)) {
     vv <- .data@variables$visible_vars
-    vv <- intersect(vv, names(new_data)) # remove any .keep-dropped visible cols
-    vv <- c(vv, new_cols) # append newly created columns
+    vv <- intersect(vv, names(new_data))
+    vv <- c(vv, new_cols)
     .data@variables$visible_vars <- if (length(vv) == 0L) NULL else vv
   }
-  # If visible_vars is NULL, it stays NULL (all cols shown, new cols included)
 
-  # Step 6: Record new column transformations in @metadata
-  # Only explicitly-named mutations have a per-column quosure entry.
-  for (col in new_cols) {
+  # Step 8: Record transformations in @metadata@transformations.
+  # Recode calls (those that set the surveytidy_recode attr) get a structured
+  # list record: fn, source_cols, expr, output_type, description.
+  # Non-recode new columns get plain text (Phase 0.5 behavior).
+  for (col in mutated_names) {
     q <- mutations[[col]]
-    if (!is.null(q)) {
-      .data@metadata@transformations[[col]] <- rlang::quo_text(q)
+    recode_attr <- recode_attrs[[col]]
+    if (!is.null(q) && !is.null(recode_attr)) {
+      updated_metadata@transformations[[col]] <- list(
+        fn = as.character(rlang::call_name(rlang::quo_get_expr(q))),
+        source_cols = setdiff(all.vars(rlang::quo_squash(q)), col),
+        expr = deparse(rlang::quo_squash(q)),
+        output_type = if (is.factor(new_data[[col]])) "factor" else "vector",
+        description = recode_attr$description
+      )
+    } else if (!is.null(q) && col %in% new_cols) {
+      updated_metadata@transformations[[col]] <- rlang::quo_text(q)
     }
   }
 
-  # Step 7: Assign updated @data and return
+  # Step 9: Assign updated @data and @metadata and return.
   .data@data <- new_data
+  .data@metadata <- updated_metadata
   .data
 }
 
