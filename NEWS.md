@@ -1,4 +1,4 @@
-# surveytidy 0.2.2
+# surveytidy 0.3.0
 
 ## New features
 

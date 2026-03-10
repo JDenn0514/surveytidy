@@ -1,6 +1,6 @@
 Package: surveytidy
 Title: Tidy dplyr/tidyr Verbs for Survey Design Objects
-Version: 0.2.2
+Version: 0.3.0
 Authors@R:
     person(
         "Jacob", "Dennen", 
