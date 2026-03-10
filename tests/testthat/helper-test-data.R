@@ -205,6 +205,20 @@ test_invariants <- function(design) {
     )
   }
 
+  # Invariant 7: surveytidy_recode attr must be stripped before @data is stored.
+  # .strip_label_attrs() in mutate.survey_base() must remove this attr from
+  # every column. Any failure here is a regression in the strip step.
+  for (col in names(design@data)) {
+    testthat::expect_null(
+      attr(design@data[[col]], "surveytidy_recode"),
+      label = paste0(
+        "@data[[\"",
+        col,
+        "\"]] must not carry surveytidy_recode attr"
+      )
+    )
+  }
+
   invisible(design)
 }
 
@@ -246,7 +260,11 @@ make_survey_result <- function(
       nest = TRUE
     )
     d <- suppressWarnings(
-      surveycore::as_survey_twophase(phase1, subset = phase2_ind, method = "approx")
+      surveycore::as_survey_twophase(
+        phase1,
+        subset = phase2_ind,
+        method = "approx"
+      )
     )
   } else {
     all_designs <- make_all_designs(seed = seed)
@@ -255,8 +273,8 @@ make_survey_result <- function(
 
   suppressWarnings(switch(
     type,
-    means  = surveycore::get_means(d, x = y1, group = group, variance = "se"),
-    freqs  = surveycore::get_freqs(d, x = group),
+    means = surveycore::get_means(d, x = y1, group = group, variance = "se"),
+    freqs = surveycore::get_freqs(d, x = group),
     ratios = surveycore::get_ratios(d, numerator = y1, denominator = y2)
   ))
 }
@@ -289,7 +307,13 @@ test_result_invariants <- function(result, expected_class) {
     is.list(m),
     label = "is.list(surveycore::meta(result))"
   )
-  required_keys <- c("design_type", "conf_level", "call", "group", "n_respondents")
+  required_keys <- c(
+    "design_type",
+    "conf_level",
+    "call",
+    "group",
+    "n_respondents"
+  )
   for (k in required_keys) {
     testthat::expect_true(
       k %in% names(m),
@@ -315,7 +339,7 @@ test_result_invariants <- function(result, expected_class) {
 #'
 #' @param result A survey_result object
 test_result_meta_coherent <- function(result) {
-  m    <- surveycore::meta(result)
+  m <- surveycore::meta(result)
   cols <- names(result)
   # Check that all $group keys reference existing output columns.
   # $group keys are grouping variable names that ARE output columns (e.g.,
@@ -363,7 +387,7 @@ make_all_designs <- function(seed = 42L) {
     seed = seed
   )
   repwt_cols <- grep("^repwt_", names(df_r), value = TRUE)
-  replicate <- surveycore::as_survey_rep(
+  replicate <- surveycore::as_survey_repweights(
     df_r,
     weights = wt,
     repweights = tidyselect::all_of(repwt_cols),

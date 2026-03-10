@@ -80,3 +80,18 @@ reference:
     contents:
       - is_rowwise
       - is_grouped
+
+  - title: "Recoding"
+    desc: >
+      Survey-aware versions of dplyr's recoding and conditional functions.
+      When called with `.label`, `.value_labels`, `.factor`, or `.description`,
+      these functions automatically propagate label metadata into `@metadata`
+      via `mutate()`. When called without these arguments, the output is
+      identical to the corresponding dplyr function.
+    contents:
+      - case_when
+      - replace_when
+      - if_else
+      - na_if
+      - recode_values
+      - replace_values

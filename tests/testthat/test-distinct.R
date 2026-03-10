@@ -24,7 +24,7 @@ test_that("distinct() reduces rows when duplicates exist (all three designs)", {
     if (nm == "replicate") {
       df_dup$repwt_1 <- df_dup$wt * 1.1
       df_dup$repwt_2 <- df_dup$wt * 0.9
-      d <- surveycore::as_survey_rep(
+      d <- surveycore::as_survey_repweights(
         df_dup,
         weights = wt,
         repweights = tidyselect::all_of(c("repwt_1", "repwt_2")),

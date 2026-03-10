@@ -107,12 +107,12 @@ test_that("mutate(.keep = 'used') re-attaches design variables", {
 
 # ── mutate() — design variable warning ───────────────────────────────────────
 
-test_that("mutate() warns when a design variable is modified by name", {
+test_that("mutate() warns surveytidy_warning_mutate_weight_col when a weight column is modified", {
   d <- make_all_designs()$taylor
 
   expect_warning(
     result <- mutate(d, wt = wt * 1.1),
-    class = "surveytidy_warning_mutate_design_var"
+    class = "surveytidy_warning_mutate_weight_col"
   )
   expect_snapshot({
     invisible(mutate(d, wt = wt * 1.1))
@@ -120,7 +120,7 @@ test_that("mutate() warns when a design variable is modified by name", {
   test_invariants(result)
 })
 
-test_that("mutate() design variable warning names the modified variable", {
+test_that("mutate() weight column warning names the modified variable", {
   d <- make_all_designs()$taylor
   expect_warning(
     mutate(d, wt = wt * 1.1),

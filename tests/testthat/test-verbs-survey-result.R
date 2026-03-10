@@ -430,12 +430,12 @@ test_that("rename_with.survey_result errors for all invalid .fn outputs", {
   result_means <- make_survey_result(type = "means")
   bad_fns <- list(
     "non-character output" = function(x) seq_along(x),
-    "wrong-length output"  = function(x) x[1],
-    "NA in output"         = function(x) {
+    "wrong-length output" = function(x) x[1],
+    "NA in output" = function(x) {
       x[1] <- NA_character_
       x
     },
-    "duplicate names"      = function(x) rep(x[1], length(x))
+    "duplicate names" = function(x) rep(x[1], length(x))
   )
   for (label in names(bad_fns)) {
     fn <- bad_fns[[label]]
