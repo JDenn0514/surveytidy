@@ -118,6 +118,172 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 }
 
 
+# ── mutate() label helpers ────────────────────────────────────────────────────
+
+# Pre-attachment: copy label attrs from @metadata into the data.frame so
+# recode functions called inside mutate() can read them via attr(x, "labels")
+# and attr(x, "label"). Does NOT set the "haven_labelled" class — attrs only.
+# Always-on: runs on every mutate() call; fast path returns early when
+# @metadata has no labels (negligible overhead for the common case).
+.attach_label_attrs <- function(data, metadata) {
+  if (
+    length(metadata@value_labels) == 0L &&
+      length(metadata@variable_labels) == 0L
+  ) {
+    return(data)
+  }
+  for (col in names(metadata@value_labels)) {
+    if (col %in% names(data)) {
+      attr(data[[col]], "labels") <- metadata@value_labels[[col]]
+    }
+  }
+  for (col in names(metadata@variable_labels)) {
+    if (col %in% names(data)) {
+      attr(data[[col]], "label") <- metadata@variable_labels[[col]]
+    }
+  }
+  data
+}
+
+# Post-detection: inspect changed_cols in new_data for the "surveytidy_recode"
+# attribute set by recode functions. When found, extract label attrs into
+# metadata. When the column was previously labelled and the new output carries
+# no "surveytidy_recode" attr, clear stale labels.
+#
+# changed_cols : character vector — names of explicitly-named LHS expressions
+#                from rlang::quos(...). Unnamed mutate expressions (e.g.,
+#                across()) are not covered — accepted limitation for Phase 0.6.
+# Returns updated metadata object (does NOT assign internally).
+.extract_labelled_outputs <- function(data, metadata, changed_cols) {
+  for (col in changed_cols) {
+    if (!col %in% names(data)) {
+      next
+    }
+    recode_attr <- attr(data[[col]], "surveytidy_recode")
+    if (!is.null(recode_attr)) {
+      # Recode function output: extract label attrs.
+      # attr(x, "label") and attr(x, "labels") are both NULL for factor and
+      # plain-with-description outputs; assigning NULL clears the entry, which
+      # is correct — the old encoding labels are no longer valid.
+      metadata@variable_labels[[col]] <- attr(
+        data[[col]],
+        "label",
+        exact = TRUE
+      )
+      metadata@value_labels[[col]] <- attr(data[[col]], "labels", exact = TRUE)
+    } else if (
+      !is.null(metadata@variable_labels[[col]]) ||
+        !is.null(metadata@value_labels[[col]])
+    ) {
+      # Non-recode overwrite of a previously-labelled column: clear stale labels.
+      metadata@variable_labels[[col]] <- NULL
+      metadata@value_labels[[col]] <- NULL
+    }
+  }
+  metadata
+}
+
+# Strip: remove all haven label attrs and the surveytidy_recode attr from
+# every column before storing new_data in @data. haven::zap_labels() removes
+# "label", "labels", "format.spss", "display_width", and the "haven_labelled"
+# class. "surveytidy_recode" is not a haven attr, so it is removed separately.
+.strip_label_attrs <- function(data) {
+  for (col in names(data)) {
+    data[[col]] <- haven::zap_labels(data[[col]])
+    # haven::zap_labels() removes "labels", "format.spss", "display_width",
+    # and the "haven_labelled" class, but KEEPS the "label" attr. Remove it.
+    attr(data[[col]], "label") <- NULL
+    attr(data[[col]], "surveytidy_recode") <- NULL
+  }
+  data
+}
+
+
+# ── recode helpers ────────────────────────────────────────────────────────────
+
+# Validate .label, .value_labels, and .description arguments.
+# Called by all six recode functions. Returns invisible(TRUE) on success.
+.validate_label_args <- function(label, value_labels, description = NULL) {
+  if (!is.null(label) && !(is.character(label) && length(label) == 1L)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .label} must be a single character string.",
+        "i" = "Got {.cls {class(label)}} of length {length(label)}."
+      ),
+      class = "surveytidy_error_recode_label_not_scalar"
+    )
+  }
+  if (!is.null(value_labels) && is.null(names(value_labels))) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .value_labels} must be a named vector.",
+        "i" = "Got an unnamed {.cls {class(value_labels)}}.",
+        "v" = "Use {.code c(\"Label\" = value, ...)} to name the entries."
+      ),
+      class = "surveytidy_error_recode_value_labels_unnamed"
+    )
+  }
+  if (
+    !is.null(description) &&
+      !(is.character(description) && length(description) == 1L)
+  ) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .description} must be a single character string.",
+        "i" = "Got {.cls {class(description)}} of length {length(description)}."
+      ),
+      class = "surveytidy_error_recode_description_not_scalar"
+    )
+  }
+  invisible(TRUE)
+}
+
+# Wrap a result vector in haven::labelled() and set the surveytidy_recode attr.
+# Called when at least one of .label or .value_labels is non-NULL.
+.wrap_labelled <- function(x, label, value_labels, description = NULL) {
+  result <- haven::labelled(x, labels = value_labels, label = label)
+  attr(result, "surveytidy_recode") <- list(description = description)
+  result
+}
+
+# Convert result to a factor with levels ordered by value_labels (if provided)
+# or by formula_values / unique(to) (if value_labels is NULL).
+.factor_from_result <- function(x, value_labels, formula_values) {
+  if (!is.null(value_labels)) {
+    levels <- names(value_labels)
+  } else {
+    levels <- formula_values
+  }
+  factor(x, levels = levels)
+}
+
+# Merge base_labels (from x's attr) with override_labels (.value_labels arg).
+# override_labels entries replace matching base_labels entries by name; new
+# override entries are appended. When two entries share the same numeric value
+# (e.g. base has "Independent" = 3 and override adds "Independent/Other" = 3),
+# the later (override) entry wins and the earlier (base) entry is dropped.
+# Returns NULL when both inputs are NULL.
+.merge_value_labels <- function(base_labels, override_labels) {
+  if (is.null(base_labels) && is.null(override_labels)) {
+    return(NULL)
+  }
+  if (is.null(base_labels)) {
+    return(override_labels)
+  }
+  if (is.null(override_labels)) {
+    return(base_labels)
+  }
+  merged <- base_labels
+  for (nm in names(override_labels)) {
+    merged[nm] <- override_labels[[nm]]
+  }
+  # haven::labelled() requires unique values. When override introduced a new
+  # label name for an existing value, drop the earlier (base) entry so the
+  # override takes precedence. fromLast = TRUE keeps the last occurrence.
+  merged[!duplicated(unname(merged), fromLast = TRUE)]
+}
+
+
 # ── survey_result helpers ──────────────────────────────────────────────────────
 
 # Restore class and .meta after NextMethod() strips them.
@@ -155,7 +321,9 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 #
 # rename_map : named character vector, c(old_name = "new_name")
 .apply_result_rename_map <- function(result, rename_map) {
-  if (length(rename_map) == 0L) return(result)
+  if (length(rename_map) == 0L) {
+    return(result)
+  }
 
   old_names <- names(rename_map)
   new_names <- unname(rename_map)
@@ -182,10 +350,12 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   }
 
   # numerator / denominator $name (get_ratios results only)
-  if (!is.null(m$numerator$name) && m$numerator$name %in% old_names)
+  if (!is.null(m$numerator$name) && m$numerator$name %in% old_names) {
     m$numerator$name <- new_names[match(m$numerator$name, old_names)]
-  if (!is.null(m$denominator$name) && m$denominator$name %in% old_names)
+  }
+  if (!is.null(m$denominator$name) && m$denominator$name %in% old_names) {
     m$denominator$name <- new_names[match(m$denominator$name, old_names)]
+  }
 
   attr(result, ".meta") <- m
   result

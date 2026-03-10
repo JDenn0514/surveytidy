@@ -122,7 +122,10 @@ test_that("filter() supports if_all() for multi-column domain selection", {
     d <- designs[[nm]]
     # suppressWarnings: if_all() may yield an empty domain for some design
     # fixtures; that behaviour is tested separately.
-    result <- suppressWarnings(dplyr::filter(d, dplyr::if_all(c(y1, y2), ~ .x > 40)))
+    result <- suppressWarnings(dplyr::filter(
+      d,
+      dplyr::if_all(c(y1, y2), ~ .x > 40)
+    ))
     test_invariants(result)
     expected <- d@data$y1 > 40 & d@data$y2 > 40
     expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], expected)
@@ -141,7 +144,10 @@ test_that("filter() if_any() treats NA columns as FALSE (outside domain)", {
   #         row 2 has a=2>0, but b is NA → in-domain
   #         row 3: both > 0 → in-domain
   result <- dplyr::filter(d, dplyr::if_any(c(a, b), ~ .x > 0))
-  expect_identical(result@data[[surveycore::SURVEYCORE_DOMAIN_COL]], c(TRUE, TRUE, TRUE))
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    c(TRUE, TRUE, TRUE)
+  )
 })
 
 test_that("chained filter() with if_any() correctly ANDs the domains", {

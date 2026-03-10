@@ -1,3 +1,85 @@
+# surveytidy 0.3.0
+
+## New features
+
+### Survey-aware recoding functions
+
+Six vector-level recoding functions are now available. Each shadows its dplyr
+equivalent and adds optional arguments for attaching variable labels, value
+labels, and transformation notes directly inside `mutate()`. Without any of
+those arguments, output is identical to dplyr.
+
+* `case_when()` — a survey-aware `dplyr::case_when()`. Evaluates a sequence
+  of `condition ~ value` formulas and uses the first match for each element.
+  Use this to create an entirely new vector from conditions. Accepts `.label`
+  to set a variable label, `.value_labels` to attach a named vector of value
+  labels, `.factor = TRUE` to return an ordered factor (levels follow formula
+  order), and `.description` to record a plain-language note about the
+  transformation.
+
+* `if_else()` — a survey-aware `dplyr::if_else()`. Applies a single binary
+  condition element-wise (`true`/`false`/`missing`). Stricter than base
+  `ifelse()`: `true`, `false`, and `missing` are cast to a common type.
+  Accepts `.label`, `.value_labels`, and `.description`.
+
+* `na_if()` — a survey-aware `dplyr::na_if()`. Converts specific values to
+  `NA`. Unlike dplyr's scalar-only `y`, this version accepts a vector `y` and
+  replaces all matching values in a single call. When the input carries value
+  labels, they are inherited automatically; `.update_labels = TRUE` (the
+  default) removes label entries for the NA'd values, while
+  `.update_labels = FALSE` retains them (useful for documenting what was set
+  to missing). Also accepts `.description`.
+
+* `recode_values()` — a survey-aware `dplyr::recode_values()`. Replaces values
+  found in `from` with the corresponding value from `to`; values not in `from`
+  are kept unchanged or trigger an error (`.unmatched = "error"`). Intended for
+  full remapping of every value in a vector. Set `.use_labels = TRUE` to build
+  the `from`/`to` map automatically from the input's existing value labels
+  (codes become `from`; label strings become `to`). Also accepts `.label`,
+  `.value_labels`, `.factor`, and `.description`.
+
+* `replace_values()` — a survey-aware `dplyr::replace_values()`. Replaces
+  values found in `from` with the corresponding value from `to`; all other
+  values are left unchanged. Use this for partial in-place replacement of
+  specific values in an existing vector. Automatically inherits both the
+  variable label and value labels from the input; supply `.label` or
+  `.value_labels` to override. Also accepts `.description`.
+
+* `replace_when()` — a survey-aware `dplyr::replace_when()`. Like `case_when()`
+  but for partial in-place updates: evaluates `condition ~ value` formulas and
+  replaces only matching elements, leaving all others at their original value.
+  Automatically inherits labels from the input; supply `.label` or
+  `.value_labels` to override. Also accepts `.description`.
+
+### Shared label arguments
+
+All six functions support a common set of label arguments that propagate into
+`@metadata` when used inside `mutate()`:
+
+* `.label` — a character string stored in `@metadata@variable_labels` as the
+  human-readable variable label for the new column.
+* `.value_labels` — a named vector stored in `@metadata@value_labels`, where
+  names are label strings and values are the corresponding data values.
+* `.description` — a plain-language string stored in
+  `@metadata@transformations` describing how the variable was derived.
+
+`case_when()` and `recode_values()` also accept `.factor = TRUE`, which
+returns an ordered factor instead of a character vector (levels follow formula
+or `to` order respectively). `.factor` and `.label` cannot be combined.
+
+### `mutate()` enhancements
+
+`mutate()` now coordinates label propagation automatically: it pre-attaches
+label attributes from `@metadata` before the inner dplyr call so recode
+functions can see existing labels, reads the label output back from recoded
+columns, and writes it into `@metadata` — all without extra user steps. The
+weight-column warning has also been split into two distinct classes:
+`surveytidy_warning_mutate_weight_col` for the weight column and
+`surveytidy_warning_mutate_structural_var` for strata, PSU, FPC, and
+replicate weights.
+
+---
+
 # surveytidy 0.2.1
 
 ## Website & branding

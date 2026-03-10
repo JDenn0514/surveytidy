@@ -10,6 +10,8 @@ description: >
   or edit R source files, test files, or any other source code.
 ---
 
+**Announce at start:** "Running merge-main skill."
+
 # Merge-Main Skill
 
 ## HARD CONSTRAINT — READ THIS FIRST
@@ -122,19 +124,10 @@ Read each file. These are the source material for the NEWS.md section.
 
 ### Draft the new section
 
-Write a draft NEWS.md section. Format:
+Read `refs/news-format.md` for the canonical format and rules.
 
-```markdown
-# surveytidy X.Y.Z
-
-## New features / improvements
-
-- [Summary of `feat:` commits]
-
-## Bug fixes
-
-- [Summary of `fix:` commits]
-```
+Write a draft NEWS.md section following that format, using the changelog files
+as source material.
 
 **Show the draft to the user and ask for approval.** Do not write to NEWS.md
 until the user approves the content. Revise if requested.
@@ -209,25 +202,10 @@ If one already exists: report its URL and skip to Step 7 (Monitor CI).
 
 ### Draft the PR
 
-PR title: `chore(release): bump version to X.Y.Z`
+Read `refs/release-pr-template.md` for the canonical PR title and body format.
 
-PR body:
-
-```markdown
-## What
-
-Release surveytidy X.Y.Z.
-
-## What's in this release
-
-[paste the NEWS.md section content here]
-
-## Checklist
-
-- [ ] `devtools::check()` — 0 errors, 0 warnings
-- [ ] NEWS.md section complete and accurate
-- [ ] DESCRIPTION version bumped to X.Y.Z
-```
+Draft the PR title and body following that template, using the approved NEWS.md
+section as the release content.
 
 **Show the draft to the user before creating.** Ask for approval. Do NOT
 create the PR until the user approves.
@@ -343,11 +321,22 @@ NEWS.md section as the release body (optional but recommended).
 
 ## Step 10: Post-release Dev Bump
 
-Switch back to `develop` and bump the version:
+Switch back to `develop`, sync history with `main`, then bump the version:
 
 ```bash
 git checkout develop
 git pull
+```
+
+**Sync `develop` with `main` immediately** — squash merges create a new commit
+on `main` with no git ancestry back to `develop`. If you skip this step, the
+next release PR will have merge conflicts on any file changed in both the
+squash and subsequent `develop` work. Merging right now (before any new commits
+land) is always conflict-free because the branch contents are identical:
+
+```bash
+git merge origin/main --no-edit
+git push origin develop
 ```
 
 Edit `DESCRIPTION`: change `Version: X.Y.Z` to `Version: X.Y.Z.9000`.
