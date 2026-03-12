@@ -67,7 +67,7 @@
 #'
 #' library(surveycore)
 #' library(surveytidy)
-#' ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+#' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
 #' # ---------------------------------------------------------------------
 #' # Basic recode_values — explicit from/to mapping ----------------------

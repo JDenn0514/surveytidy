@@ -66,7 +66,7 @@
 #' library(surveytidy)
 #'
 #' # create the survey design
-#' ns_wave1_svy <- as_survey_calibrated(
+#' ns_wave1_svy <- as_survey_nonprob(
 #'   ns_wave1,
 #'   weights = weight
 #' )

@@ -12,7 +12,7 @@
 .make_labeled_design <- function(seed = 42L) {
   designs <- make_all_designs(seed)
   d <- designs$taylor
-  surveycore::set_var_label(d, y1, "Outcome variable 1")
+  surveycore::set_var_label(d, y1 = "Outcome variable 1")
 }
 
 # ── select() — happy path ─────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ test_that("select() preserves @metadata for retained columns", {
   d <- .make_labeled_design()
   result <- select(d, y1, y2)
   expect_identical(
-    surveycore::extract_var_label(result, y1),
+    unname(surveycore::extract_var_label(result, y1)),
     "Outcome variable 1"
   )
   test_invariants(result)
@@ -130,7 +130,7 @@ test_that("select() preserves @metadata for retained columns", {
 test_that("select() deletes @metadata entries for dropped columns", {
   d <- .make_labeled_design()
   # Set a label on y3, then drop it
-  d <- surveycore::set_var_label(d, y3, "Binary outcome")
+  d <- surveycore::set_var_label(d, y3 = "Binary outcome")
   result <- select(d, y1, y2)
   expect_null(result@metadata@variable_labels[["y3"]])
   test_invariants(result)
@@ -167,8 +167,8 @@ test_that("select() works for all three design types", {
   }
 })
 
-test_that("select() preserves weight column on survey_calibrated without explicit selection", {
-  # Regression: .get_design_vars_flat() has no survey_calibrated branch and
+test_that("select() preserves weight column on survey_nonprob without explicit selection", {
+  # Regression: .get_design_vars_flat() has no survey_nonprob branch and
   # returned character(0L), so the weight column was not protected and was
   # physically dropped, causing S7 validator to error.
   df <- data.frame(
@@ -176,7 +176,7 @@ test_that("select() preserves weight column on survey_calibrated without explici
     y2 = letters[1:5],
     cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9)
   )
-  d <- surveycore::as_survey_calibrated(df, weights = cal_wt)
+  d <- surveycore::as_survey_nonprob(df, weights = cal_wt)
 
   # Should not error even though cal_wt is not explicitly selected
   result <- select(d, y1)
@@ -187,11 +187,11 @@ test_that("select() preserves weight column on survey_calibrated without explici
   test_invariants(result)
 })
 
-test_that("dplyr_reconstruct() catches removed weight column on survey_calibrated", {
+test_that("dplyr_reconstruct() catches removed weight column on survey_nonprob", {
   # Regression: same gap — dplyr_reconstruct() used .get_design_vars_flat()
   # directly, which returned character(0L) for calibrated designs.
   df <- data.frame(y1 = 1:5, cal_wt = c(1.2, 0.8, 1.0, 1.5, 0.9))
-  d <- surveycore::as_survey_calibrated(df, weights = cal_wt)
+  d <- surveycore::as_survey_nonprob(df, weights = cal_wt)
 
   bad <- d@data[, "y1", drop = FALSE] # cal_wt removed
   expect_error(

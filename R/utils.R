@@ -34,14 +34,14 @@
 # Returns the design-variable column names for any survey type.
 #
 # surveycore::.get_design_vars_flat() handles survey_taylor, survey_replicate,
-# and survey_twophase but has no branch for survey_calibrated (returns
-# character(0L) for that class). survey_calibrated carries only a weights
+# and survey_twophase but has no branch for survey_nonprob (returns
+# character(0L) for that class). survey_nonprob carries only a weights
 # column — no ids, strata, fpc, or repweights.
 #
 # This helper is the single authoritative source used by .protected_cols()
 # and dplyr_reconstruct.survey_base().
 .survey_design_var_names <- function(design) {
-  if (S7::S7_inherits(design, surveycore::survey_calibrated)) {
+  if (S7::S7_inherits(design, surveycore::survey_nonprob)) {
     unique(c(design@variables$weights))
   } else {
     surveycore::.get_design_vars_flat(design)

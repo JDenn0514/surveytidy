@@ -118,7 +118,7 @@ test_that("rename() handles design var + visible_vars simultaneously", {
 
 test_that("rename() updates @metadata variable_labels key", {
   d <- make_all_designs()$taylor
-  d <- surveycore::set_var_label(d, y1, "Outcome 1")
+  d <- surveycore::set_var_label(d, y1 = "Outcome 1")
   d2 <- rename(d, outcome1 = y1)
   expect_null(d2@metadata@variable_labels[["y1"]])
   expect_identical(d2@metadata@variable_labels[["outcome1"]], "Outcome 1")
@@ -127,7 +127,7 @@ test_that("rename() updates @metadata variable_labels key", {
 
 test_that("rename() does not affect @metadata for non-renamed columns", {
   d <- make_all_designs()$taylor
-  d <- surveycore::set_var_label(d, y2, "Outcome 2")
+  d <- surveycore::set_var_label(d, y2 = "Outcome 2")
   d2 <- rename(d, outcome1 = y1)
   expect_identical(d2@metadata@variable_labels[["y2"]], "Outcome 2")
   test_invariants(d2)
@@ -224,7 +224,7 @@ test_that("rename_with() updates visible_vars when renamed cols are visible", {
 
 test_that("rename_with() updates @metadata keys for renamed columns", {
   d <- make_all_designs(seed = 42)$taylor
-  d <- surveycore::set_var_label(d, y1, "Outcome 1")
+  d <- surveycore::set_var_label(d, y1 = "Outcome 1")
   result <- rename_with(d, toupper, .cols = dplyr::all_of("y1"))
   test_invariants(result)
   expect_null(result@metadata@variable_labels[["y1"]])
