@@ -57,7 +57,7 @@ when \code{x} carries existing labels, output label metadata is written to
 
 library(surveycore)
 library(surveytidy)
-ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
 # ---------------------------------------------------------------------
 # Basic replace_when — identical to dplyr::replace_when() -------------

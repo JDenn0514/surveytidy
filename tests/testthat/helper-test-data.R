@@ -387,7 +387,7 @@ make_all_designs <- function(seed = 42L) {
     seed = seed
   )
   repwt_cols <- grep("^repwt_", names(df_r), value = TRUE)
-  replicate <- surveycore::as_survey_repweights(
+  replicate <- surveycore::as_survey_replicate(
     df_r,
     weights = wt,
     repweights = tidyselect::all_of(repwt_cols),

@@ -256,14 +256,29 @@ mutate.survey_base <- function(
   # Step 8: Record transformations in @metadata@transformations.
   # Recode calls (those that set the surveytidy_recode attr) get a structured
   # list record: fn, source_cols, expr, output_type, description.
+  # When surveytidy_recode$fn and surveytidy_recode$var are set, those values
+  # are used directly (immune to aliasing; var correct inside across()).
   # Non-recode new columns get plain text (Phase 0.5 behavior).
   for (col in mutated_names) {
     q <- mutations[[col]]
     recode_attr <- recode_attrs[[col]]
     if (!is.null(q) && !is.null(recode_attr)) {
+      # Use fn and var from the recode attr when available; fall back to quosure.
+      recode_fn <- recode_attr$fn
+      recode_var <- recode_attr$var
+      fn_name <- if (!is.null(recode_fn)) {
+        recode_fn
+      } else {
+        as.character(rlang::call_name(rlang::quo_get_expr(q)))
+      }
+      source_cols <- if (!is.null(recode_var)) {
+        recode_var
+      } else {
+        setdiff(all.vars(rlang::quo_squash(q)), col)
+      }
       updated_metadata@transformations[[col]] <- list(
-        fn = as.character(rlang::call_name(rlang::quo_get_expr(q))),
-        source_cols = setdiff(all.vars(rlang::quo_squash(q)), col),
+        fn = fn_name,
+        source_cols = source_cols,
         expr = deparse(rlang::quo_squash(q)),
         output_type = if (is.factor(new_data[[col]])) "factor" else "vector",
         description = recode_attr$description

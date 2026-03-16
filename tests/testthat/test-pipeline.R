@@ -83,7 +83,7 @@ test_that("pipeline 4: filter(A) |> filter(B) equals filter(A, B) for domain val
 
 test_that("pipeline 5: variable label persists through select() |> rename() |> mutate()", {
   d <- make_all_designs()$taylor
-  d <- surveycore::set_var_label(d, y1, "Outcome variable 1")
+  d <- surveycore::set_var_label(d, y1 = "Outcome variable 1")
 
   d2 <- select(d, y1, y2)
   d3 <- rename(d2, outcome1 = y1)
@@ -91,7 +91,7 @@ test_that("pipeline 5: variable label persists through select() |> rename() |> m
 
   test_invariants(d4)
   expect_identical(
-    surveycore::extract_var_label(d4, outcome1),
+    unname(surveycore::extract_var_label(d4, outcome1)),
     "Outcome variable 1"
   )
 })

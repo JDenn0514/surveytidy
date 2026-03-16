@@ -28,6 +28,16 @@ Naming convention:
 | `surveytidy_error_recode_from_to_missing` | `R/recode.R` | `from` is NULL and `.use_labels = FALSE` in `recode_values()` |
 | `surveytidy_error_recode_description_not_scalar` | `R/recode.R` | `.description` is not NULL and not a character(1) |
 | `surveytidy_error_na_if_update_labels_not_scalar` | `R/na-if.R` | `.update_labels` is not a single non-NA logical value |
+| `surveytidy_error_make_factor_bad_arg` | `R/transform.R` | `.label`/`.description` not `character(1)`, or `ordered`/`drop_levels`/`force`/`na.rm` not `logical(1)` |
+| `surveytidy_error_make_factor_unsupported_type` | `R/transform.R` | `x` not numeric, haven_labelled, factor, or character |
+| `surveytidy_error_make_factor_no_labels` | `R/transform.R` | `x` is numeric/haven_labelled, `attr(x, "labels")` is NULL, `force = FALSE` |
+| `surveytidy_error_make_factor_incomplete_labels` | `R/transform.R` | One or more non-NA observed values lack a label entry |
+| `surveytidy_error_make_dicho_too_few_levels` | `R/transform.R` | Fewer than 2 levels remain after `.exclude` |
+| `surveytidy_error_make_dicho_collapse_ambiguous` | `R/transform.R` | First-word stripping does not yield exactly 2 unique stems |
+| `surveytidy_error_make_rev_not_numeric` | `R/transform.R` | `typeof(x)` not `"double"` or `"integer"` |
+| `surveytidy_error_make_flip_not_numeric` | `R/transform.R` | `typeof(x)` not `"double"` or `"integer"` |
+| `surveytidy_error_make_flip_missing_label` | `R/transform.R` | `label` missing or not `character(1)` |
+| `surveytidy_error_transform_bad_arg` | `R/transform.R` | `.label`/`.description` not `character(1)`, or boolean flag not `logical(1)`, in `make_dicho()`, `make_binary()`, `make_rev()`, or `make_flip()` |
 
 ---
 
@@ -42,3 +52,6 @@ Naming convention:
 | `surveytidy_warning_rename_design_var` | `R/rename.R` | `rename()` or `rename_with()` renames a protected design variable or the domain column |
 | `surveytidy_warning_slice_sample_weight_by` | `R/slice.R` | `weight_by` argument passed to `slice_sample()` |
 | `surveytidy_warning_distinct_design_var` | `R/distinct.R` | `distinct()` called with a design variable in `...` — deduplicating by design variables may corrupt variance estimation |
+| `surveytidy_warning_make_factor_forced` | `R/transform.R` | `force = TRUE` coerces numeric without labels via `as.factor()` |
+| `surveytidy_warning_make_dicho_unknown_exclude` | `R/transform.R` | A name in `.exclude` not found in levels of `x` |
+| `surveytidy_warning_make_rev_all_na` | `R/transform.R` | All values in `x` are `NA` |

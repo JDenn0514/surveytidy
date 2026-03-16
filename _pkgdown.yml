@@ -95,3 +95,16 @@ reference:
       - na_if
       - recode_values
       - replace_values
+
+  - title: "Transformation"
+    desc: >
+      Vector-level transformation functions for common survey variable
+      operations. These functions operate on plain R vectors and integrate with
+      `mutate()` via the `surveytidy_recode` attribute protocol, automatically
+      recording transformation metadata in `@metadata@transformations`.
+    contents:
+      - make_factor
+      - make_dicho
+      - make_binary
+      - make_rev
+      - make_flip

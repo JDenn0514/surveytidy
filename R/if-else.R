@@ -54,7 +54,7 @@
 #'
 #' library(surveycore)
 #' library(surveytidy)
-#' ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+#' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
 #' # ---------------------------------------------------------------------
 #' # Basic if_else — identical to dplyr::if_else() -----------------------
@@ -161,11 +161,16 @@ if_else <- function(
   )
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description))
+    return(.wrap_labelled(result, .label, .value_labels, .description,
+                          fn = "if_else", var = NULL))
   }
 
   if (!is.null(.description)) {
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "if_else",
+      var = NULL,
+      description = .description
+    )
   }
 
   result

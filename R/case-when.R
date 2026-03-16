@@ -66,7 +66,7 @@
 #' library(surveytidy)
 #'
 #' # create the survey design
-#' ns_wave1_svy <- as_survey_calibrated(
+#' ns_wave1_svy <- as_survey_nonprob(
 #'   ns_wave1,
 #'   weights = weight
 #' )
@@ -242,16 +242,25 @@ case_when <- function(
       formula_values <- unique(as.character(result[!is.na(result)]))
     }
     result <- .factor_from_result(result, .value_labels, formula_values)
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "case_when",
+      var = NULL,
+      description = .description
+    )
     return(result)
   }
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description))
+    return(.wrap_labelled(result, .label, .value_labels, .description,
+                          fn = "case_when", var = NULL))
   }
 
   if (!is.null(.description)) {
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "case_when",
+      var = NULL,
+      description = .description
+    )
   }
 
   result

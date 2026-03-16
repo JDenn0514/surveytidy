@@ -1,3 +1,37 @@
+# surveytidy 0.4.0
+
+## New features
+
+### Survey-aware transformation functions
+
+Five vector-level transformation functions are now available for converting,
+collapsing, and reversing variables inside `mutate()`. All five propagate value
+labels automatically and accept `.label` and `.description` arguments to
+attach metadata in a single step.
+
+* `make_factor()` — converts labelled, numeric, character, or factor vectors
+  to an R `factor`. Levels are ordered by the numeric value of each value label.
+  Accepts `ordered`, `drop_levels`, `force`, and `na.rm` to control level
+  creation.
+
+* `make_dicho()` — collapses a multi-level factor to two levels by stripping
+  the first word of each label and merging labels that reduce to the same
+  stem. Accepts `.exclude` to keep specific levels as `NA`, and `flip_levels`
+  to reverse the resulting order.
+
+* `make_binary()` — converts a dichotomous variable to a 0/1 integer. Thin
+  wrapper around `make_dicho()`; accepts `flip_values` to control which level
+  maps to 1.
+
+* `make_rev()` — reverses a numeric scale using `min + max - x` and remaps
+  value labels to match. Issues a warning when all values are `NA`.
+
+* `make_flip()` — reverses the semantic valence of a variable by reversing the
+  label strings while keeping the underlying values unchanged. Requires a
+  `label` argument to document the new meaning.
+
+---
+
 # surveytidy 0.3.0
 
 ## New features

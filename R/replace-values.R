@@ -57,7 +57,7 @@
 #'
 #' library(surveycore)
 #' library(surveytidy)
-#' ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+#' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
 #' # ---------------------------------------------------------------------
 #' # Basic replace_values — replace specific values ----------------------
@@ -145,6 +145,10 @@ replace_values <- function(
   .value_labels = NULL,
   .description = NULL
 ) {
+  var_name <- tryCatch(
+    dplyr::cur_column(),
+    error = function(e) rlang::as_label(rlang::enquo(x))
+  )
   .validate_label_args(.label, .value_labels, .description)
 
   result <- dplyr::replace_values(x, from = from, to = to, ...)
@@ -160,11 +164,16 @@ replace_values <- function(
   }
 
   if (!is.null(merged_labels) || !is.null(effective_label)) {
-    return(.wrap_labelled(result, effective_label, merged_labels, .description))
+    return(.wrap_labelled(result, effective_label, merged_labels, .description,
+                          fn = "replace_values", var = var_name))
   }
 
   if (!is.null(.description)) {
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "replace_values",
+      var = var_name,
+      description = .description
+    )
   }
 
   result

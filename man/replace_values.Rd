@@ -65,7 +65,7 @@ as \code{x}.
 
 library(surveycore)
 library(surveytidy)
-ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
 # ---------------------------------------------------------------------
 # Basic replace_values — replace specific values ----------------------
