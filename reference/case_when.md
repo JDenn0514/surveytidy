@@ -130,7 +130,7 @@ library(surveycore)
 library(surveytidy)
 
 # create the survey design
-ns_wave1_svy <- as_survey_calibrated(
+ns_wave1_svy <- as_survey_nonprob(
   ns_wave1,
   weights = weight
 )
@@ -156,7 +156,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3
@@ -189,6 +189,8 @@ new@metadata
 #>  ..  ..- attr(*, "names")= chr [1:4] "Democrat" "Republican" "Independent" "Something else"
 #>  @ question_prefaces: Named list()
 #>  @ notes            : list()
+#>  @ universe         : list()
+#>  @ missing_codes    : list()
 #>  @ transformations  :List of 1
 #>  .. $ age_pid: chr "case_when(age < 30 & pid3 == 1 ~ \"18-29 Democrats\", age < 30 & \n    pid3 == 2 ~ \"18-29 Republicans\", age <"| __truncated__
 #>  @ weighting_history: list()
@@ -335,7 +337,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3

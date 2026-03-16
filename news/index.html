@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,21 @@
       <small>Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="surveytidy-040">surveytidy 0.4.0<a class="anchor" aria-label="anchor" href="#surveytidy-040"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-4-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
+<div class="section level4">
+<h4 id="survey-aware-transformation-functions-0-4-0">Survey-aware transformation functions<a class="anchor" aria-label="anchor" href="#survey-aware-transformation-functions-0-4-0"></a></h4>
+<p>Five vector-level transformation functions are now available for converting, collapsing, and reversing variables inside <code><a href="../reference/mutate.html">mutate()</a></code>. All five propagate value labels automatically and accept <code>.label</code> and <code>.description</code> arguments to attach metadata in a single step.</p>
+<ul><li><p><code><a href="../reference/make_factor.html">make_factor()</a></code> — converts labelled, numeric, character, or factor vectors to an R <code>factor</code>. Levels are ordered by the numeric value of each value label. Accepts <code>ordered</code>, <code>drop_levels</code>, <code>force</code>, and <code>na.rm</code> to control level creation.</p></li>
+<li><p><code><a href="../reference/make_dicho.html">make_dicho()</a></code> — collapses a multi-level factor to two levels by stripping the first word of each label and merging labels that reduce to the same stem. Accepts <code>.exclude</code> to keep specific levels as <code>NA</code>, and <code>flip_levels</code> to reverse the resulting order.</p></li>
+<li><p><code><a href="../reference/make_binary.html">make_binary()</a></code> — converts a dichotomous variable to a 0/1 integer. Thin wrapper around <code><a href="../reference/make_dicho.html">make_dicho()</a></code>; accepts <code>flip_values</code> to control which level maps to 1.</p></li>
+<li><p><code><a href="../reference/make_rev.html">make_rev()</a></code> — reverses a numeric scale using <code>min + max - x</code> and remaps value labels to match. Issues a warning when all values are <code>NA</code>.</p></li>
+<li><p><code><a href="../reference/make_flip.html">make_flip()</a></code> — reverses the semantic valence of a variable by reversing the label strings while keeping the underlying values unchanged. Requires a <code>label</code> argument to document the new meaning.</p></li>
+</ul><hr></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="surveytidy-030">surveytidy 0.3.0<a class="anchor" aria-label="anchor" href="#surveytidy-030"></a></h2>
 <div class="section level3">

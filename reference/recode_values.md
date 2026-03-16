@@ -138,7 +138,7 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
-ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
 # ---------------------------------------------------------------------
 # Basic recode_values — explicit from/to mapping ----------------------
@@ -158,7 +158,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -197,7 +197,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -237,7 +237,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -344,7 +344,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2

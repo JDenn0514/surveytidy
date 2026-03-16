@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -232,6 +232,50 @@
 
         </dt>
         <dd>Partially update values using an explicit mapping</dd>
+      </dl></div><div class="section level2">
+      <h2 id="transformation">Transformation<a class="anchor" aria-label="anchor" href="#transformation"></a></h2>
+
+      <div class="section-desc"><p>Vector-level transformation functions for common survey variable operations. These functions operate on plain R vectors and integrate with <code><a href="../reference/mutate.html">mutate()</a></code> via the <code>surveytidy_recode</code> attribute protocol, automatically recording transformation metadata in <code>@metadata@transformations</code>.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="make_factor.html">make_factor()</a></code>
+
+        </dt>
+        <dd>Convert a vector to a factor using value labels</dd>
+
+        <dt>
+
+          <code><a href="make_dicho.html">make_dicho()</a></code>
+
+        </dt>
+        <dd>Collapse a multi-level factor to two levels</dd>
+
+        <dt>
+
+          <code><a href="make_binary.html">make_binary()</a></code>
+
+        </dt>
+        <dd>Convert a dichotomous variable to a numeric 0/1 indicator</dd>
+
+        <dt>
+
+          <code><a href="make_rev.html">make_rev()</a></code>
+
+        </dt>
+        <dd>Reverse the numeric values of a scale variable</dd>
+
+        <dt>
+
+          <code><a href="make_flip.html">make_flip()</a></code>
+
+        </dt>
+        <dd>Flip the semantic valence of a variable</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -109,7 +109,7 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
-ns_wave1_svy <- as_survey_calibrated(ns_wave1, weights = weight)
+ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
 # ---------------------------------------------------------------------
 # Basic if_else — identical to dplyr::if_else() -----------------------
@@ -122,7 +122,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -152,6 +152,8 @@ new@metadata
 #>  @ value_labels     : Named list()
 #>  @ question_prefaces: Named list()
 #>  @ notes            : list()
+#>  @ universe         : list()
+#>  @ missing_codes    : list()
 #>  @ transformations  :List of 1
 #>  .. $ senior: chr "if_else(age >= 65, \"Senior (65+)\", \"Non-senior\")"
 #>  @ weighting_history: list()
@@ -169,7 +171,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_calibrated> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (calibrated / non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2

@@ -27,7 +27,7 @@ dplyr::case_when()."><meta property="og:image" content="https://jdenn0514.github
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -165,7 +165,7 @@ existing value labels from the input automatically.</p></li>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create the survey design</span></span></span>
-<span class="r-in"><span><span class="va">ns_wave1_svy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey_calibrated.html" class="external-link">as_survey_calibrated</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">ns_wave1_svy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey_nonprob.html" class="external-link">as_survey_nonprob</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">ns_wave1</span>,</span></span>
 <span class="r-in"><span>  weights <span class="op">=</span> <span class="va">weight</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
@@ -191,7 +191,7 @@ existing value labels from the input automatically.</p></li>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_calibrated&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 3</span></span>
@@ -224,6 +224,8 @@ existing value labels from the input automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ..  ..- attr(*, "names")= chr [1:4] "Democrat" "Republican" "Independent" "Something else"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ question_prefaces: Named list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ notes            : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  @ universe         : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  @ missing_codes    : list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ transformations  :List of 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .. $ age_pid: chr "case_when(age &lt; 30 &amp; pid3 == 1 ~ \"18-29 Democrats\", age &lt; 30 &amp; \n    pid3 == 2 ~ \"18-29 Republicans\", age &lt;"| __truncated__</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ weighting_history: list()</span>
@@ -370,7 +372,7 @@ existing value labels from the input automatically.</p></li>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_calibrated&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 3</span></span>

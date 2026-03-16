@@ -19,6 +19,11 @@
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/index.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/is_grouped.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/is_rowwise.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/make_binary.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/make_dicho.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/make_factor.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/make_flip.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/make_rev.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/mutate.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/na_if.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/pull.html</loc></url>

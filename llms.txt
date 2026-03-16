@@ -543,3 +543,23 @@ corresponding dplyr function.
 - [`replace_values()`](https://jdenn0514.github.io/surveytidy/reference/replace_values.md)
   : Partially update values using an explicit mapping
 
+## Transformation
+
+Vector-level transformation functions for common survey variable
+operations. These functions operate on plain R vectors and integrate
+with
+[`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+via the `surveytidy_recode` attribute protocol, automatically recording
+transformation metadata in `@metadata@transformations`.
+
+- [`make_factor()`](https://jdenn0514.github.io/surveytidy/reference/make_factor.md)
+  : Convert a vector to a factor using value labels
+- [`make_dicho()`](https://jdenn0514.github.io/surveytidy/reference/make_dicho.md)
+  : Collapse a multi-level factor to two levels
+- [`make_binary()`](https://jdenn0514.github.io/surveytidy/reference/make_binary.md)
+  : Convert a dichotomous variable to a numeric 0/1 indicator
+- [`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md)
+  : Reverse the numeric values of a scale variable
+- [`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md)
+  : Flip the semantic valence of a variable
+
