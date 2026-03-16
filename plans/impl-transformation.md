@@ -19,7 +19,7 @@ quality gate).
 
 ## PR Map
 
-- [ ] PR 1: `feature/transformation` — Implement `make_factor()`,
+- [x] PR 1: `feature/transformation` — Implement `make_factor()`,
   `make_dicho()`, `make_binary()`, `make_rev()`, `make_flip()`; update
   `mutate.survey_base()` step 8; expand `surveytidy_recode` structure in
   Phase 0.6 recode files (full file list per plan-review Pass 1 Issues 1–2)
