@@ -240,9 +240,17 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 
 # Wrap a result vector in haven::labelled() and set the surveytidy_recode attr.
 # Called when at least one of .label or .value_labels is non-NULL.
-.wrap_labelled <- function(x, label, value_labels, description = NULL) {
+# fn:  character(1) — the recode function name (e.g., "recode_values")
+# var: character(1) or NULL — the column name; NULL for multi-input functions
+#      (case_when, if_else) that may consume multiple source columns.
+.wrap_labelled <- function(x, label, value_labels, description = NULL,
+                           fn = NULL, var = NULL) {
   result <- haven::labelled(x, labels = value_labels, label = label)
-  attr(result, "surveytidy_recode") <- list(description = description)
+  attr(result, "surveytidy_recode") <- list(
+    fn = fn,
+    var = var,
+    description = description
+  )
   result
 }
 

@@ -208,6 +208,10 @@ recode_values <- function(
   .use_labels = FALSE,
   .description = NULL
 ) {
+  var_name <- tryCatch(
+    dplyr::cur_column(),
+    error = function(e) rlang::as_label(rlang::enquo(x))
+  )
   .validate_label_args(.label, .value_labels, .description)
   if (isTRUE(.factor) && !is.null(.label)) {
     cli::cli_abort(
@@ -278,16 +282,25 @@ recode_values <- function(
 
   if (isTRUE(.factor)) {
     result <- .factor_from_result(result, .value_labels, unique(to))
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "recode_values",
+      var = var_name,
+      description = .description
+    )
     return(result)
   }
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description))
+    return(.wrap_labelled(result, .label, .value_labels, .description,
+                          fn = "recode_values", var = var_name))
   }
 
   if (!is.null(.description)) {
-    attr(result, "surveytidy_recode") <- list(description = .description)
+    attr(result, "surveytidy_recode") <- list(
+      fn = "recode_values",
+      var = var_name,
+      description = .description
+    )
   }
 
   result
