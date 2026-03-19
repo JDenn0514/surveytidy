@@ -276,22 +276,24 @@ test_that("distinct() on an ungrouped design leaves @groups as character(0) (all
 
 # ── Section 6: Edge cases ─────────────────────────────────────────────────────
 
-test_that("distinct() on single-row data returns 1 row and issues the physical-subset warning", {
-  df_1row <- data.frame(
-    psu = "psu_1",
-    strata = "s1",
-    fpc = 100,
-    wt = 10,
-    y1 = 42,
-    y2 = 0,
-    y3 = 0L,
-    group = "A",
+test_that("distinct() on duplicate-row data collapses to 1 row and issues the physical-subset warning", {
+  # Use 2 identical rows so as_survey() accepts (>=2 rows required), then
+
+  # distinct() collapses them to 1 row.
+  df_dup <- data.frame(
+    psu = c("psu_1", "psu_1"),
+    strata = c("s1", "s1"),
+    fpc = c(100, 100),
+    wt = c(10, 10),
+    y1 = c(42, 42),
+    y2 = c(0, 0),
+    y3 = c(0L, 0L),
+    group = c("A", "A"),
     stringsAsFactors = FALSE
   )
-  # suppressWarnings: surveycore warns on single-row/single-stratum designs
-  d_1row <- suppressWarnings(
+  d_dup <- suppressWarnings(
     surveycore::as_survey(
-      df_1row,
+      df_dup,
       ids = psu,
       weights = wt,
       strata = strata,
@@ -301,7 +303,7 @@ test_that("distinct() on single-row data returns 1 row and issues the physical-s
   )
 
   expect_warning(
-    result <- distinct(d_1row),
+    result <- distinct(d_dup),
     class = "surveycore_warning_physical_subset"
   )
   test_invariants(result)

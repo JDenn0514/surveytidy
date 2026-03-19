@@ -172,7 +172,7 @@ mutate.survey_base <- function(
 
   # Step 2: Pre-attach label attrs from @metadata so recode functions can
   # read them via attr(x, "labels") / attr(x, "label").
-  augmented_data <- .attach_label_attrs(.data@data, .data@metadata)
+  augmented_data <- .attach_metadata_attrs(.data@data, .data@metadata)
 
   if (rowwise_mode) {
     effective_by <- NULL
@@ -219,7 +219,7 @@ mutate.survey_base <- function(
   }
 
   # Step 4: Post-detect labelled outputs and update @metadata.
-  updated_metadata <- .extract_labelled_outputs(
+  updated_metadata <- .extract_metadata_attrs(
     new_data,
     .data@metadata,
     mutated_names
@@ -235,7 +235,7 @@ mutate.survey_base <- function(
   names(recode_attrs) <- mutated_names
 
   # Step 5b: Strip haven attrs and surveytidy_recode attr from @data.
-  new_data <- .strip_label_attrs(new_data)
+  new_data <- .strip_metadata_attrs(new_data)
 
   # Step 6: Re-attach protected columns that .keep dropped
   protected_in_data <- intersect(.protected_cols(.data), names(.data@data))
