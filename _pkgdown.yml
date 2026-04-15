@@ -108,3 +108,5 @@ reference:
       - make_binary
       - make_rev
       - make_flip
+      - row_means
+      - row_sums
