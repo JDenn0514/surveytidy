@@ -276,6 +276,37 @@ mutate.survey_base <- function(
       } else {
         setdiff(all.vars(rlang::quo_squash(q)), col)
       }
+      # For row_means() / row_sums(): (a) warn if .cols includes design vars,
+      # (b) fall back to the column name as label when .label was not supplied
+      # (cur_column() is unavailable in regular mutate() context).
+      if (isTRUE(recode_fn %in% c("row_means", "row_sums"))) {
+        # (a) design-variable overlap warning
+        design_vars <- .survey_design_var_names(.data)
+        overlap <- intersect(source_cols, design_vars)
+        if (length(overlap) > 0L) {
+          cli::cli_warn(
+            c(
+              "!" = paste0(
+                ".cols includes {length(overlap)} design variable ",
+                "column{?s}: {.field {overlap}}."
+              ),
+              "i" = paste0(
+                "Row aggregation across design variables produces ",
+                "methodologically meaningless results."
+              ),
+              "i" = paste0(
+                "Use a targeted selector such as ",
+                "{.code starts_with(\"y\")} to restrict to substantive columns."
+              )
+            ),
+            class = "surveytidy_warning_rowstats_includes_design_var"
+          )
+        }
+        # (b) label fallback: use column name when .label was not supplied
+        if (is.null(updated_metadata@variable_labels[[col]])) {
+          updated_metadata@variable_labels[[col]] <- col
+        }
+      }
       updated_metadata@transformations[[col]] <- list(
         fn = fn_name,
         source_cols = source_cols,
