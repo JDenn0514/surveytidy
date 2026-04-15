@@ -8,6 +8,8 @@
 #   .warn_physical_subset()         — standard warning for row-removal verbs
 #   dplyr_reconstruct.survey_base() — class preservation in complex pipelines
 #                                     (moved from R/filter.R on feature/select)
+#   .validate_transform_args()      — validate .label/.description for transform fns
+#   .set_recode_attrs()             — set label, labels, surveytidy_recode attrs
 
 # ── surveycore internal wrappers ─────────────────────────────────────────────
 
@@ -329,6 +331,51 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   # label name for an existing value, drop the earlier (base) entry so the
   # override takes precedence. fromLast = TRUE keeps the last occurrence.
   merged[!duplicated(unname(merged), fromLast = TRUE)]
+}
+
+
+# ── transform helpers ─────────────────────────────────────────────────────────
+
+# Validate .label and .description for transform functions.
+# error_class: the class to raise (different per function).
+# Returns invisible(TRUE) on success.
+.validate_transform_args <- function(label, description, error_class) {
+  if (!is.null(label) && !rlang::is_string(label)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .label} must be a single character string or {.code NULL}.",
+        "i" = "Got {.cls {class(label)}} of length {length(label)}."
+      ),
+      class = error_class
+    )
+  }
+  if (!is.null(description) && !rlang::is_string(description)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .description} must be a single character string or {.code NULL}.",
+        "i" = "Got {.cls {class(description)}} of length {length(description)}."
+      ),
+      class = error_class
+    )
+  }
+  invisible(TRUE)
+}
+
+# Set label, labels, and surveytidy_recode attrs on a result vector.
+# label:       character(1) or NULL - variable label
+# labels:      named vector or NULL - value labels
+# fn:          character(1) - function name (hardcoded per function)
+# var:         character(1) or NULL - column name
+# description: character(1) or NULL - user-supplied description
+.set_recode_attrs <- function(result, label, labels, fn, var, description) {
+  attr(result, "label") <- label
+  attr(result, "labels") <- labels
+  attr(result, "surveytidy_recode") <- list(
+    fn = fn,
+    var = var,
+    description = description
+  )
+  result
 }
 
 
