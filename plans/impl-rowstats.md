@@ -25,7 +25,7 @@ refactor PR so the move is isolated from the feature diff.
 ## PR Map
 
 - [x] PR 1: `refactor/rowstats-shared-helpers` — Move `.validate_transform_args()` and `.set_recode_attrs()` to `R/utils.R`
-- [ ] PR 2: `feature/rowstats` — Implement `row_means()`, `row_sums()`, mutate design-var warning, and tests
+- [x] PR 2: `feature/rowstats` — Implement `row_means()`, `row_sums()`, mutate design-var warning, and tests
 
 ---
 
