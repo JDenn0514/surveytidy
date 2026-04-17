@@ -94,6 +94,32 @@ dplyr::slice_max
 #' @export
 dplyr::slice_sample
 
+# ── join verbs ────────────────────────────────────────────────────────────────
+
+#' @rdname left_join
+#' @export
+dplyr::left_join
+
+#' @rdname semi_join
+#' @export
+dplyr::semi_join
+
+#' @rdname semi_join
+#' @export
+dplyr::anti_join
+
+#' @rdname inner_join
+#' @export
+dplyr::inner_join
+
+#' @rdname right_join
+#' @export
+dplyr::right_join
+
+#' @rdname right_join
+#' @export
+dplyr::full_join
+
 # ── tidyr verbs ───────────────────────────────────────────────────────────────
 
 #' @rdname drop_na

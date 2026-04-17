@@ -38,6 +38,13 @@ Naming convention:
 | `surveytidy_error_make_flip_not_numeric` | `R/transform.R` | `typeof(x)` not `"double"` or `"integer"` |
 | `surveytidy_error_make_flip_missing_label` | `R/transform.R` | `label` missing or not `character(1)` |
 | `surveytidy_error_transform_bad_arg` | `R/transform.R` | `.label`/`.description` not `character(1)`, or boolean flag not `logical(1)`, in `make_dicho()`, `make_binary()`, `make_rev()`, or `make_flip()` |
+| `surveytidy_error_join_survey_to_survey` | `R/joins.R` | `y` is a survey object in any join |
+| `surveytidy_error_join_adds_rows` | `R/joins.R` | `right_join` or `full_join` called on a survey (would add rows with NA design variables) |
+| `surveytidy_error_join_row_expansion` | `R/joins.R` | Duplicate keys in `y` would expand row count (left_join or inner_join) |
+| `surveytidy_error_join_twophase_row_removal` | `R/joins.R` | Physical `inner_join(.domain_aware = FALSE)` called on a `survey_twophase` object |
+| `surveytidy_error_bind_rows_survey` | `R/joins.R` | `bind_rows()` called with a survey object |
+| `surveytidy_error_bind_cols_row_mismatch` | `R/joins.R` | Row counts differ between `x` and `...` in `bind_cols()` |
+| `surveytidy_error_reserved_col_name` | `R/joins.R` | `"..surveytidy_row_index.."` already in `names(x@data)` when `semi_join`, `anti_join`, or `inner_join` (domain-aware) is called |
 
 ---
 
@@ -55,3 +62,4 @@ Naming convention:
 | `surveytidy_warning_make_factor_forced` | `R/transform.R` | `force = TRUE` coerces numeric without labels via `as.factor()` |
 | `surveytidy_warning_make_dicho_unknown_exclude` | `R/transform.R` | A name in `.exclude` not found in levels of `x` |
 | `surveytidy_warning_make_rev_all_na` | `R/transform.R` | All values in `x` are `NA` |
+| `surveytidy_warning_join_col_conflict` | `R/joins.R` | `y` has column names matching design variable names in `x` (dropped before joining) |
