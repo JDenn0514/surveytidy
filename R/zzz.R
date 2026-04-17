@@ -208,6 +208,50 @@
     envir = asNamespace("tidyr")
   )
 
+  # ── feature/joins ─────────────────────────────────────────────────────────
+
+  registerS3method(
+    "left_join",
+    "surveycore::survey_base",
+    get("left_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "semi_join",
+    "surveycore::survey_base",
+    get("semi_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "anti_join",
+    "surveycore::survey_base",
+    get("anti_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "inner_join",
+    "surveycore::survey_base",
+    get("inner_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "right_join",
+    "surveycore::survey_base",
+    get("right_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "full_join",
+    "surveycore::survey_base",
+    get("full_join.survey_base", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── survey_result verbs (PR 1 — passthrough) ──────────────────────────────
 
   registerS3method(
