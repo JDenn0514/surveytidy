@@ -1,3 +1,64 @@
+# surveytidy 0.5.0
+
+## New features
+
+### Survey-aware join functions
+
+Eight join and binding functions are now available for combining survey design
+objects with plain data frames. All join functions protect design variable
+columns (weights, strata, PSU, etc.) from being overwritten by `y` and append
+a typed sentinel to `@variables$domain` for traceability by Phase 1 estimation
+functions.
+
+* `left_join()` — appends lookup columns from `y` without removing any rows.
+  Errors if duplicate keys in `y` would expand rows.
+
+* `inner_join()` — two modes: domain-aware (`.domain_aware = TRUE`, default)
+  marks unmatched rows out-of-domain without removing them; physical mode
+  (`.domain_aware = FALSE`) removes rows and issues a warning. Physical mode
+  is not supported for `survey_twophase` designs.
+
+* `semi_join()` — marks rows matching `y` as in-domain; unmatched rows are
+  marked out-of-domain. No rows are physically removed.
+
+* `anti_join()` — inverse of `semi_join()`; marks rows that do NOT match `y`
+  as in-domain.
+
+* `right_join()` and `full_join()` — always error when called on a survey
+  object. Both would add rows with `NA` design variable values, which would
+  invalidate variance estimation.
+
+* `bind_cols()` — appends columns from `...` to a survey object. Validates
+  that all inputs have the same row count. Passes through to
+  `dplyr::bind_cols()` for non-survey inputs.
+
+* `bind_rows()` — always errors when called with a survey object. Combining
+  two survey designs has undefined variance structure. Passes through to
+  `dplyr::bind_rows()` for non-survey inputs.
+
+### Row statistic helpers
+
+Two helper functions are now available for computing row-wise statistics
+inside `mutate()`. Both propagate metadata automatically and accept `.label`
+and `.description` to document the new variable in a single step.
+
+* `row_means()` — computes the row mean across selected columns. Accepts
+  `na.rm` to control `NA` handling. Issues a warning if any selected column
+  is a design variable.
+
+* `row_sums()` — computes the row sum across selected columns. Accepts
+  `na.rm` to control `NA` handling. Issues a warning if any selected column
+  is a design variable.
+
+## Bug fixes
+
+* `mutate()` — transformation metadata is now correctly written back to the
+  design object. Previously, `[[<-` assignment on S7 properties silently
+  failed; the fix uses `S7::prop<-()` to sync all six metadata properties
+  correctly (#25).
+
+---
+
 # surveytidy 0.4.0
 
 ## New features
