@@ -69,6 +69,8 @@ Other transformation:
 \code{\link{make_binary}()},
 \code{\link{make_dicho}()},
 \code{\link{make_flip}()},
-\code{\link{make_rev}()}
+\code{\link{make_rev}()},
+\code{\link{row_means}()},
+\code{\link{row_sums}()}
 }
 \concept{transformation}
