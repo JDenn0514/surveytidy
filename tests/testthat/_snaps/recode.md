@@ -43,6 +43,18 @@
       x `.update_labels` must be a single <logical> value.
       i Got <character> of length 1.
 
+# recode_values() .use_labels = TRUE combined with formulas errors
+
+    Code
+      mutate(d, y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE))
+    Condition
+      Error in `dplyr::mutate()`:
+      i In argument: `y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE)`.
+      Caused by error in `recode_values()`:
+      x `.use_labels = TRUE` cannot be combined with formulas in `...`.
+      i Both describe the `from`/`to` map.
+      v Remove the formulas, or set `.use_labels = FALSE` and let the formulas define the map.
+
 # error snapshots for all recode error classes
 
     Code
@@ -97,8 +109,8 @@
       Error in `dplyr::mutate()`:
       i In argument: `cat = recode_values(y3, .use_labels = FALSE)`.
       Caused by error in `recode_values()`:
-      x `from` must be supplied when `.use_labels = FALSE`.
-      v Supply `from` and `to`, or set `.use_labels = TRUE` to build the map from `x`'s value labels.
+      x No recoding map supplied.
+      v Pass `old ~ new` formulas in `...`, supply `from` and `to`, or set `.use_labels = TRUE`.
 
 ---
 

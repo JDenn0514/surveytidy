@@ -555,11 +555,126 @@ test_that("recode_values() .factor = TRUE + .label -> surveytidy_error_recode_fa
   )
 })
 
-test_that("recode_values() from = NULL + .use_labels = FALSE -> surveytidy_error_recode_from_to_missing", {
+test_that("recode_values() no formulas + from = NULL + .use_labels = FALSE -> surveytidy_error_recode_from_to_missing", {
   d <- make_all_designs(seed = 42)$taylor
+  # No formulas in ..., no from, and .use_labels = FALSE — no map supplied
   expect_error(
     mutate(d, y3_r = recode_values(y3, .use_labels = FALSE)),
     class = "surveytidy_error_recode_from_to_missing"
+  )
+})
+
+# ── 7b. recode_values() formula interface ────────────────────────────────────
+
+test_that("recode_values() formula interface matches dplyr [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", 1L ~ "yes")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@data$y3_r,
+      dplyr::recode_values(d@data$y3, 0L ~ "no", 1L ~ "yes")
+    )
+  }
+})
+
+test_that("recode_values() formula interface with default [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(y3, 1L ~ "yes", default = "other")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@data$y3_r,
+      dplyr::recode_values(d@data$y3, 1L ~ "yes", default = "other")
+    )
+  }
+})
+
+test_that("recode_values() formula interface with .unmatched = 'error' on unmatched values", {
+  d <- make_all_designs(seed = 42)$taylor
+  # y3 has values 0L and 1L; formula only matches 1L — 0L is unmatched
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(y3, 1L ~ "yes", .unmatched = "error")
+    ),
+    class = "surveytidy_error_recode_unmatched_values"
+  )
+})
+
+test_that("recode_values() formula interface + .label sets variable label [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        0L ~ "no",
+        1L ~ "yes",
+        .label = "Y3 recoded"
+      )
+    )
+    test_invariants(result)
+    expect_identical(result@metadata@variable_labels$y3_r, "Y3 recoded")
+  }
+})
+
+test_that("recode_values() formula interface + .value_labels sets value labels [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        0L ~ 10L,
+        1L ~ 20L,
+        .value_labels = c("Low" = 10L, "High" = 20L)
+      )
+    )
+    test_invariants(result)
+    expect_identical(
+      result@metadata@value_labels$y3_r,
+      c("Low" = 10L, "High" = 20L)
+    )
+  }
+})
+
+test_that("recode_values() formula interface + .factor = TRUE uses formula RHS order [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_f = recode_values(y3, 1L ~ "yes", 0L ~ "no", .factor = TRUE)
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$y3_f))
+    # Levels follow formula RHS order, not sorted data order
+    expect_identical(levels(result@data$y3_f), c("yes", "no"))
+  }
+})
+
+test_that("recode_values() .use_labels = TRUE combined with formulas errors", {
+  d <- make_all_designs(seed = 42)$taylor
+  d@metadata@value_labels[["y3"]] <- c("No" = 0L, "Yes" = 1L)
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE)
+    ),
+    class = "surveytidy_error_recode_use_labels_with_formulas"
+  )
+  expect_snapshot(
+    error = TRUE,
+    mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE)
+    )
   )
 })
 
