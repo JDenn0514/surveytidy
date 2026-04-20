@@ -5,3 +5,7 @@
 .DS_Store
 .quarto
 docs
+README.html
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
+.claude/worktrees/
