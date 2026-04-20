@@ -25,7 +25,8 @@ Naming convention:
 | `surveytidy_error_recode_factor_with_label` | `R/recode.R` | `.factor = TRUE` and `.label` is non-NULL |
 | `surveytidy_error_recode_use_labels_no_attrs` | `R/recode.R` | `.use_labels = TRUE` but `attr(x, "labels")` is NULL |
 | `surveytidy_error_recode_unmatched_values` | `R/recode.R` | `.unmatched = "error"` and unmatched values exist in `recode_values()` |
-| `surveytidy_error_recode_from_to_missing` | `R/recode.R` | `from` is NULL and `.use_labels = FALSE` in `recode_values()` |
+| `surveytidy_error_recode_from_to_missing` | `R/recode-values.R` | No formulas in `...`, `from = NULL`, and `.use_labels = FALSE` in `recode_values()` |
+| `surveytidy_error_recode_use_labels_with_formulas` | `R/recode-values.R` | Both formulas in `...` and `.use_labels = TRUE` in `recode_values()` |
 | `surveytidy_error_recode_description_not_scalar` | `R/recode.R` | `.description` is not NULL and not a character(1) |
 | `surveytidy_error_na_if_update_labels_not_scalar` | `R/na-if.R` | `.update_labels` is not a single non-NA logical value |
 | `surveytidy_error_make_factor_bad_arg` | `R/transform.R` | `.label`/`.description` not `character(1)`, or `ordered`/`drop_levels`/`force`/`na.rm` not `logical(1)` |

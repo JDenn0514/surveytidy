@@ -296,6 +296,22 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   result
 }
 
+# Extract unique right-hand-side values from `old ~ new` formulas passed
+# through `...`. Used by recode_values() to derive factor levels when the
+# formula interface is used instead of explicit `to`. Non-formula elements
+# in `...` are ignored (dplyr::recode_values() will error on them anyway).
+.formula_rhs_values <- function(...) {
+  dots <- rlang::list2(...)
+  rhs <- lapply(dots, function(e) {
+    if (rlang::is_formula(e)) rlang::eval_tidy(rlang::f_rhs(e)) else NULL
+  })
+  rhs <- rhs[!vapply(rhs, is.null, logical(1L))]
+  if (length(rhs) == 0L) {
+    return(NULL)
+  }
+  unique(unlist(rhs, use.names = FALSE))
+}
+
 # Convert result to a factor with levels ordered by value_labels (if provided)
 # or by formula_values / unique(to) (if value_labels is NULL).
 .factor_from_result <- function(x, value_labels, formula_values) {

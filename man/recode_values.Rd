@@ -22,9 +22,12 @@ recode_values(
 \arguments{
 \item{x}{Vector to recode.}
 
-\item{...}{These dots are for future extensions and must be empty.}
+\item{...}{\code{old_value ~ new_value} formulas describing the recoding map.
+Equivalent to supplying parallel \code{from}/\code{to} vectors. When \code{...} is
+non-empty, \code{from} and \code{.use_labels = TRUE} must not be used.}
 
-\item{from}{Vector of old values to recode from. Required unless
+\item{from}{Vector (or list of vectors, for many-to-one mapping) of old
+values. Required unless formulas are supplied in \code{...} or
 \code{.use_labels = TRUE}. Must be the same type as \code{x}.}
 
 \item{to}{Vector of new values corresponding to \code{from}. Must be the same
@@ -48,13 +51,15 @@ any value in \code{x} not present in \code{from} triggers a
 \verb{@metadata@value_labels}. Names are the label strings; values are the
 data values.}
 
-\item{.factor}{\code{logical(1)}. If \code{TRUE}, returns a factor with levels in
-\code{to} order (or \code{.value_labels} name order if supplied). Cannot be
-combined with \code{.label}.}
+\item{.factor}{\code{logical(1)}. If \code{TRUE}, returns a factor. Levels are taken
+from \code{.value_labels} names if supplied, otherwise from \code{to} in lookup
+mode or from the right-hand sides of the \code{...} formulas in formula mode.
+Cannot be combined with \code{.label}.}
 
 \item{.use_labels}{\code{logical(1)}. If \code{TRUE}, reads \code{attr(x, "labels")} to
 build the \code{from}/\code{to} map automatically: values become \code{from}, label
-strings become \code{to}. \code{x} must carry value labels; errors if not.}
+strings become \code{to}. \code{x} must carry value labels; errors if not. Cannot
+be combined with formulas in \code{...}.}
 
 \item{.description}{\code{character(1)} or \code{NULL}. Plain-language description
 of how the variable was created. Stored in
@@ -69,14 +74,23 @@ A vector, factor, or \code{haven_labelled} vector:
 }
 }
 \description{
-\code{recode_values()} replaces each value of \code{x} found in \code{from} with the
-corresponding value from \code{to}. Values not found in \code{from} are either kept
-unchanged (\code{.unmatched = "default"}, the default) or trigger an error
+\code{recode_values()} replaces each value of \code{x} with a corresponding new
+value. The mapping can be supplied in any of three ways:
+\itemize{
+\item \strong{Formula interface} — pass \code{old_value ~ new_value} formulas in \code{...}:
+\code{recode_values(score, 1 ~ "SD", 2 ~ "D", 3 ~ "N", 4 ~ "A", 5 ~ "SA")}.
+\item \strong{Lookup-table interface} — pass parallel \code{from} and \code{to} vectors.
+\item \strong{Label-driven interface} — set \code{.use_labels = TRUE} to build the map
+from \code{attr(x, "labels")} (values become \code{from}, label strings become \code{to}).
+}
+
+Values not found in the map are either kept unchanged
+(\code{.unmatched = "default"}, the default) or trigger an error
 (\code{.unmatched = "error"}).
 
 Unlike \code{\link[=replace_values]{replace_values()}}, which updates only specific matching values and
 retains everything else, \code{recode_values()} is intended for full remapping:
-every possible value in \code{x} typically has a corresponding entry in \code{from}.
+every possible value in \code{x} typically has a corresponding entry in the map.
 
 When any of \code{.label}, \code{.value_labels}, \code{.factor}, or \code{.description} are
 supplied, output label metadata is written to \verb{@metadata} after \code{\link[=mutate]{mutate()}}.
@@ -88,6 +102,37 @@ When none of these arguments are used, the output is identical to
 library(surveycore)
 library(surveytidy)
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
+
+# ---------------------------------------------------------------------
+# Formula interface ---------------------------------------------------
+# ---------------------------------------------------------------------
+
+# Recode pid3 using `old ~ new` formulas passed through `...`
+new <- ns_wave1_svy |>
+  mutate(
+    party = recode_values(
+      pid3,
+      1 ~ "Democrat",
+      2 ~ "Republican",
+      3 ~ "Independent",
+      4 ~ "Other"
+    )
+  ) |>
+  select(pid3, party)
+
+new
+
+
+# ---- Formula interface with default ----
+
+new <- ns_wave1_svy |>
+  mutate(
+    dem = recode_values(pid3, 1 ~ "Democrat", default = "Non-Democrat")
+  ) |>
+  select(pid3, dem)
+
+new
+
 
 # ---------------------------------------------------------------------
 # Basic recode_values — explicit from/to mapping ----------------------
