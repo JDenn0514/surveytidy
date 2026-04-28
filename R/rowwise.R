@@ -147,3 +147,9 @@ is_rowwise <- function(design) {
 is_grouped <- function(design) {
   length(design@groups) > 0L
 }
+
+# ── rowwise.survey_collection (PR 2b) ──
+# ── end ──
+
+# ── is_rowwise.survey_collection (PR 2c) ──
+# ── end ──

@@ -46,6 +46,10 @@ Naming convention:
 | `surveytidy_error_bind_rows_survey` | `R/joins.R` | `bind_rows()` called with a survey object |
 | `surveytidy_error_bind_cols_row_mismatch` | `R/joins.R` | Row counts differ between `x` and `...` in `bind_cols()` |
 | `surveytidy_error_reserved_col_name` | `R/joins.R` | `"..surveytidy_row_index.."` already in `names(x@data)` when `semi_join`, `anti_join`, or `inner_join` (domain-aware) is called |
+| `surveytidy_error_collection_verb_emptied` | `R/collection-dispatch.R` | Verb result is an empty collection (e.g., every member skipped via `.if_missing_var = "skip"`). Message identifies the verb and reports whether `.if_missing_var` came from per-call or stored property. |
+| `surveytidy_error_collection_verb_failed` | `R/collection-dispatch.R` | Per-survey verb application errored under `.if_missing_var = "error"`. Re-raises with `parent = cnd` so the original error chain is preserved. |
+| `surveytidy_error_collection_by_unsupported` | `R/filter.R`, `R/mutate.R`, `R/slice.R` | Per-call `.by` (or `by` for `slice_min`/`slice_max`/`slice_sample`) was supplied to a verb dispatched on a `survey_collection`. Raised before dispatch. Names the verb and points users to `group_by` on the collection or `coll@groups`. |
+| `surveytidy_pre_check_missing_var` | `R/collection-dispatch.R` | **Internal — not part of public condition API.** Typed condition synthesized by the dispatcher's pre-check path when a data-masking quosure references a name unresolved in both the quosure's enclosing env and the survey's `@data`. Class chain: `c("surveytidy_pre_check_missing_var", "error", "condition")` (deliberately omits `"rlang_error"`). Fields: `$missing_vars` (chr), `$survey_name` (chr), `$quosure`. Stable for `parent`-chain testing; not exported. |
 
 ---
 
@@ -64,3 +68,15 @@ Naming convention:
 | `surveytidy_warning_make_dicho_unknown_exclude` | `R/transform.R` | A name in `.exclude` not found in levels of `x` |
 | `surveytidy_warning_make_rev_all_na` | `R/transform.R` | All values in `x` are `NA` |
 | `surveytidy_warning_join_col_conflict` | `R/joins.R` | `y` has column names matching design variable names in `x` (dropped before joining) |
+| `surveytidy_warning_collection_rowwise_mixed` | `R/mutate.R` | `mutate.survey_collection` detects that `is_rowwise()` is not uniform across `coll@surveys` (some members are rowwise, others are not). Soft invariant — fires once per `mutate()` call before per-member dispatch; per-member rowwise/non-rowwise semantics still apply for that call. |
+
+---
+
+## Messages
+
+Typed messages emitted via `cli::cli_inform()`. Registered as classes for
+handler consistency (`expect_message(class = …)`); not errors or warnings.
+
+| Class | Source file | Trigger |
+|-------|-------------|---------|
+| `surveytidy_message_collection_skipped_surveys` | `R/collection-dispatch.R` | Informational message from the collection dispatcher listing surveys that were skipped under `.if_missing_var = "skip"` because they were missing a referenced variable. Mirrors `surveycore_message_collection_skipped_surveys` from the analysis dispatcher. |

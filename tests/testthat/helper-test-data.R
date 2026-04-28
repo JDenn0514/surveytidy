@@ -361,6 +361,97 @@ test_result_meta_coherent <- function(result) {
   invisible(result)
 }
 
+# ---------------------------------------------------------------------------
+# survey_collection test helpers (Phase 0.7)
+# ---------------------------------------------------------------------------
+
+#' Build a 3-member collection mixing all three design subclasses.
+#'
+#' Members are unnamed (taylor / replicate / twophase) and share the column
+#' schema produced by make_all_designs(). Default `@id` is ".survey" and
+#' default `@if_missing_var` is "error".
+make_test_collection <- function(seed = 42L) {
+  designs <- make_all_designs(seed = seed)
+  surveycore::as_survey_collection(
+    !!!designs,
+    .id = ".survey",
+    .if_missing_var = "error"
+  )
+}
+
+#' Build a 3-member, all-`survey_taylor` collection with deliberately
+#' divergent non-design column schemas. Used to exercise
+#' `.if_missing_var = "skip"`, `any_of()`, and per-verb missing-variable
+#' handling.
+#'
+#' Member contract:
+#'   * m1 — full schema (psu, strata, fpc, wt, y1, y2, y3, group)
+#'   * m2 — drops y2 and y3 (psu, strata, fpc, wt, y1, group)
+#'   * m3 — drops y1 and adds region (psu, strata, fpc, wt, y2, y3, group, region)
+make_heterogeneous_collection <- function(seed = 42L) {
+  base <- make_survey_data(n = 200L, n_psu = 20L, n_strata = 4L, seed = seed)
+
+  m1_data <- base
+  m2_data <- base[, !(names(base) %in% c("y2", "y3"))]
+  m3_data <- base[, !(names(base) %in% "y1")]
+  m3_data$region <- sample(
+    c("north", "south", "east", "west"),
+    nrow(m3_data),
+    replace = TRUE
+  )
+
+  to_taylor <- function(df) {
+    surveycore::as_survey(
+      df,
+      ids = psu,
+      strata = strata,
+      weights = wt,
+      fpc = fpc
+    )
+  }
+
+  surveycore::as_survey_collection(
+    m1 = to_taylor(m1_data),
+    m2 = to_taylor(m2_data),
+    m3 = to_taylor(m3_data),
+    .id = ".survey",
+    .if_missing_var = "error"
+  )
+}
+
+#' Collection-level invariant helper. Mirrors `test_invariants()` but for
+#' a `survey_collection` (G1 / G1b / @id / @if_missing_var enforcement).
+#' Spec §IX.2.
+test_collection_invariants <- function(coll) {
+  testthat::expect_true(
+    S7::S7_inherits(coll, surveycore::survey_collection)
+  )
+
+  testthat::expect_gte(length(coll@surveys), 1L)
+  for (member in coll@surveys) {
+    testthat::expect_true(S7::S7_inherits(member, surveycore::survey_base))
+  }
+
+  testthat::expect_type(coll@id, "character")
+  testthat::expect_length(coll@id, 1L)
+  testthat::expect_true(nzchar(coll@id))
+
+  testthat::expect_true(coll@if_missing_var %in% c("error", "skip"))
+
+  for (member in coll@surveys) {
+    testthat::expect_identical(member@groups, coll@groups)
+  }
+
+  for (gcol in coll@groups) {
+    for (member in coll@surveys) {
+      testthat::expect_true(gcol %in% names(member@data))
+    }
+  }
+
+  invisible(coll)
+}
+
+
 make_all_designs <- function(seed = 42L) {
   df_t <- make_survey_data(
     n = 100L,
