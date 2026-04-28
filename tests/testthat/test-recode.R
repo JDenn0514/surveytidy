@@ -1030,3 +1030,68 @@ test_that("mutate() warns surveytidy_warning_mutate_weight_col when mutating wei
     test_invariants(result)
   }
 })
+
+# ── 11. Coverage gap: non-literal RHS in case_when() .factor branch ──────────
+
+test_that("case_when() .factor = TRUE with non-literal RHS uses unique result values for levels [all designs]", {
+  # Covers R/case-when.R:242 — the all_literal == FALSE branch where
+  # formula_values is derived from unique(result) rather than from the
+  # syntactic literals on the RHS of each formula.
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      cat = case_when(
+        y1 > 50 ~ paste0("hi", "gh"),
+        .default = "low",
+        .factor = TRUE
+      )
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$cat))
+    # Levels come from unique non-NA values in result; "low" is the .default
+    expect_setequal(levels(result@data$cat), c("high", "low"))
+  }
+})
+
+# ── 12. Coverage gap: recode_values() rethrows non-unmatched errors ──────────
+
+test_that("recode_values() rethrows errors that aren't vctrs_error_combine_unmatched", {
+  # Covers R/recode-values.R:339 — `stop(e)` re-throws errors thrown by
+  # dplyr::recode_values() that are NOT vctrs_error_combine_unmatched (e.g.,
+  # incompatible from/to lengths produce vctrs_error_incompatible_size).
+  d <- make_all_designs(seed = 42)$taylor
+
+  # from has 2 elements but to has 3 — vctrs_error_incompatible_size, which
+  # doesn't match the unmatched-values branch and falls through to stop(e).
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        from = c(0L, 1L),
+        to = c("a", "b", "c")
+      )
+    ),
+    class = "vctrs_error_incompatible_size"
+  )
+})
+
+# ── 13. Coverage gap: replace_values() .label argument propagates ────────────
+
+test_that("replace_values() .label sets variable label in @metadata [all designs]", {
+  # Covers R/replace-values.R:161 — the !is.null(.label) branch where the
+  # caller-supplied .label takes precedence over attr(x, "label").
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = replace_values(y3, from = 0L, to = 9L, .label = "Recoded outcome")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@metadata@variable_labels$y3_r,
+      "Recoded outcome"
+    )
+  }
+})

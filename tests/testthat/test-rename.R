@@ -147,6 +147,29 @@ test_that("rename() does not alter the domain column", {
   test_invariants(d3)
 })
 
+# Coverage: rename map containing ONLY the domain column. After stripping
+# the domain col (silently blocked), the rename map is empty and we hit the
+# domain-only warning branch in .apply_rename_map() (R/rename.R L52-58).
+test_that("rename() warns and is a no-op when only the domain column is renamed", {
+  d <- make_all_designs()$taylor
+  d2 <- filter(d, y1 > 0) # creates the domain column
+  domain_col <- surveycore::SURVEYCORE_DOMAIN_COL
+
+  expect_warning(
+    result <- rename(d2, new_dom = !!domain_col),
+    class = "surveytidy_warning_rename_design_var"
+  )
+  test_invariants(result)
+  # Domain column is silently NOT renamed — name unchanged.
+  expect_true(domain_col %in% names(result@data))
+  expect_false("new_dom" %in% names(result@data))
+  # Object otherwise unchanged.
+  expect_identical(
+    result@data[[domain_col]],
+    d2@data[[domain_col]]
+  )
+})
+
 # ── rename.R refactor regression ──────────────────────────────────────────────
 # Verifies that extracting .apply_rename_map() introduced no behavioral change
 # to rename(). All existing rename() contracts still hold after the refactor.

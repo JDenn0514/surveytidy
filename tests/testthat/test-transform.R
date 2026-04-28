@@ -1000,3 +1000,66 @@ test_that("cur_column() captures correct var per column in across() on plain dat
   expect_identical(recode_q1$fn, "make_factor")
   expect_identical(recode_q2$fn, "make_factor")
 })
+
+# ── coverage closers ─────────────────────────────────────────────────────────
+
+# 60. ordered = TRUE on character input applies ordered class (transform.R L152)
+test_that("make_factor() with ordered = TRUE on character input returns ordered factor", {
+  x <- c("low", "mid", "high", "mid")
+  result <- make_factor(x, ordered = TRUE)
+  expect_true(is.ordered(result))
+  expect_true(is.factor(result))
+  # Levels remain alphabetical (factor()'s default for character)
+  expect_equal(levels(result), c("high", "low", "mid"))
+})
+
+# 61. force = TRUE + ordered = TRUE on numeric without labels (transform.R L200)
+test_that("make_factor() force = TRUE with ordered = TRUE returns ordered factor", {
+  x <- c(1, 2, 3, 1, 2)
+  expect_warning(
+    result <- make_factor(x, force = TRUE, ordered = TRUE),
+    class = "surveytidy_warning_make_factor_forced"
+  )
+  expect_true(is.ordered(result))
+  expect_true(is.factor(result))
+})
+
+# 62. na.rm = FALSE: unlabelled value in na_values is tolerated (transform.R L240)
+test_that("make_factor() tolerates unlabelled na_values entries when na.rm = FALSE", {
+  # Value 8 is in na_values but has no label entry. With na.rm = FALSE this
+  # is permitted because special-missing values without labels are excluded
+  # from the unlabelled-error check.
+  x <- c(1, 2, 3, 8, 1)
+  attr(x, "labels") <- c("Agree" = 1, "Neutral" = 2, "Disagree" = 3)
+  attr(x, "na_values") <- c(8)
+  # Should NOT error
+  result <- make_factor(x, na.rm = FALSE)
+  expect_true(is.factor(result))
+  expect_true("Agree" %in% levels(result))
+})
+
+# 63. na.rm = FALSE: unlabelled value within na_range tolerated (transform.R L248)
+test_that("make_factor() tolerates unlabelled na_range entries when na.rm = FALSE", {
+  # Value 98 is inside na_range but has no label entry; na.rm = FALSE so the
+  # special-missing tolerance branch in is_special_missing() applies.
+  x <- c(1, 2, 3, 98, 1)
+  attr(x, "labels") <- c("Low" = 1, "Mid" = 2, "High" = 3)
+  attr(x, "na_range") <- c(97, 99)
+  result <- make_factor(x, na.rm = FALSE)
+  expect_true(is.factor(result))
+  expect_true("Low" %in% levels(result))
+})
+
+# 64. na.rm = TRUE skips special-missing check; unlabelled non-special errors
+#     (transform.R L258 — the na.rm = TRUE branch of the unlabelled-vals path)
+test_that("make_factor() with na.rm = TRUE errors on unlabelled non-special value", {
+  # Value 4 is NOT in na_values nor na_range, but lacks a label. With
+  # na.rm = TRUE the code path takes the else branch (L258) before erroring.
+  x <- c(1, 2, 3, 4, 8)
+  attr(x, "labels") <- c("A" = 1, "B" = 2, "C" = 3)
+  attr(x, "na_values") <- c(8)
+  expect_error(
+    make_factor(x, na.rm = TRUE),
+    class = "surveytidy_error_make_factor_incomplete_labels"
+  )
+})
