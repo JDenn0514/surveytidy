@@ -91,6 +91,25 @@ Added two new error classes:
 - `surveytidy_error_collection_select_group_removed`
 - `surveytidy_error_collection_rename_group_partial`
 
+### Coverage lift: 85% → 100%
+
+Coverage on this branch had dropped to 85.48% — the survey_collection
+work expanded `R/` without proportional test additions, and covr could
+not measure two structural patterns:
+
+- `.onLoad()` in `R/zzz.R` (326 lines) runs before covr instruments
+- the `.make_slice_method()` factory closure in `R/slice.R` (40 lines)
+  cannot be traced from source through closure indirection
+
+Both were excluded via `.covrignore` (zzz.R) and `# nocov` markers
+(slice.R) with comments pointing to the tests that verify them.
+Added 38 targeted test blocks across 8 test files for the remaining
+genuine gaps in `joins.R`, `rename.R`, `utils.R`, `transform.R`,
+`mutate.R`, `filter.R`, `case-when.R`, `recode-values.R`,
+`replace-values.R`, and `select.R`. Also added `.covrignore` to
+`.Rbuildignore` to suppress the "hidden files and directories" R CMD
+check note. Final coverage: 100% across every measured file.
+
 ### New: `tests/testthat/test-collection-select.R`
 
 Cross-design happy paths for `select` and `relocate` with dual
@@ -131,12 +150,9 @@ emptied error.
 
 ## Verification
 
-- `devtools::test()` — all tests pass (`17,595 PASS`)
+- `devtools::test()` — all tests pass
 - `devtools::check()` — 0 errors, 0 warnings, 0 notes
-- `covr::package_coverage()` (touched files):
-  `R/distinct.R` 100% · `R/drop-na.R` 100% · `R/rowwise.R` 100% ·
-  `R/select.R` 98.77% · `R/rename.R` 97.71% ·
-  `R/collection-dispatch.R` 100%
+- `covr::package_coverage()` — 100% across every measured file
 - `air format` — applied to all touched files
 
 ## Files Modified
@@ -163,3 +179,9 @@ emptied error.
   `man/drop_na.Rd`, `man/rowwise.Rd` — regenerated for the new
   collection methods
 - `plans/error-messages.md` — added two new error classes
+- `.covrignore` — new; excludes `R/zzz.R` from coverage measurement
+- `.Rbuildignore` — added `.covrignore`
+- `R/slice.R` — `# nocov` markers on the `.make_slice_method` factory closure
+- `tests/testthat/test-filter.R`, `test-joins.R`, `test-mutate.R`,
+  `test-recode.R`, `test-rename.R`, `test-transform.R`, `test-utils.R` —
+  38 new test blocks closing genuine coverage gaps
