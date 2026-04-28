@@ -251,8 +251,14 @@ case_when <- function(
   }
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description,
-                          fn = "case_when", var = NULL))
+    return(.wrap_labelled(
+      result,
+      .label,
+      .value_labels,
+      .description,
+      fn = "case_when",
+      var = NULL
+    ))
   }
 
   if (!is.null(.description)) {

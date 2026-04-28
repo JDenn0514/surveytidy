@@ -161,8 +161,14 @@ if_else <- function(
   )
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description,
-                          fn = "if_else", var = NULL))
+    return(.wrap_labelled(
+      result,
+      .label,
+      .value_labels,
+      .description,
+      fn = "if_else",
+      var = NULL
+    ))
   }
 
   if (!is.null(.description)) {

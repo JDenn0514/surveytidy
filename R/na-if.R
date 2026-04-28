@@ -153,8 +153,14 @@ na_if <- function(x, y, .update_labels = TRUE, .description = NULL) {
       labels_attr <- labels_attr[keep]
       if (length(labels_attr) == 0L) labels_attr <- NULL
     }
-    return(.wrap_labelled(result, label_attr, labels_attr, .description,
-                          fn = "na_if", var = var_name))
+    return(.wrap_labelled(
+      result,
+      label_attr,
+      labels_attr,
+      .description,
+      fn = "na_if",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {

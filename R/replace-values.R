@@ -164,8 +164,14 @@ replace_values <- function(
   }
 
   if (!is.null(merged_labels) || !is.null(effective_label)) {
-    return(.wrap_labelled(result, effective_label, merged_labels, .description,
-                          fn = "replace_values", var = var_name))
+    return(.wrap_labelled(
+      result,
+      effective_label,
+      merged_labels,
+      .description,
+      fn = "replace_values",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {
