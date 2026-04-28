@@ -119,3 +119,34 @@ drop_na.survey_result <- function(data, ...) {
   old_meta <- attr(data, ".meta")
   NextMethod() |> .restore_survey_result(old_class, old_meta)
 }
+
+
+# ── drop_na.survey_collection (PR 2b) ────────────────────────────────────────
+
+#' @rdname drop_na
+#' @method drop_na survey_collection
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `drop_na()` is dispatched to each
+#' member independently with the same `...`. Per-member empty-domain warnings
+#' fire as usual. The collection's stored `@if_missing_var` controls behavior
+#' when a tidyselect-named column is absent from one or more members;
+#' detection mode is class-catch (the tidyselect error is caught at dispatch
+#' time).
+#'
+#' Unlike other collection verbs, `drop_na()` does not accept a per-call
+#' `.if_missing_var` argument: tidyr's `drop_na()` generic calls
+#' `rlang::check_dots_unnamed()` before S3 dispatch, which rejects any named
+#' `...` argument. Use [surveycore::set_collection_if_missing_var()] to change
+#' the collection's stored behavior instead.
+drop_na.survey_collection <- function(data, ...) {
+  .dispatch_verb_over_collection(
+    fn = tidyr::drop_na,
+    verb_name = "drop_na",
+    collection = data,
+    ...,
+    .if_missing_var = NULL,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
+}

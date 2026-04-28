@@ -6,6 +6,8 @@
 \alias{rename.survey_result}
 \alias{rename_with.survey_base}
 \alias{rename_with.survey_result}
+\alias{rename.survey_collection}
+\alias{rename_with.survey_collection}
 \title{Rename columns of a survey design object}
 \usage{
 rename(.data, ...)
@@ -17,6 +19,16 @@ rename(.data, ...)
 \method{rename_with}{survey_base}(.data, .fn, .cols = dplyr::everything(), ...)
 
 \method{rename_with}{survey_result}(.data, .fn, .cols = dplyr::everything(), ...)
+
+\method{rename}{survey_collection}(.data, ..., .if_missing_var = NULL)
+
+\method{rename_with}{survey_collection}(
+  .data,
+  .fn,
+  .cols = dplyr::everything(),
+  ...,
+  .if_missing_var = NULL
+)
 }
 \arguments{
 \item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object, or a
@@ -32,6 +44,11 @@ duplicates and no conflicts with existing non-renamed column names.}
 
 \item{.cols}{<\code{\link[tidyselect:language]{tidy-select}}> Columns whose names
 \code{.fn} will transform. Defaults to all columns.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -103,6 +120,42 @@ Extra arguments to \code{.fn} can be passed via \code{...}:
 variable.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{rename()} is dispatched to each
+member independently. Each member's \code{rename.survey_base} updates \verb{@data},
+\verb{@variables}, \verb{@metadata}, and \verb{@groups} atomically.
+
+Before dispatching, \code{rename.survey_collection} resolves the rename map
+against each member's \verb{@data} and raises
+\code{surveytidy_error_collection_rename_group_partial} if any column in
+\code{coll@groups} would be renamed on some members but not others — that
+would leave the collection with an inconsistent \verb{@groups} invariant
+(G1) that no \code{.if_missing_var} policy can recover. For plain \code{rename}
+the rename map is universal, so this branch normally fires only as a
+defense-in-depth catch for regressions in the surveycore G1b validator.
+
+Renaming a non-group design variable (weights, ids, strata, fpc) emits
+\code{surveytidy_warning_rename_design_var} once per member — N firings on
+an N-member collection. Capture with \code{withCallingHandlers()}.
+
+
+When applied to a \code{survey_collection}, \code{rename_with()} is dispatched to
+each member independently. Each member resolves \code{.cols} against its own
+\verb{@data}, so a \code{.cols} like \code{where(is.factor)} may select different
+columns on different members.
+
+Before dispatching, \code{rename_with.survey_collection} resolves \code{.cols}
+per-member and raises
+\code{surveytidy_error_collection_rename_group_partial} if any column in
+\code{coll@groups} would be renamed on some members but not others. This
+is the genuine trigger for the partial-rename class — \code{.cols}
+resolving differently across a heterogeneous collection is the path
+the spec is designed to catch (see §IV.4 reachability note).
+
+Per-member design-variable warnings fire once per affected member.
+}
+
 \examples{
 library(dplyr)
 library(surveytidy)

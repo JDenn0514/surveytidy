@@ -148,8 +148,38 @@ is_grouped <- function(design) {
   length(design@groups) > 0L
 }
 
-# ── rowwise.survey_collection (PR 2b) ──
-# ── end ──
+# ── rowwise.survey_collection (PR 2b) ────────────────────────────────────────
+
+#' @rdname rowwise
+#' @method rowwise survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `rowwise()` is dispatched to each
+#' member independently — every member receives `@variables$rowwise = TRUE`
+#' and the same `@variables$rowwise_id_cols`. The collection has no rowwise
+#' marker; rowwise state lives entirely per-member. `@groups`, `@id`, and
+#' `@if_missing_var` on the collection are unchanged.
+#'
+#' Construction-time uniformity is by-construction: every member is rowwise
+#' after the call. Mixed rowwise state across members is detected later by
+#' [mutate()] (see §IV.5 of the survey-collection spec) and warned about
+#' rather than blocked.
+rowwise.survey_collection <- function(
+  data,
+  ...,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::rowwise,
+    verb_name = "rowwise",
+    collection = data,
+    ...,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
+}
 
 # ── is_rowwise.survey_collection (PR 2c) ──
 # ── end ──

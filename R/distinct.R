@@ -126,3 +126,40 @@ distinct.survey_base <- function(.data, ..., .keep_all = FALSE) {
   .data@data <- new_data
   .data
 }
+
+
+# ── distinct.survey_collection (PR 2b) ────────────────────────────────────────
+
+#' @rdname distinct
+#' @method distinct survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `distinct()` is dispatched to each
+#' member independently — there is no cross-survey deduplication. Two
+#' members that share a literally identical row will both retain that row
+#' in their post-`distinct()` results. This is the V9 contract from the
+#' survey-collection spec; collections deliberately avoid the
+#' `bind_rows()` analogy here because cross-survey deduplication has no
+#' coherent variance interpretation across designs.
+#'
+#' Each member's `distinct.survey_base` issues
+#' `surveycore_warning_physical_subset` independently — N firings on an
+#' N-member collection. Capture with `withCallingHandlers()`.
+distinct.survey_collection <- function(
+  .data,
+  ...,
+  .keep_all = FALSE,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::distinct,
+    verb_name = "distinct",
+    collection = .data,
+    ...,
+    .keep_all = .keep_all,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
+}

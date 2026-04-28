@@ -4,11 +4,14 @@
 \alias{drop_na}
 \alias{drop_na.survey_base}
 \alias{drop_na.survey_result}
+\alias{drop_na.survey_collection}
 \title{Mark rows with missing values as out-of-domain}
 \usage{
 \method{drop_na}{survey_base}(data, ...)
 
 \method{drop_na}{survey_result}(data, ...)
+
+\method{drop_na}{survey_collection}(data, ...)
 
 drop_na(data, ...)
 }
@@ -47,6 +50,22 @@ filter(d, !is.na(bpxsy1), ridageyr >= 18)
 }\if{html}{\out{</div>}}
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{drop_na()} is dispatched to each
+member independently with the same \code{...}. Per-member empty-domain warnings
+fire as usual. The collection's stored \verb{@if_missing_var} controls behavior
+when a tidyselect-named column is absent from one or more members;
+detection mode is class-catch (the tidyselect error is caught at dispatch
+time).
+
+Unlike other collection verbs, \code{drop_na()} does not accept a per-call
+\code{.if_missing_var} argument: tidyr's \code{drop_na()} generic calls
+\code{rlang::check_dots_unnamed()} before S3 dispatch, which rejects any named
+\code{...} argument. Use \code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}} to change
+the collection's stored behavior instead.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)
