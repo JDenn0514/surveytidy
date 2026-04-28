@@ -160,8 +160,14 @@ replace_when <- function(
   }
 
   if (!is.null(merged_labels) || !is.null(effective_label)) {
-    return(.wrap_labelled(result, effective_label, merged_labels, .description,
-                          fn = "replace_when", var = var_name))
+    return(.wrap_labelled(
+      result,
+      effective_label,
+      merged_labels,
+      .description,
+      fn = "replace_when",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {

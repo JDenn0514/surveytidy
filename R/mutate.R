@@ -335,3 +335,82 @@ mutate.survey_result <- function(.data, ...) {
   attr(result, ".meta") <- new_meta
   result
 }
+
+#' @rdname mutate
+#' @method mutate survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `mutate()` is dispatched to each
+#' member independently. Per-member warnings (e.g.,
+#' `surveytidy_warning_mutate_weight_col` when modifying the weight column)
+#' fire once per member in which they apply — an N-member collection that
+#' all modify the weight column will surface N warnings.
+#'
+#' If members have non-uniform rowwise state (some are rowwise, some are not),
+#' `mutate()` emits `surveytidy_warning_collection_rowwise_mixed` once before
+#' dispatch as a soft-invariant diagnostic. Dispatch still proceeds; per-member
+#' rowwise/non-rowwise semantics apply for the call. To resolve, call
+#' [rowwise()] or [ungroup()] on the entire collection first.
+#'
+#' `.by` is rejected at the collection layer with
+#' `surveytidy_error_collection_by_unsupported`. Set grouping with
+#' [group_by()] on the collection instead.
+mutate.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .keep = c("all", "used", "unused", "none"),
+  .before = NULL,
+  .after = NULL,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+
+  rowwise_state <- vapply(.data@surveys, is_rowwise, logical(1L))
+  if (any(rowwise_state) && !all(rowwise_state)) {
+    rw_names <- names(.data@surveys)[rowwise_state]
+    nrw_names <- names(.data@surveys)[!rowwise_state]
+    cli::cli_warn(
+      c(
+        "!" = paste0(
+          "{.fn mutate} called on a {.cls survey_collection} with mixed ",
+          "rowwise state."
+        ),
+        "i" = paste0(
+          "Rowwise: {.val {rw_names}}; non-rowwise: {.val {nrw_names}}. ",
+          "Each member will be mutated under its own semantics, which may ",
+          "give inconsistent results."
+        ),
+        "i" = paste0(
+          "Call {.code rowwise(coll)} or {.code ungroup(coll)} on the ",
+          "collection first to make rowwise state uniform."
+        )
+      ),
+      class = "surveytidy_warning_collection_rowwise_mixed"
+    )
+  }
+
+  .keep <- match.arg(.keep)
+  .dispatch_verb_over_collection(
+    fn = dplyr::mutate,
+    verb_name = "mutate",
+    collection = .data,
+    ...,
+    .keep = .keep,
+    .before = .before,
+    .after = .after,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
+}

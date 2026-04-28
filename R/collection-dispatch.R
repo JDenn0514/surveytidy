@@ -13,14 +13,16 @@
 
 #' Shared parameters for survey_collection verb methods
 #'
-#' @name survey_collection_args
-#' @keywords internal
-#' @noRd
-#'
 #' @param .if_missing_var Per-call override of `collection@if_missing_var`.
 #'   One of `"error"` or `"skip"`, or `NULL` (the default) to inherit the
 #'   collection's stored value. See
 #'   [surveycore::set_collection_if_missing_var()].
+#'
+#' @return The modified collection, with members updated by the dispatched
+#'   verb.
+#'
+#' @name survey_collection_args
+#' @keywords internal
 NULL
 
 
@@ -36,7 +38,14 @@ NULL
 # class-catch path via `inherits(cnd$parent, "rlang_error")`.
 .pre_check_missing_vars <- function(dots, survey, survey_name) {
   data_cols <- names(survey@data)
-  for (quo in dots) {
+  dot_names <- names(dots) %||% rep("", length(dots))
+  for (i in seq_along(dots)) {
+    # Skip dotted-name scalars (e.g., `.keep`, `.before`) — they are not
+    # data-mask expressions and may already be unwrapped to plain values.
+    if (startsWith(dot_names[[i]], ".")) {
+      next
+    }
+    quo <- dots[[i]]
     expr <- rlang::quo_get_expr(quo)
     env <- rlang::quo_get_env(quo)
     candidate <- all.vars(expr)
@@ -100,6 +109,36 @@ NULL
     parent = cnd,
     class = "surveytidy_error_collection_verb_failed"
   )
+}
+
+
+# ── Scalar-dot unwrapper ──────────────────────────────────────────────────────
+
+# `enquos(...)` wraps every `...` argument as a quosure to preserve data-mask
+# semantics for bare-name expressions (e.g., `y1 > 50`, `region`). But scalar
+# control args whose names start with `.` (e.g., `.keep`, `.before`, `.after`,
+# `.preserve`) are not data-mask targets — they are values the receiving verb
+# matches directly (e.g., `match.arg(.keep)`). When spliced via `!!!`, those
+# stay wrapped as quosures unless we evaluate them first. This helper walks
+# the captured quosures, evaluates any whose name begins with `.`, and returns
+# a bare list suitable for `rlang::inject(fn(survey, !!!list))`.
+.unwrap_scalar_dots <- function(dots) {
+  if (length(dots) == 0L) {
+    return(dots)
+  }
+  nms <- names(dots) %||% rep("", length(dots))
+  # Build a fresh list to avoid `[[<- NULL` deletion semantics — when a
+  # scalar evaluates to NULL we still want the named slot present.
+  out <- vector("list", length(dots))
+  names(out) <- nms
+  for (i in seq_along(dots)) {
+    if (startsWith(nms[[i]], ".")) {
+      out[i] <- list(rlang::eval_tidy(dots[[i]]))
+    } else {
+      out[[i]] <- dots[[i]]
+    }
+  }
+  out
 }
 
 
@@ -172,6 +211,12 @@ NULL
   id_from_stored <- is.null(.if_missing_var)
 
   dots <- rlang::enquos(...)
+  # Dotted-name args (e.g., `.keep`, `.before`, `.after`, `.preserve`) are
+  # scalar control parameters — they must be evaluated to plain values before
+  # `rlang::inject(fn(survey, !!!dots))` so the receiving verb method does not
+  # see a quosure where it expects a string / logical / NSE expression.
+  # Bare-name args remain quosures so data-masking semantics work.
+  dots <- .unwrap_scalar_dots(dots)
 
   # Step 2: per-member apply with detection mode.
   results <- vector("list", length(collection@surveys))

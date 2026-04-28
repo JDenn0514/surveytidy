@@ -19,8 +19,13 @@ library(dplyr)
 # Build a haven_labelled-like numeric vector with labels and label attrs
 .make_labelled <- function(x, labels, label = NULL) {
   attr(x, "labels") <- labels
-  attr(x, "class") <- c("haven_labelled", class(x)[class(x) != "haven_labelled"])
-  if (!is.null(label)) attr(x, "label") <- label
+  attr(x, "class") <- c(
+    "haven_labelled",
+    class(x)[class(x) != "haven_labelled"]
+  )
+  if (!is.null(label)) {
+    attr(x, "label") <- label
+  }
   x
 }
 
@@ -28,8 +33,10 @@ library(dplyr)
 .likert4 <- function() {
   x <- c(1, 2, 2, 3, 4, 1, 3, 4, 2, NA)
   attr(x, "labels") <- c(
-    "Strongly agree" = 1, "Agree" = 2,
-    "Disagree" = 3, "Strongly disagree" = 4
+    "Strongly agree" = 1,
+    "Agree" = 2,
+    "Disagree" = 3,
+    "Strongly disagree" = 4
   )
   attr(x, "label") <- "Agreement scale"
   class(x) <- c("haven_labelled", "numeric")
@@ -118,8 +125,13 @@ test_that("make_factor() with ordered = TRUE returns ordered factor for labelled
 # 7. na.rm = TRUE converts na_values to NA before levelling
 test_that("make_factor() na.rm = TRUE removes na_values from levels", {
   x <- c(1, 2, 3, 8, 9, 1)
-  attr(x, "labels") <- c("Agree" = 1, "Neutral" = 2, "Disagree" = 3,
-                          "Don't know" = 8, "Refused" = 9)
+  attr(x, "labels") <- c(
+    "Agree" = 1,
+    "Neutral" = 2,
+    "Disagree" = 3,
+    "Don't know" = 8,
+    "Refused" = 9
+  )
   attr(x, "na_values") <- c(8, 9)
   result <- make_factor(x, na.rm = TRUE)
   expect_false("Don't know" %in% levels(result))
@@ -133,8 +145,14 @@ test_that("make_factor() na.rm = TRUE removes na_values from levels", {
 # 8. na.rm = TRUE with na_range
 test_that("make_factor() na.rm = TRUE with na_range converts range to NA", {
   x <- c(1, 2, 3, 97, 98, 99)
-  attr(x, "labels") <- c("Low" = 1, "Mid" = 2, "High" = 3,
-                          "DK" = 97, "Refused" = 98, "N/A" = 99)
+  attr(x, "labels") <- c(
+    "Low" = 1,
+    "Mid" = 2,
+    "High" = 3,
+    "DK" = 97,
+    "Refused" = 98,
+    "N/A" = 99
+  )
   attr(x, "na_range") <- c(97, 99)
   result <- make_factor(x, na.rm = TRUE)
   expect_false("DK" %in% levels(result))
@@ -240,7 +258,7 @@ test_that("make_factor() errors when numeric has no labels and force = FALSE", {
 
 # 14. Error: incomplete labels (one value missing a label)
 test_that("make_factor() errors when a non-NA value lacks a label entry", {
-  x <- c(1, 2, 3, 4)  # value 4 has no label
+  x <- c(1, 2, 3, 4) # value 4 has no label
   attr(x, "labels") <- c("A" = 1, "B" = 2, "C" = 3)
   expect_error(
     make_factor(x),
@@ -284,8 +302,10 @@ test_that("make_dicho() collapses 4-level Likert to 2 levels", {
 
 # 16. Already 2-level factor: stems are single words, pass through
 test_that("make_dicho() passes through 2-level factor with single-word levels", {
-  x <- factor(c("Agree", "Disagree", "Agree", "Agree"),
-              levels = c("Agree", "Disagree"))
+  x <- factor(
+    c("Agree", "Disagree", "Agree", "Agree"),
+    levels = c("Agree", "Disagree")
+  )
   result <- make_dicho(x)
   expect_true(is.factor(result))
   expect_equal(nlevels(result), 2L)
@@ -294,10 +314,22 @@ test_that("make_dicho() passes through 2-level factor with single-word levels", 
 
 # 17. .exclude sets middle level to NA
 test_that("make_dicho() .exclude removes specified level from levels", {
-  x <- factor(c("Always agree", "Sometimes agree", "Sometimes disagree",
-                "Always disagree", "Neutral"),
-              levels = c("Always agree", "Sometimes agree", "Neutral",
-                         "Sometimes disagree", "Always disagree"))
+  x <- factor(
+    c(
+      "Always agree",
+      "Sometimes agree",
+      "Sometimes disagree",
+      "Always disagree",
+      "Neutral"
+    ),
+    levels = c(
+      "Always agree",
+      "Sometimes agree",
+      "Neutral",
+      "Sometimes disagree",
+      "Always disagree"
+    )
+  )
   result <- make_dicho(x, .exclude = "Neutral")
   expect_false("Neutral" %in% levels(result))
   expect_equal(nlevels(result), 2L)
@@ -305,8 +337,10 @@ test_that("make_dicho() .exclude removes specified level from levels", {
 
 # 18. .exclude: excluded rows become NA in the 2-level factor result
 test_that("make_dicho() .exclude rows become NA in result", {
-  x <- factor(c("Always agree", "Neutral", "Always disagree"),
-              levels = c("Always agree", "Neutral", "Always disagree"))
+  x <- factor(
+    c("Always agree", "Neutral", "Always disagree"),
+    levels = c("Always agree", "Neutral", "Always disagree")
+  )
   result <- make_dicho(x, .exclude = "Neutral")
   expect_true(is.na(result[2]))
   expect_false(is.na(result[1]))
@@ -342,8 +376,10 @@ test_that("make_dicho() errors when fewer than 2 levels remain after .exclude", 
 
 # 22. Error: collapse ambiguous (4 distinct stems, no shared first word)
 test_that("make_dicho() errors when collapse is ambiguous (4 distinct stems)", {
-  x <- factor(c("Apple", "Banana", "Cherry", "Date"),
-              levels = c("Apple", "Banana", "Cherry", "Date"))
+  x <- factor(
+    c("Apple", "Banana", "Cherry", "Date"),
+    levels = c("Apple", "Banana", "Cherry", "Date")
+  )
   expect_error(
     make_dicho(x),
     class = "surveytidy_error_make_dicho_collapse_ambiguous"
@@ -362,7 +398,12 @@ test_that("make_dicho() leaves single-word level labels unchanged", {
 test_that("make_dicho() strips first word from multi-word Likert levels", {
   x <- factor(
     c("Always agree", "Usually agree", "Usually disagree", "Always disagree"),
-    levels = c("Always agree", "Usually agree", "Usually disagree", "Always disagree")
+    levels = c(
+      "Always agree",
+      "Usually agree",
+      "Usually disagree",
+      "Always disagree"
+    )
   )
   result <- make_dicho(x)
   lvls <- levels(result)
@@ -373,8 +414,18 @@ test_that("make_dicho() strips first word from multi-word Likert levels", {
 # 25. Level order preserved from original labels, not alphabetical
 test_that("make_dicho() preserves original level order (not alphabetical)", {
   x <- factor(
-    c("Always agree", "Sometimes agree", "Sometimes disagree", "Always disagree"),
-    levels = c("Always agree", "Sometimes agree", "Sometimes disagree", "Always disagree")
+    c(
+      "Always agree",
+      "Sometimes agree",
+      "Sometimes disagree",
+      "Always disagree"
+    ),
+    levels = c(
+      "Always agree",
+      "Sometimes agree",
+      "Sometimes disagree",
+      "Always disagree"
+    )
   )
   result <- make_dicho(x)
   lvls <- levels(result)
@@ -386,7 +437,11 @@ test_that("make_dicho() preserves original level order (not alphabetical)", {
 # 26. .label and .description set attrs on result
 test_that("make_dicho() .label and .description are set on result", {
   x <- .likert4()
-  result <- make_dicho(x, .label = "Agreement group", .description = "Collapsed Likert")
+  result <- make_dicho(
+    x,
+    .label = "Agreement group",
+    .description = "Collapsed Likert"
+  )
   expect_identical(attr(result, "label"), "Agreement group")
   recode_attr <- attr(result, "surveytidy_recode")
   expect_identical(recode_attr$description, "Collapsed Likert")
@@ -423,8 +478,10 @@ test_that("make_dicho() errors on bad flip_levels type", {
 
 # 27. Basic 0/1 mapping: first level → 1, second → 0
 test_that("make_binary() maps first level to 1 and second level to 0", {
-  x <- factor(c("Agree", "Disagree", "Agree", NA),
-              levels = c("Agree", "Disagree"))
+  x <- factor(
+    c("Agree", "Disagree", "Agree", NA),
+    levels = c("Agree", "Disagree")
+  )
   result <- make_binary(x)
   expect_equal(result[1], 1L)
   expect_equal(result[2], 0L)
@@ -434,8 +491,7 @@ test_that("make_binary() maps first level to 1 and second level to 0", {
 
 # 28. flip_values reverses mapping: first level → 0
 test_that("make_binary() flip_values = TRUE maps first level to 0", {
-  x <- factor(c("Agree", "Disagree", "Agree"),
-              levels = c("Agree", "Disagree"))
+  x <- factor(c("Agree", "Disagree", "Agree"), levels = c("Agree", "Disagree"))
   result <- make_binary(x, flip_values = TRUE)
   expect_equal(result[1], 0L)
   expect_equal(result[2], 1L)
@@ -480,7 +536,11 @@ test_that("make_binary() flip_values = TRUE reflects in labels attr", {
 # 32. .label and .description set attrs on result
 test_that("make_binary() .label and .description are set on result", {
   x <- factor(c("Agree", "Disagree"), levels = c("Agree", "Disagree"))
-  result <- make_binary(x, .label = "Binary agreement", .description = "Encoded")
+  result <- make_binary(
+    x,
+    .label = "Binary agreement",
+    .description = "Encoded"
+  )
   expect_identical(attr(result, "label"), "Binary agreement")
   recode_attr <- attr(result, "surveytidy_recode")
   expect_identical(recode_attr$description, "Encoded")
@@ -525,8 +585,12 @@ test_that("make_rev() reverses a 1-4 scale correctly", {
 # 34. Remaps value labels: strings stay tied to concept
 test_that("make_rev() remaps label values while keeping label strings", {
   x <- c(1, 2, 3, 4)
-  attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-                          "Disagree" = 3, "Strongly disagree" = 4)
+  attr(x, "labels") <- c(
+    "Strongly agree" = 1,
+    "Agree" = 2,
+    "Disagree" = 3,
+    "Strongly disagree" = 4
+  )
   result <- make_rev(x)
   lbs <- attr(result, "labels")
   expect_false(is.null(lbs))
@@ -610,15 +674,21 @@ test_that("make_rev() errors on bad .label type", {
 # 40. Sorted labels after reversal (ascending by new value)
 test_that("make_rev() labels are sorted ascending by new value after reversal", {
   x <- c(1, 2, 3, 4)
-  attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-                          "Disagree" = 3, "Strongly disagree" = 4)
+  attr(x, "labels") <- c(
+    "Strongly agree" = 1,
+    "Agree" = 2,
+    "Disagree" = 3,
+    "Strongly disagree" = 4
+  )
   result <- make_rev(x)
   lbs <- attr(result, "labels")
   # Values should be in ascending order: 1, 2, 3, 4
   expect_equal(unname(sort(lbs)), c(1, 2, 3, 4))
   # Names should be: Strongly disagree=1, Disagree=2, Agree=3, Strongly agree=4
-  expect_equal(names(lbs)[order(unname(lbs))],
-               c("Strongly disagree", "Disagree", "Agree", "Strongly agree"))
+  expect_equal(
+    names(lbs)[order(unname(lbs))],
+    c("Strongly disagree", "Disagree", "Agree", "Strongly agree")
+  )
 })
 
 # 41. 2–5 scale: range preserved (not shifted to 1–4)
@@ -651,8 +721,12 @@ test_that("make_flip() sets variable label to the required label arg", {
 # 44. attr(result, "labels") has reversed string-to-value mapping
 test_that("make_flip() reverses label string-to-value mapping", {
   x <- c(1, 2, 3, 4)
-  attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-                          "Disagree" = 3, "Strongly disagree" = 4)
+  attr(x, "labels") <- c(
+    "Strongly agree" = 1,
+    "Agree" = 2,
+    "Disagree" = 3,
+    "Strongly disagree" = 4
+  )
   result <- make_flip(x, "Flipped")
   lbs <- attr(result, "labels")
   # Values unchanged (1, 2, 3, 4), but names reversed
@@ -742,10 +816,8 @@ test_that("make_flip() all-NA input: values unchanged, labels reversed, no warni
 # 51. var field captures column name via cur_column() in across()
 test_that("surveytidy_recode$var captures column name via cur_column() in across()", {
   df <- data.frame(
-    q1 = structure(c(1, 2, 3),
-                   labels = c("A" = 1, "B" = 2, "C" = 3)),
-    q2 = structure(c(3, 2, 1),
-                   labels = c("A" = 1, "B" = 2, "C" = 3))
+    q1 = structure(c(1, 2, 3), labels = c("A" = 1, "B" = 2, "C" = 3)),
+    q2 = structure(c(3, 2, 1), labels = c("A" = 1, "B" = 2, "C" = 3))
   )
   result <- df |> mutate(across(c(q1, q2), make_factor))
   recode_q1 <- attr(result$q1, "surveytidy_recode")
@@ -826,8 +898,14 @@ test_that("mutate() updates @metadata correctly for all 5 transform functions", 
     expect_false(is.null(result@metadata@variable_labels$y3_factor))
     expect_null(result@metadata@value_labels$y3_factor)
     expect_false(is.null(result@metadata@transformations$y3_factor))
-    expect_identical(result@metadata@transformations$y3_factor$fn, "make_factor")
-    expect_identical(result@metadata@transformations$y3_factor$source_cols, "y3_lab")
+    expect_identical(
+      result@metadata@transformations$y3_factor$fn,
+      "make_factor"
+    )
+    expect_identical(
+      result@metadata@transformations$y3_factor$source_cols,
+      "y3_lab"
+    )
 
     # Test make_rev() in mutate()
     result_rev <- dplyr::mutate(d, y1_rev = make_rev(y1))

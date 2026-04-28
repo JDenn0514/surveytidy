@@ -356,8 +356,14 @@ recode_values <- function(
   }
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description,
-                          fn = "recode_values", var = var_name))
+    return(.wrap_labelled(
+      result,
+      .label,
+      .value_labels,
+      .description,
+      fn = "recode_values",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {

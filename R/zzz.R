@@ -338,6 +338,34 @@
 
   # ── survey_collection: data-mask verbs (PR 2a) ──
 
+  registerS3method(
+    "filter",
+    "surveycore::survey_collection",
+    get("filter.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "filter_out",
+    "surveycore::survey_collection",
+    get("filter_out.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "mutate",
+    "surveycore::survey_collection",
+    get("mutate.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "arrange",
+    "surveycore::survey_collection",
+    get("arrange.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── survey_collection: tidyselect verbs (PR 2b) ──
 
   # ── survey_collection: grouping verbs (PR 2c) ──

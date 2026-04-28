@@ -4,11 +4,14 @@
 \alias{arrange}
 \alias{arrange.survey_base}
 \alias{arrange.survey_result}
+\alias{arrange.survey_collection}
 \title{Order rows using column values}
 \usage{
 \method{arrange}{survey_base}(.data, ..., .by_group = FALSE, .locale = NULL)
 
 \method{arrange}{survey_result}(.data, ..., .by_group = FALSE)
+
+\method{arrange}{survey_collection}(.data, ..., .by_group = FALSE, .locale = NULL, .if_missing_var = NULL)
 
 arrange(.data, ..., .by_group = FALSE)
 }
@@ -25,6 +28,11 @@ order.}
 
 \item{.locale}{The locale to use for ordering strings. If \code{NULL}, uses the
 \code{"C"} locale. See \code{\link[stringi:about_locale]{stringi::locale()}} for available locales.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -55,6 +63,16 @@ The domain column moves with the rows — row reordering does not affect which
 rows are in or out of the survey domain.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{arrange()} is dispatched to each
+member independently. Each member's rows are sorted in place; per-member
+domain columns travel with the sorted rows. The output \code{survey_collection}
+preserves the input's \verb{@id}, \verb{@if_missing_var}, and \verb{@groups}. Use
+\code{.if_missing_var} to override the collection's stored missing-variable
+behavior for this call.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)

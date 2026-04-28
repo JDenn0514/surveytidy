@@ -188,6 +188,51 @@ filter.survey_result <- function(.data, ...) {
   NextMethod() |> .restore_survey_result(old_class, old_meta)
 }
 
+#' @rdname filter
+#' @method filter survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `filter()` is dispatched to each
+#' member independently. Each member's domain column is updated per
+#' `filter.survey_base`'s contract; the per-member empty-domain warning
+#' (`surveycore_warning_empty_domain`) fires N times on an N-member collection
+#' if every member's filter is empty. The output `survey_collection` preserves
+#' the input's `@id`, `@if_missing_var`, and `@groups`. Use `.if_missing_var`
+#' to override the collection's stored missing-variable behavior for this call.
+#'
+#' `.by` is rejected at the collection layer with
+#' `surveytidy_error_collection_by_unsupported`. Set grouping with
+#' [group_by()] on the collection instead.
+filter.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .preserve = FALSE,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+  .dispatch_verb_over_collection(
+    fn = dplyr::filter,
+    verb_name = "filter",
+    collection = .data,
+    ...,
+    .preserve = .preserve,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
+}
+
 
 # ── filter_out() ─────────────────────────────────────────────────────────────
 
@@ -247,6 +292,38 @@ filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 
   .data@data[[domain_col]] <- domain_mask
   .data
+}
+
+#' @rdname filter
+#' @method filter_out survey_collection
+#' @inheritParams survey_collection_args
+filter_out.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .preserve = FALSE,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+  .dispatch_verb_over_collection(
+    fn = filter_out,
+    verb_name = "filter_out",
+    collection = .data,
+    ...,
+    .preserve = .preserve,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
 }
 
 

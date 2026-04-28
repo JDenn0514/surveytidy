@@ -4,14 +4,20 @@
 \alias{filter}
 \alias{filter.survey_base}
 \alias{filter.survey_result}
+\alias{filter.survey_collection}
 \alias{filter_out.survey_base}
+\alias{filter_out.survey_collection}
 \title{Keep or drop rows using domain estimation}
 \usage{
 \method{filter}{survey_base}(.data, ..., .by = NULL, .preserve = FALSE)
 
 \method{filter}{survey_result}(.data, ...)
 
+\method{filter}{survey_collection}(.data, ..., .by = NULL, .preserve = FALSE, .if_missing_var = NULL)
+
 \method{filter_out}{survey_base}(.data, ..., .by = NULL, .preserve = FALSE)
+
+\method{filter_out}{survey_collection}(.data, ..., .by = NULL, .preserve = FALSE, .if_missing_var = NULL)
 
 filter(.data, ..., .by = NULL, .preserve = FALSE)
 }
@@ -27,6 +33,11 @@ evaluated against the survey data. Multiple conditions are combined with
 grouping.}
 
 \item{.preserve}{Ignored. Included for compatibility with the dplyr generic.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -83,6 +94,21 @@ The domain status of each row is stored in the \code{..surveycore_domain..}
 column of \verb{@data}. \code{TRUE} means in-domain; \code{FALSE} means out-of-domain.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{filter()} is dispatched to each
+member independently. Each member's domain column is updated per
+\code{filter.survey_base}'s contract; the per-member empty-domain warning
+(\code{surveycore_warning_empty_domain}) fires N times on an N-member collection
+if every member's filter is empty. The output \code{survey_collection} preserves
+the input's \verb{@id}, \verb{@if_missing_var}, and \verb{@groups}. Use \code{.if_missing_var}
+to override the collection's stored missing-variable behavior for this call.
+
+\code{.by} is rejected at the collection layer with
+\code{surveytidy_error_collection_by_unsupported}. Set grouping with
+\code{\link[=group_by]{group_by()}} on the collection instead.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)
