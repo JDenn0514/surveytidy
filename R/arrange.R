@@ -108,3 +108,34 @@ arrange.survey_result <- function(.data, ..., .by_group = FALSE) {
   old_meta <- attr(.data, ".meta")
   NextMethod() |> .restore_survey_result(old_class, old_meta)
 }
+
+#' @rdname arrange
+#' @method arrange survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `arrange()` is dispatched to each
+#' member independently. Each member's rows are sorted in place; per-member
+#' domain columns travel with the sorted rows. The output `survey_collection`
+#' preserves the input's `@id`, `@if_missing_var`, and `@groups`. Use
+#' `.if_missing_var` to override the collection's stored missing-variable
+#' behavior for this call.
+arrange.survey_collection <- function(
+  .data,
+  ...,
+  .by_group = FALSE,
+  .locale = NULL,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::arrange,
+    verb_name = "arrange",
+    collection = .data,
+    ...,
+    .by_group = .by_group,
+    .locale = .locale,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
+}

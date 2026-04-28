@@ -4,6 +4,7 @@
 \alias{mutate}
 \alias{mutate.survey_base}
 \alias{mutate.survey_result}
+\alias{mutate.survey_collection}
 \title{Create, modify, and delete columns of a survey design object}
 \usage{
 \method{mutate}{survey_base}(
@@ -16,6 +17,16 @@
 )
 
 \method{mutate}{survey_result}(.data, ...)
+
+\method{mutate}{survey_collection}(
+  .data,
+  ...,
+  .by = NULL,
+  .keep = c("all", "used", "unused", "none"),
+  .before = NULL,
+  .after = NULL,
+  .if_missing_var = NULL
+)
 
 mutate(.data, ...)
 }
@@ -38,6 +49,11 @@ regardless of this argument.}
 
 \item{.before, .after}{<\code{\link[tidyselect:language]{tidy-select}}> Optionally
 position new columns before or after an existing one.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -89,6 +105,25 @@ The \code{.by} argument is not used directly.
 }
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{mutate()} is dispatched to each
+member independently. Per-member warnings (e.g.,
+\code{surveytidy_warning_mutate_weight_col} when modifying the weight column)
+fire once per member in which they apply — an N-member collection that
+all modify the weight column will surface N warnings.
+
+If members have non-uniform rowwise state (some are rowwise, some are not),
+\code{mutate()} emits \code{surveytidy_warning_collection_rowwise_mixed} once before
+dispatch as a soft-invariant diagnostic. Dispatch still proceeds; per-member
+rowwise/non-rowwise semantics apply for the call. To resolve, call
+\code{\link[=rowwise]{rowwise()}} or \code{\link[=ungroup]{ungroup()}} on the entire collection first.
+
+\code{.by} is rejected at the collection layer with
+\code{surveytidy_error_collection_by_unsupported}. Set grouping with
+\code{\link[=group_by]{group_by()}} on the collection instead.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)
