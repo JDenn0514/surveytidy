@@ -31,6 +31,27 @@
 }
 
 
+# ── survey_collection internal accessors ────────────────────────────────────
+
+# Wrappers around surveycore internals used by the collection-layer
+# group_by helper. Same get() + asNamespace() pattern as the rename wrappers
+# above to avoid the ":::" R CMD check NOTE.
+#
+# .sc_propagate_or_match() and .sc_check_groups_match() are documented in
+# surveycore as @keywords internal helpers shared with surveytidy's
+# group_by.survey_collection (PR 2c).
+
+.sc_propagate_or_match <- function(...) {
+  fn <- get(".propagate_or_match", envir = asNamespace("surveycore"))
+  fn(...)
+}
+
+.sc_check_groups_match <- function(...) {
+  fn <- get(".check_groups_match", envir = asNamespace("surveycore"))
+  fn(...)
+}
+
+
 # ── Column protection ─────────────────────────────────────────────────────────
 
 # Returns the design-variable column names for any survey type.
@@ -126,12 +147,12 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # .attach_metadata_attrs(), .extract_metadata_attrs(), and .strip_metadata_attrs()
 # to keep the mapping in one place.
 .METADATA_ATTR_MAP <- list(
-  variable_labels   = "label",
-  value_labels      = "labels",
+  variable_labels = "label",
+  value_labels = "labels",
   question_prefaces = "question_preface",
-  notes             = "note",
-  universe          = "universe",
-  missing_codes     = "missing_codes"
+  notes = "note",
+  universe = "universe",
+  missing_codes = "missing_codes"
 )
 
 # Pre-attachment: copy metadata into column attrs on the data.frame so
@@ -143,7 +164,9 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   data_cols <- names(data)
   for (prop in names(.METADATA_ATTR_MAP)) {
     entries <- S7::prop(metadata, prop)
-    if (length(entries) == 0L) next
+    if (length(entries) == 0L) {
+      next
+    }
     attr_name <- .METADATA_ATTR_MAP[[prop]]
     for (col in names(entries)) {
       if (col %in% data_cols) {
@@ -175,7 +198,9 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   )
 
   for (col in changed_cols) {
-    if (!col %in% names(data)) next
+    if (!col %in% names(data)) {
+      next
+    }
 
     recode_attr <- attr(data[[col]], "surveytidy_recode")
 
@@ -285,8 +310,14 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # fn:  character(1) — the recode function name (e.g., "recode_values")
 # var: character(1) or NULL — the column name; NULL for multi-input functions
 #      (case_when, if_else) that may consume multiple source columns.
-.wrap_labelled <- function(x, label, value_labels, description = NULL,
-                           fn = NULL, var = NULL) {
+.wrap_labelled <- function(
+  x,
+  label,
+  value_labels,
+  description = NULL,
+  fn = NULL,
+  var = NULL
+) {
   result <- haven::labelled(x, labels = value_labels, label = label)
   attr(result, "surveytidy_recode") <- list(
     fn = fn,

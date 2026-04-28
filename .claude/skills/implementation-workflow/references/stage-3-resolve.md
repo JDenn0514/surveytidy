@@ -1,19 +1,77 @@
 # Stage 3: Resolve Plan Issues + Log Decisions
 
-## Before Starting
+## Before Starting — Load Open Issues via Subagent
 
-Check for a plan-review file at `plans/plan-review-phase-{X}.md`.
+Check whether the plan-review file exists:
 
-**If the file exists:** Work through those issues in order. Do not do a fresh
-review pass — the adversarial review is already done. Skip to the review mode
-question below.
+```bash
+test -f plans/plan-review-{phase}.md && echo exists || echo absent
+```
 
-**If no file exists:** Tell the user:
+(`{phase}` is the phase id, e.g. `phase-0.7`, `phase-1`, or a feature
+slug like `joins`.)
 
-> "No plan-review file found at `plans/plan-review-phase-{X}.md`.
+**If absent:** Tell the user:
+
+> "No plan-review file found at `plans/plan-review-{phase}.md`.
 > Run Stage 2 first to get a saved issue list, then come back here to
 > resolve them. Alternatively, confirm you want an informal review pass
 > without a saved issue list."
+
+**If it exists:** Dispatch a loader subagent to extract just the open
+issues. **Do not read the plan-review file yourself** — it can be 1000+
+lines and loading it forces compaction mid-session.
+
+Use the `Agent` tool with `subagent_type: "general-purpose"`. Hand it the
+prompt below verbatim:
+
+````
+You are loading open issues from a surveyverse plan-review file for a
+Stage 3 Resolve session. Your job: read the file and return ONLY the
+unresolved issues in a compact structured list. Filter out section
+headers, summary tables, prior-pass status tables, prose, and any issue
+marked ✅ Resolved on a later pass.
+
+## Input
+
+File: plans/plan-review-{phase}.md
+
+## What "open" means
+
+An issue is open if it appears in the most recent pass's "New Issues"
+section AND has not been marked ✅ Resolved by a later pass. If the most
+recent pass shows it as ⚠️ Still open in its Prior Issues table, it is
+still open.
+
+## Output format
+
+Return a JSON-style array. One object per open issue. Use this schema:
+
+[
+  {
+    "id": <number>,
+    "section": "<plan section name from the file, e.g. 'PR Map' or 'PR 2 — Implementation'>",
+    "severity": "BLOCKING" | "REQUIRED" | "SUGGESTION",
+    "title": "<short title>",
+    "body": "<the full markdown body of the issue, verbatim — description,
+             options with effort/risk/impact/maintenance, recommendation,
+             confirmation prompt>"
+  },
+  ...
+]
+
+After the array, add one summary line:
+"Loaded N open issues. Severity counts: B blocking, R required, S suggestion. Walkthrough order: <list of ids in order>."
+
+Walkthrough order: BLOCKING first, then REQUIRED, then SUGGESTION;
+within each tier, file order.
+
+Do not summarize, abbreviate, or paraphrase the issue bodies. The user
+needs the full text to make informed decisions.
+````
+
+Hold the returned list in conversation state. Use the `body` field
+verbatim when presenting issues — do not re-summarize.
 
 ---
 
@@ -54,7 +112,9 @@ explicit direction on each issue.
 
 ## Issue Format
 
-For each issue (whether from the review file or found during this session) use `AskUserQuestion` tool:
+For each issue (whether from the review file or found during this session),
+**first print this block as plain markdown in the conversation**, leave a
+blank line, then call `AskUserQuestion`:
 
 ```
 **Issue [N]: [Short title]**
@@ -73,13 +133,84 @@ Options:
 > Do you agree with option [letter], or would you prefer a different direction?
 ```
 
+The blank line between the markdown and the `AskUserQuestion` call is
+**load-bearing** — without it the tool-call rendering clips the last line of
+the markdown and the user loses the recommendation or the confirmation
+prompt. This is non-negotiable: the markdown above is what the user reads
+to make an informed decision, not the tool UI.
+
+Call `AskUserQuestion` with the labels A / B / C and brief trade-off
+summaries in the description fields. The full Effort / Risk / Impact /
+Maintenance breakdown and the rationale must live in the markdown — they
+will not fit inside the tool call (header is ≤12 chars, labels are 1–5
+words).
+
 ---
 
-## Applying Fixes
+## Applying Fixes — Editor Subagent
 
-When the user approves a direction, **edit the plan file immediately** — before
-presenting the next issue. Do not batch fixes. After each edit, summarize what
-changed in one sentence.
+When the user approves a direction, **dispatch an editor subagent** to apply
+the change. Do not edit the plan file in main context — implementation
+plans are 800–1500 lines for a typical phase, and reading them mid-session
+forces compaction.
+
+Phrase the FIND and REPLACE WITH text yourself based on the user's chosen
+option (you have the issue body, you know what the plan currently says
+because the issue quoted it, and you know what the new wording should be).
+Then hand the editor the verbatim before/after strings.
+
+Use the `Agent` tool with `subagent_type: "general-purpose"`. Hand it
+this prompt:
+
+````
+You are applying an approved plan edit. Your job: open the plan file,
+locate the target text, replace it, and confirm.
+
+## Inputs
+
+- Plan file: plans/impl-{id}.md
+- Target section (for context only): {e.g., "PR 2 — Acceptance Criteria"}
+- Edit type: REPLACE | INSERT_AFTER
+
+If REPLACE:
+  - FIND (verbatim current text, must be unique in file):
+    {paste exact current text}
+  - REPLACE WITH (verbatim new text):
+    {paste exact new text}
+
+If INSERT_AFTER:
+  - ANCHOR (verbatim text the new content goes after, must be unique):
+    {paste anchor text}
+  - NEW TEXT:
+    {paste new text}
+
+## Workflow
+
+1. Open the plan file with Read.
+2. For REPLACE: use Edit with old_string=FIND, new_string=REPLACE WITH.
+   For INSERT_AFTER: use Edit with old_string=ANCHOR,
+   new_string=ANCHOR + "\n\n" + NEW TEXT.
+3. If FIND/ANCHOR is not unique, expand it with surrounding context
+   until unique, then retry.
+4. If FIND/ANCHOR is not found, return:
+   "Edit failed: <reason>." Do not invent content.
+5. On success, return:
+   "Section <target> updated: <one-sentence summary of what changed>."
+
+Do not paraphrase or improve the supplied text. Apply it verbatim.
+````
+
+After the subagent returns, surface its one-sentence summary and move to
+the next issue.
+
+If the subagent reports failure, surface the failure to the user and
+ask how to proceed (re-phrase the FIND text? skip this issue?). Do not
+attempt the edit in main context as a fallback — that re-introduces the
+plan into main context, which is what this dispatch avoids.
+
+Do not batch fixes. One editor dispatch per approved issue gives you
+live "Section X updated" feedback after each decision and surfaces
+wording problems early.
 
 ---
 

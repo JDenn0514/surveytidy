@@ -16,7 +16,6 @@ maintaining proper variance estimation and metadata handling.
 - **Name:** surveytidy
 - **Purpose:** dplyr/tidyr verbs for survey objects (filter, select, mutate, rename, arrange, group_by, etc.)
 - **Target Audience:** Survey researchers using tidyverse; users transitioning from srvyr
-- **Current Status:** Phase 0.5 (planning complete; implementation starting)
 - **License:** GPL-3 (inherits from surveycore)
 - **Dependencies:** surveycore (imports core S7 classes)
 
@@ -26,7 +25,7 @@ surveytidy makes survey analysis feel natural to tidyverse users by:
 
 1. **Domain-aware filtering** — `filter()` marks rows in/out of domain without removing them
 2. **Intelligent metadata handling** — `select()` and `rename()` update labels automatically
-3. **Group-by support** — `group_by()` sets up stratification for Phase 1 estimation functions
+3. **Group-by support** — `group_by()` sets up stratification for downstream estimation functions
 4. **Familiar API** — Users never write formula syntax; everything uses bare names (tidy-select)
 
 ## Key Design Decisions (Finalized)
@@ -105,9 +104,8 @@ tests/testthat/
   `visible_vars` tracks the user's selection so design vars are hidden from print
 
 #### @groups
-- Reserved for Phase 0.5 (now used by `group_by()`)
 - Populated by `group_by()`, cleared by `ungroup()`
-- Will be used by Phase 1 estimation functions
+- Used by downstream estimation functions
 
 #### dplyr_reconstruct()
 - Required for complex pipelines (joins, across(), slice, etc.)
@@ -138,19 +136,6 @@ tests/testthat/
 **Reference:**
 - `../surveycore/CLAUDE.md` — surveycore architecture (survey class structure, @data/@variables/@metadata)
 - `plans/error-messages.md` — surveytidy error/warning classes (update before adding any new class)
-
-## Phase 0.5 Build Order
-
-1. `feature/filter` — `R/01-filter.R` + `tests/testthat/test-filter.R`
-2. `feature/select` — `R/02-select.R` + `tests/testthat/test-select.R`
-3. `feature/mutate` — `R/03-mutate.R` + `tests/testthat/test-mutate.R`
-4. `feature/rename` — `R/04-rename.R` + `tests/testthat/test-rename.R`
-5. `feature/arrange` — `R/05-arrange.R` + `tests/testthat/test-arrange.R`
-6. `feature/group-by` — `R/06-group-by.R` + `tests/testthat/test-group-by.R`
-7. `feature/tidyr` — `R/07-tidyr.R` + `tests/testthat/test-tidyr.R` (stretch)
-8. `feature/joins` — `R/08-joins.R` + `tests/testthat/test-joins.R` (stretch)
-
----
 
 ## Key Implementation Details
 
@@ -216,8 +201,7 @@ Use `library(tidyr)` instead for `drop_na()` and other tidyr verbs.
 
 ## Reference Documents
 
-All planning documents are in `plans/`:
-- (Currently minimal; will grow as Phase 0.5 proceeds)
+All planning documents are in `plans/`.
 
 All finalized decisions are in `../survey-standards/.claude/rules/`:
 - `code-style.md` — R style, S7 patterns, error conventions, function design, roxygen/package check

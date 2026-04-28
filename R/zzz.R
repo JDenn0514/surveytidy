@@ -335,4 +335,12 @@
     get("rename_with.survey_result", envir = ns),
     envir = asNamespace("dplyr")
   )
+
+  # ── survey_collection: data-mask verbs (PR 2a) ──
+
+  # ── survey_collection: tidyselect verbs (PR 2b) ──
+
+  # ── survey_collection: grouping verbs (PR 2c) ──
+
+  # ── survey_collection: slice verbs (PR 2d) ──
 }
