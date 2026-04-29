@@ -24,7 +24,7 @@
 | Setter return values | `invisible(x)` |
 | Getter return values | Visible (no `invisible()`) |
 | Argument order | `x`/`data` first → required NSE → required scalar → optional NSE → optional scalar → `...` |
-| Internal helper placement | Inline if used in 1 file; `07-utils.R` if used in 2+ files |
+| Internal helper placement | Same file (below exports) if used in 1 file; `R/utils.R` if used in 2+ files |
 | Dispatch rule | `S7::method()` for extending existing generics; plain function + `S7::S7_inherits()` for surveycore-owned generics |
 | Error structure | `"x"` + `"i"` + optional `"v"` bullets; `class=` on every `cli_abort()` |
 | Warning classes | `class=` on every `cli_warn()` too |
@@ -136,7 +136,7 @@ Use **`@` directly** everywhere in internal code. Do not create accessor functio
 **Exception:** `@data` and `@metadata` have thin accessor functions to protect against raw manipulation and provide a stable name if internal structure changes:
 
 ```r
-# Accessor functions (defined in 07-utils.R, exported)
+# Accessor functions (defined in R/utils.R, exported)
 survey_data     <- function(x) x@data
 survey_metadata <- function(x) x@metadata
 
@@ -409,18 +409,36 @@ summary.survey_taylor <- function(object, ...) { ... }    # never dispatched
 ### Internal helper placement
 | Helper used in... | Lives in... |
 |-------------------|-------------|
-| Exactly 1 source file | Defined at the top of that file, before its first call site |
-| 2 or more source files | `R/07-utils.R` |
+| Exactly 1 source file | Same file, **below** the exported function(s) that call it |
+| 2 or more source files | `R/utils.R` |
+
+R parses the entire file before any function executes, so helpers defined
+below their callers are still resolved correctly. Putting exports at the top
+puts the public API in front of the reader; helpers stay nearby but out of
+the way.
 
 All internal helpers are **not exported** and prefixed with `.`:
 
 ```r
-# In R/03-constructors.R — used only by as_survey()
-.check_probs_weights_consistency <- function(probs_var, weights_var, data, tol = 1e-6) {
-  ...
+# R/some-verb.R
+
+#' @export
+some_verb <- function(x, ...) {
+  .check_input(x)
+  # ... implementation ...
 }
 
-# In R/07-utils.R — used by constructors AND update_design()
+# ── helpers ──────────────────────────────────────────────────────────────
+
+.check_input <- function(x) {
+  # validation logic
+}
+```
+
+For shared helpers in `R/utils.R`:
+
+```r
+# In R/utils.R — used by constructors AND update_design()
 .get_design_vars_flat <- function(design) {
   c(
     design@variables$ids,
@@ -431,7 +449,8 @@ All internal helpers are **not exported** and prefixed with `.`:
 }
 ```
 
-When a single-use inline helper grows a second call site, promote it to `07-utils.R` in the same PR that adds the second call.
+When a single-use inline helper grows a second call site, promote it to
+`R/utils.R` in the same PR that adds the second call.
 
 ---
 

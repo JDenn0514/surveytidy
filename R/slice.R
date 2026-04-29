@@ -141,17 +141,20 @@ utils::globalVariables("check_fn")
 #' * Always issues `surveycore_warning_physical_subset`.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' # First 10 rows (issues a physical subset warning)
+#' # first 10 rows (issues a physical subset warning)
 #' slice_head(d, n = 10)
 #'
-#' # Rows with the 5 lowest survey weights
+#' # rows with the 5 lowest survey weights
 #' slice_min(d, order_by = weight, n = 5)
 #'
-#' # Random sample of 50 rows
+#' # random sample of 50 rows
 #' slice_sample(d, n = 50)
 #'
 #' @family row operations

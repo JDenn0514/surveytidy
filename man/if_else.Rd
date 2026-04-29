@@ -65,43 +65,36 @@ of these arguments are used, the output is identical to \code{\link[dplyr:if_els
 For more than two conditions, see \code{\link[=case_when]{case_when()}}.
 }
 \examples{
-
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic if_else — identical to dplyr::if_else() -----------------------
-# ---------------------------------------------------------------------
-
+# basic if_else — identical to dplyr::if_else()
 new <- ns_wave1_svy |>
   mutate(senior = if_else(age >= 65, "Senior (65+)", "Non-senior")) |>
   select(age, senior)
 
+# by default, no metadata is attached
 new
-
-# By default, no metadata is attached
 new@metadata
 
-
-# ---- Handle missing values ----
-
-# Use missing = to specify the output value when condition is NA
+# use missing = to specify the output value when condition is NA
 new <- ns_wave1_svy |>
   mutate(
-    dem = if_else(pid3 == 1, "Democrat", "Non-Democrat", missing = "Unknown")
+    dem = if_else(
+      pid3 == 1,
+      "Democrat",
+      "Non-Democrat",
+      missing = "Unknown"
+    )
   ) |>
   select(pid3, dem)
 
 new
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
+# attach a variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -115,10 +108,7 @@ new <- ns_wave1_svy |>
 
 new@metadata@variable_labels
 
-
-# ---- Value labels ----
-
-# Use integer codes for the output and add value labels to document them
+# use integer codes and document them with value labels
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -133,9 +123,7 @@ new <- ns_wave1_svy |>
 
 new@metadata@value_labels
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -143,7 +131,10 @@ new <- ns_wave1_svy |>
       "Senior (65+)",
       "Non-senior",
       .label = "Senior citizen (age 65+)",
-      .description = "age >= 65 coded as 'Senior (65+)'; everyone else as 'Non-senior'."
+      .description = paste(
+        "age >= 65 coded as 'Senior (65+)';",
+        "everyone else as 'Non-senior'."
+      )
     )
   ) |>
   select(age, senior)

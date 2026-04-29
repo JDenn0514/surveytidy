@@ -91,22 +91,26 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Keep adults 50 and older
+#' # keep adults 50 and older
 #' filter(d, agecat >= 3)
 #'
-#' # Multiple conditions are AND-ed together
+#' # multiple conditions are AND-ed together
 #' filter(d, agecat >= 3, gender == 2)
 #'
 #' # filter_out() excludes matching rows — complement of filter()
 #' filter_out(d, agecat == 1)
 #'
-#' # Chained calls accumulate (these are equivalent)
+#' # chained calls accumulate (these are equivalent)
 #' filter(d, agecat >= 3, gender == 2)
-#' filter(d, agecat >= 3) |> filter(gender == 2)
+#' d |>
+#'   filter(agecat >= 3) |>
+#'   filter(gender == 2)
 #'
-#' # Multi-column conditions with if_any() and if_all()
+#' # multi-column conditions with if_any() and if_all()
 #' filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #' filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #'
@@ -358,9 +362,11 @@ filter_out.survey_collection <- function(
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Physical row removal — always issues a warning
+#' # physical row removal — always issues a warning
 #' subset(d, agecat >= 3)
 #'
 #' @seealso [filter()] for domain-aware row marking (preferred for

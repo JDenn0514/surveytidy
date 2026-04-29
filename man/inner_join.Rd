@@ -82,8 +82,7 @@ The surveytidy method adds one argument not present in the dplyr generic:
 }
 }
 \examples{
-library(dplyr)
-library(surveycore)
+# create a small survey object
 df <- data.frame(
   psu = paste0("psu_", 1:5),
   strata = "s1",
@@ -91,12 +90,20 @@ df <- data.frame(
   wt = 1,
   y1 = 1:5
 )
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
+d <- surveycore::as_survey(
+  df,
+  ids = psu,
+  weights = wt,
+  strata = strata,
+  fpc = fpc,
+  nest = TRUE
+)
 lookup <- data.frame(y1 = 1:3, label = letters[1:3])
-# Domain-aware: marks rows 4 and 5 as out-of-domain
+
+# domain-aware: marks rows 4 and 5 as out-of-domain
 inner_join(d, lookup, by = "y1")
-# Physical: removes rows 4 and 5
+
+# physical: removes rows 4 and 5
 inner_join(d, lookup, by = "y1", .domain_aware = FALSE)
 
 }

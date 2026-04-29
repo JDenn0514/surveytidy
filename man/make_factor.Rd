@@ -54,11 +54,7 @@ When called inside \code{\link[=mutate]{mutate()}}, metadata is recorded in
 \verb{@metadata@transformations[[col]]}.
 }
 \examples{
-library(dplyr)
-d <- surveycore::as_survey(
-  data.frame(x = c(1, 2, 1, 2), wt = c(1, 1, 1, 1)),
-  weights = wt
-)
+# attach value labels to a numeric vector and convert to a factor
 x <- c(1, 2, 1, 2)
 attr(x, "labels") <- c("Yes" = 1, "No" = 2)
 make_factor(x)

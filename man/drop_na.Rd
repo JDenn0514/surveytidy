@@ -67,17 +67,22 @@ the collection's stored behavior instead.
 }
 
 \examples{
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+library(tidyr)
 
-# Mark rows with NA in votegen_post as out-of-domain
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
+
+# mark rows with NA in votegen_post as out-of-domain
 drop_na(d, votegen_post)
 
-# Mark rows with NA in either social media column
+# mark rows with NA in either social media column
 drop_na(d, smuse_fb, smuse_yt)
 
-# No columns specified — any NA in any column marks the row out-of-domain
+# no columns specified — any NA in any column marks the row out-of-domain
 drop_na(d)
 
 }

@@ -18,14 +18,17 @@ Returns \code{TRUE} if the design has one or more grouping columns set via
 designs.
 }
 \examples{
-library(surveytidy)
-library(surveycore)
-library(dplyr)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-is_grouped(d)                   # FALSE
-is_grouped(group_by(d, gender)) # TRUE
-is_grouped(rowwise(d))          # FALSE (rowwise != grouped)
+# only group_by() makes is_grouped() TRUE; rowwise() does not count
+is_grouped(d)
+is_grouped(group_by(d, gender))
+is_grouped(rowwise(d))
 
 }
 \seealso{

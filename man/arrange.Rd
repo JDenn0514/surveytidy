@@ -76,18 +76,20 @@ behavior for this call.
 \examples{
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Sort by age category ascending
+# sort by age category ascending
 arrange(d, agecat)
 
-# Sort by age category descending
+# sort by age category descending
 arrange(d, dplyr::desc(agecat))
 
-# Sort by multiple variables
+# sort by multiple variables
 arrange(d, gender, dplyr::desc(agecat))
 
-# Sort by grouping variables first
+# sort by grouping variables first
 d_grouped <- group_by(d, gender)
 arrange(d_grouped, .by_group = TRUE, agecat)
 

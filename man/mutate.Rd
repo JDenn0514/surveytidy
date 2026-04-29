@@ -127,22 +127,29 @@ rowwise/non-rowwise semantics apply for the call. To resolve, call
 \examples{
 library(surveytidy)
 library(surveycore)
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Add a new column
+# add a new column
 mutate(d, college_grad = educcat == 1)
 
-# Conditional recoding
-mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
+# conditional recoding
+mutate(
+  d,
+  college = dplyr::if_else(educcat == 1, "college+", "non-college")
+)
 
-# Grouped mutate — within-group mean centring
+# grouped mutate — within-group mean centring
 d |>
   group_by(gender) |>
   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
 
 # .keep = "none" keeps only new columns plus design vars (always preserved)
-mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
-  .keep = "none")
+mutate(
+  d,
+  college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+  .keep = "none"
+)
 
 }
 \seealso{

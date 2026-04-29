@@ -45,39 +45,27 @@
 #' * [replace_when()] for condition-based in-place replacement.
 #'
 #' @examples
-#'
 #' library(surveycore)
 #' library(surveytidy)
+#'
+#' # create the survey design
 #' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
-#' # ---------------------------------------------------------------------
-#' # Basic na_if — replace a specific value with NA ----------------------
-#' # ---------------------------------------------------------------------
-#'
-#' # Replace "Something else" (pid3 == 4) with NA
+#' # basic na_if — replace "Something else" (pid3 == 4) with NA
 #' new <- ns_wave1_svy |>
 #'   mutate(pid3_clean = na_if(pid3, 4)) |>
 #'   select(pid3, pid3_clean)
 #'
 #' new
 #'
-#'
-#' # ---- Replace multiple values at once ----
-#'
-#' # Replace both Independent (3) and "Something else" (4) with NA
+#' # replace multiple values at once — Independent (3) and "Something else" (4)
 #' new <- ns_wave1_svy |>
 #'   mutate(pid3_2party = na_if(pid3, c(3, 4))) |>
 #'   select(pid3, pid3_2party)
 #'
 #' new
 #'
-#'
-#' # ---------------------------------------------------------------------
-#' # .update_labels — control which value labels are kept ----------------
-#' # ---------------------------------------------------------------------
-#'
-#' # .update_labels = TRUE (default): the label entry for the NA'd value
-#' # is removed from the output's value labels
+#' # .update_labels = TRUE (default) drops label entries for NA'd values
 #' new <- ns_wave1_svy |>
 #'   mutate(pid3_clean = na_if(pid3, 4, .update_labels = TRUE)) |>
 #'   select(pid3, pid3_clean)
@@ -85,9 +73,7 @@
 #' # "Something else" (4) is removed from pid3_clean's value labels
 #' new@metadata@value_labels$pid3_clean
 #'
-#'
-#' # .update_labels = FALSE: the label entry for 4 is retained even though
-#' # those rows are now NA; useful when documenting what was set to missing
+#' # .update_labels = FALSE retains label entries even for NA'd values
 #' new <- ns_wave1_svy |>
 #'   mutate(pid3_clean = na_if(pid3, 4, .update_labels = FALSE)) |>
 #'   select(pid3, pid3_clean)
@@ -95,9 +81,7 @@
 #' # "Something else" (4) is still in pid3_clean's value labels
 #' new@metadata@value_labels$pid3_clean
 #'
-#'
-#' # ---- Transformation ----
-#'
+#' # attach a plain-language description of the transformation
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     pid3_clean = na_if(

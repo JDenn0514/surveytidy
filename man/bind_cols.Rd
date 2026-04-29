@@ -45,7 +45,8 @@ intercepts survey objects before delegating to dplyr.
 }
 \examples{
 library(surveytidy)
-library(surveycore)
+
+# create a small survey object
 df <- data.frame(
   psu = paste0("psu_", 1:5),
   strata = "s1",
@@ -53,8 +54,16 @@ df <- data.frame(
   wt = 1,
   y1 = 1:5
 )
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
+d <- surveycore::as_survey(
+  df,
+  ids = psu,
+  weights = wt,
+  strata = strata,
+  fpc = fpc,
+  nest = TRUE
+)
+
+# append a new column by row position
 extra <- data.frame(label = letters[1:5])
 bind_cols(d, extra)
 

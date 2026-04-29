@@ -88,32 +88,36 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
-#' library(dplyr)
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Group by a column
+#' # group by a single column
 #' group_by(d, gender)
 #'
-#' # Grouped mutate — within-group mean centring
+#' # grouped mutate — within-group mean centring
 #' d |>
 #'   group_by(gender) |>
 #'   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
 #'
-#' # Add a second grouping variable with .add = TRUE
+#' # add a second grouping variable with .add = TRUE
 #' d |>
 #'   group_by(gender) |>
 #'   group_by(cregion, .add = TRUE)
 #'
-#' # Remove all groups
-#' d |> group_by(gender) |> ungroup()
+#' # remove all groups
+#' d |>
+#'   group_by(gender) |>
+#'   ungroup()
 #'
-#' # Partial ungroup — remove only gender, keep cregion
+#' # partial ungroup — remove only gender, keep cregion
 #' d |>
 #'   group_by(gender, cregion) |>
 #'   ungroup(gender)
 #'
-#' # Get current grouping column names
-#' d |> group_by(gender, cregion) |> group_vars()
+#' # get current grouping column names
+#' d |>
+#'   group_by(gender, cregion) |>
+#'   group_vars()
 #'
 #' @family grouping
 #' @name group_by

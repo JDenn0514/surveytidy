@@ -28,12 +28,14 @@ variables are hidden from the display.
 \examples{
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Glimpse all columns
+# glimpse all columns
 glimpse(d)
 
-# After select(), shows only the selected columns
+# after select(), shows only the selected columns
 d |>
   select(gender, agecat, partysum) |>
   glimpse()

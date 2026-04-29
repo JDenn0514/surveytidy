@@ -69,8 +69,7 @@ the new suffixed name.
 }
 }
 \examples{
-library(dplyr)
-library(surveycore)
+# create a small survey object
 df <- data.frame(
   psu = paste0("psu_", 1:5),
   strata = "s1",
@@ -78,8 +77,16 @@ df <- data.frame(
   wt = 1,
   y1 = 1:5
 )
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
+d <- surveycore::as_survey(
+  df,
+  ids = psu,
+  weights = wt,
+  strata = strata,
+  fpc = fpc,
+  nest = TRUE
+)
+
+# add a lookup column from a plain data frame
 lookup <- data.frame(y1 = 1:5, label = letters[1:5])
 left_join(d, lookup, by = "y1")
 

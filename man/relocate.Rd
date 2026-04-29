@@ -70,15 +70,17 @@ pre-flight does not apply.
 \examples{
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Move agecat before gender
+# move agecat before gender
 relocate(d, agecat, .before = gender)
 
-# Move all social media columns to the front
-relocate(d, dplyr::starts_with("smuse_"))
+# move all social media columns to the front
+relocate(d, tidyselect::starts_with("smuse_"))
 
-# After select(), relocate reorders the visible columns
+# after select(), relocate reorders the visible columns
 d |>
   select(gender, agecat, partysum) |>
   relocate(partysum, .before = gender)

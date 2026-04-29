@@ -27,7 +27,7 @@
 #' @description
 #' `rowwise()` enables row-by-row computation in [mutate()]. Each row is
 #' treated as an independent group, so expressions like
-#' `mutate(d, row_max = max(c_across(starts_with("y"))))` compute the maximum
+#' `mutate(d, row_max = max(dplyr::c_across(tidyselect::starts_with("y"))))` compute the maximum
 #' across columns for each row independently.
 #'
 #' Use [ungroup()] or [group_by()] to exit rowwise mode.
@@ -58,18 +58,24 @@
 #'   `@variables$rowwise_id_cols` set. All other properties are unchanged.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' library(dplyr)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' # Row-wise max across several columns
+#' # row-wise max across several columns
 #' d |>
 #'   rowwise() |>
-#'   mutate(row_max = max(c_across(starts_with("econ")), na.rm = TRUE))
+#'   mutate(
+#'     row_max = max(dplyr::c_across(tidyselect::starts_with("econ")), na.rm = TRUE)
+#'   )
 #'
-#' # Exit rowwise mode
-#' d |> rowwise() |> ungroup()
+#' # exit rowwise mode
+#' d |>
+#'   rowwise() |>
+#'   ungroup()
 #'
 #' @family grouping
 #' @name rowwise
@@ -105,12 +111,16 @@ rowwise.survey_base <- function(data, ...) {
 #' @return A scalar logical.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' is_rowwise(d)           # FALSE
-#' is_rowwise(rowwise(d))  # TRUE
+#' # FALSE for a freshly-built design; TRUE after rowwise()
+#' is_rowwise(d)
+#' is_rowwise(rowwise(d))
 #'
 #' @family grouping
 #' @export
@@ -133,14 +143,17 @@ is_rowwise <- function(design) {
 #' @return A scalar logical.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' library(dplyr)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' is_grouped(d)                   # FALSE
-#' is_grouped(group_by(d, gender)) # TRUE
-#' is_grouped(rowwise(d))          # FALSE (rowwise != grouped)
+#' # only group_by() makes is_grouped() TRUE; rowwise() does not count
+#' is_grouped(d)
+#' is_grouped(group_by(d, gender))
+#' is_grouped(rowwise(d))
 #'
 #' @family grouping
 #' @export

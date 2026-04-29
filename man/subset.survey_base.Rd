@@ -36,9 +36,11 @@ reminder of the statistical implications.
 \examples{
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Physical row removal — always issues a warning
+# physical row removal — always issues a warning
 subset(d, agecat >= 3)
 
 }

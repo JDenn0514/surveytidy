@@ -98,16 +98,13 @@ When none of these arguments are used, the output is identical to
 \code{dplyr::recode_values()}.
 }
 \examples{
-
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Formula interface ---------------------------------------------------
-# ---------------------------------------------------------------------
-
-# Recode pid3 using `old ~ new` formulas passed through `...`
+# formula interface — recode pid3 using `old ~ new` formulas in `...`
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -122,9 +119,7 @@ new <- ns_wave1_svy |>
 
 new
 
-
-# ---- Formula interface with default ----
-
+# formula interface with default for unmatched values
 new <- ns_wave1_svy |>
   mutate(
     dem = recode_values(pid3, 1 ~ "Democrat", default = "Non-Democrat")
@@ -133,12 +128,7 @@ new <- ns_wave1_svy |>
 
 new
 
-
-# ---------------------------------------------------------------------
-# Basic recode_values — explicit from/to mapping ----------------------
-# ---------------------------------------------------------------------
-
-# Recode pid3 numeric codes to character labels
+# explicit from/to mapping — recode numeric codes to character labels
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -151,10 +141,7 @@ new <- ns_wave1_svy |>
 
 new
 
-
-# ---- Use default to catch unmatched values ----
-
-# Only recode Democrats; everything else becomes "Non-Democrat"
+# use default to catch unmatched values
 new <- ns_wave1_svy |>
   mutate(
     dem = recode_values(
@@ -168,26 +155,14 @@ new <- ns_wave1_svy |>
 
 new
 
-
-# ---------------------------------------------------------------------
-# .use_labels — build the map from existing value labels --------------
-# ---------------------------------------------------------------------
-
-# pid3 carries value labels (1=Democrat, 2=Republican, 3=Independent,
-# 4=Something else). .use_labels = TRUE converts codes to label strings.
+# .use_labels = TRUE builds the from/to map from existing value labels
 new <- ns_wave1_svy |>
   mutate(party = recode_values(pid3, .use_labels = TRUE)) |>
   select(pid3, party)
 
 new
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
+# attach a variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -201,10 +176,7 @@ new <- ns_wave1_svy |>
 
 new@metadata@variable_labels
 
-
-# ---- Value labels ----
-
-# Collapse 4 categories to 3 and add updated value labels
+# collapse 4 categories to 3 and document via .value_labels
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -223,10 +195,7 @@ new <- ns_wave1_svy |>
 
 new@metadata@value_labels
 
-
-# ---- Make output a factor ----
-
-# Levels are ordered by the to vector
+# return a factor with levels in `to` order
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -240,9 +209,7 @@ new <- ns_wave1_svy |>
 
 new
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -250,7 +217,10 @@ new <- ns_wave1_svy |>
       from = c(1, 2, 3, 4),
       to = c("Democrat", "Republican", "Independent", "Other"),
       .label = "Party identification",
-      .description = "pid3 recoded: 1->Democrat, 2->Republican, 3->Independent, 4->Other."
+      .description = paste(
+        "pid3 recoded: 1->Democrat, 2->Republican,",
+        "3->Independent, 4->Other."
+      )
     )
   ) |>
   select(pid3, party)

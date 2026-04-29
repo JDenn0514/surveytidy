@@ -277,8 +277,7 @@
 #' appended to `@data`. `visible_vars` is updated if it was set.
 #'
 #' @examples
-#' library(dplyr)
-#' library(surveycore)
+#' # create a small survey object
 #' df <- data.frame(
 #'   psu = paste0("psu_", 1:5),
 #'   strata = "s1",
@@ -286,8 +285,16 @@
 #'   wt = 1,
 #'   y1 = 1:5
 #' )
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
+#' d <- surveycore::as_survey(
+#'   df,
+#'   ids = psu,
+#'   weights = wt,
+#'   strata = strata,
+#'   fpc = fpc,
+#'   nest = TRUE
+#' )
+#'
+#' # add a lookup column from a plain data frame
 #' lookup <- data.frame(y1 = 1:5, label = letters[1:5])
 #' left_join(d, lookup, by = "y1")
 #'
@@ -395,8 +402,7 @@ left_join.survey_base <- function(
 #' (`..surveycore_domain..`) updated. Row count unchanged. No new columns added.
 #'
 #' @examples
-#' library(dplyr)
-#' library(surveycore)
+#' # create a small survey object
 #' df <- data.frame(
 #'   psu = paste0("psu_", 1:5),
 #'   strata = "s1",
@@ -404,10 +410,20 @@ left_join.survey_base <- function(
 #'   wt = 1,
 #'   y1 = 1:5
 #' )
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
+#' d <- surveycore::as_survey(
+#'   df,
+#'   ids = psu,
+#'   weights = wt,
+#'   strata = strata,
+#'   fpc = fpc,
+#'   nest = TRUE
+#' )
 #' keepers <- data.frame(y1 = c(1, 3, 5))
+#'
+#' # semi_join: rows matching keepers stay in-domain
 #' semi_join(d, keepers, by = "y1")
+#'
+#' # anti_join: rows matching keepers are marked out-of-domain
 #' anti_join(d, keepers, by = "y1")
 #'
 #' @family joins
@@ -580,7 +596,8 @@ anti_join.survey_base <- function(x, y, by = NULL, copy = FALSE, ...) {
 #'
 #' @examples
 #' library(surveytidy)
-#' library(surveycore)
+#'
+#' # create a small survey object
 #' df <- data.frame(
 #'   psu = paste0("psu_", 1:5),
 #'   strata = "s1",
@@ -588,8 +605,16 @@ anti_join.survey_base <- function(x, y, by = NULL, copy = FALSE, ...) {
 #'   wt = 1,
 #'   y1 = 1:5
 #' )
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
+#' d <- surveycore::as_survey(
+#'   df,
+#'   ids = psu,
+#'   weights = wt,
+#'   strata = strata,
+#'   fpc = fpc,
+#'   nest = TRUE
+#' )
+#'
+#' # append a new column by row position
 #' extra <- data.frame(label = letters[1:5])
 #' bind_cols(d, extra)
 #'
@@ -722,8 +747,7 @@ bind_cols.survey_base <- function(x, ..., .name_repair = "unique") {
 #'   rows; new columns from `y` appended.
 #'
 #' @examples
-#' library(dplyr)
-#' library(surveycore)
+#' # create a small survey object
 #' df <- data.frame(
 #'   psu = paste0("psu_", 1:5),
 #'   strata = "s1",
@@ -731,12 +755,20 @@ bind_cols.survey_base <- function(x, ..., .name_repair = "unique") {
 #'   wt = 1,
 #'   y1 = 1:5
 #' )
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
+#' d <- surveycore::as_survey(
+#'   df,
+#'   ids = psu,
+#'   weights = wt,
+#'   strata = strata,
+#'   fpc = fpc,
+#'   nest = TRUE
+#' )
 #' lookup <- data.frame(y1 = 1:3, label = letters[1:3])
-#' # Domain-aware: marks rows 4 and 5 as out-of-domain
+#'
+#' # domain-aware: marks rows 4 and 5 as out-of-domain
 #' inner_join(d, lookup, by = "y1")
-#' # Physical: removes rows 4 and 5
+#'
+#' # physical: removes rows 4 and 5
 #' inner_join(d, lookup, by = "y1", .domain_aware = FALSE)
 #'
 #' @family joins
@@ -947,16 +979,28 @@ inner_join.survey_base <- function(
 #' @return Never returns — always throws an error.
 #'
 #' @examples
-#' \dontrun{
-#' library(dplyr)
-#' library(surveycore)
-#' df <- data.frame(psu = "p1", strata = "s1", fpc = 10, wt = 1, y1 = 1)
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
-#' lookup <- data.frame(y1 = 1:2, label = c("a", "b"))
-#' right_join(d, lookup, by = "y1")  # errors
-#' full_join(d, lookup, by = "y1")   # errors
-#' }
+#' # create a tiny survey object and a lookup table with an extra row
+#' d <- surveycore::as_survey(
+#'   data.frame(wt = c(1, 1), y1 = c(1, 2)),
+#'   weights = wt
+#' )
+#' lookup <- data.frame(y1 = c(1, 2, 3), label = c("a", "b", "c"))
+#'
+#' # right_join() and full_join() always error on a survey object — they would
+#' # add rows with NA design variables, producing an invalid design
+#' tryCatch(
+#'   right_join(d, lookup, by = "y1"),
+#'   error = function(e) message(conditionMessage(e))
+#' )
+#'
+#' tryCatch(
+#'   full_join(d, lookup, by = "y1"),
+#'   error = function(e) message(conditionMessage(e))
+#' )
+#'
+#' # the recommended alternative: use left_join() to add lookup columns
+#' # without changing the row set
+#' left_join(d, lookup, by = "y1")
 #'
 #' @family joins
 #' @name right_join
@@ -1052,14 +1096,32 @@ full_join.survey_base <- function(x, y, ...) {
 #'   When `x` is not a survey object, returns the result of [dplyr::bind_rows()].
 #'
 #' @examples
-#' \dontrun{
-#' library(surveytidy)
-#' library(surveycore)
-#' df <- data.frame(psu = "p1", strata = "s1", fpc = 10, wt = 1, y1 = 1)
-#' d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-#'                nest = TRUE)
-#' bind_rows(d, df)  # errors
-#' }
+#' # NOTE: do not load dplyr here — its bind_rows() would mask surveytidy's
+#' # bind_rows() and bypass the survey-object check shown below.
+#'
+#' # two raw data frames that together define a combined survey
+#' df1 <- data.frame(wt = c(1, 1), y1 = c(1, 2))
+#' df2 <- data.frame(wt = c(1, 1), y1 = c(3, 4))
+#'
+#' # bind_rows() on plain data frames delegates to dplyr::bind_rows()
+#' bind_rows(df1, df2)
+#'
+#' # but bind_rows() on a survey object always errors — stacking two surveys
+#' # would change the design, requiring a new design specification
+#' d1 <- surveycore::as_survey(df1, weights = wt)
+#'
+#' tryCatch(
+#'   bind_rows(d1, df2),
+#'   error = function(e) message(conditionMessage(e))
+#' )
+#'
+#' # the recommended workflow: extract raw data from each survey, bind, then
+#' # re-specify the design on the combined data frame
+#' combined <- bind_rows(
+#'   surveycore::survey_data(d1),
+#'   df2
+#' )
+#' surveycore::as_survey(combined, weights = wt)
 #'
 #' @family joins
 #' @export
