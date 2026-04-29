@@ -155,10 +155,11 @@ NULL
   dots,
   survey_name,
   verb_name,
-  resolved_if_missing_var
+  resolved_if_missing_var,
+  scalar_args = list()
 ) {
   tryCatch(
-    rlang::inject(fn(survey, !!!dots)),
+    rlang::inject(fn(survey, !!!dots, !!!scalar_args)),
     vctrs_error_subscript_oob = function(cnd) {
       .handle_class_catch(cnd, survey_name, verb_name, resolved_if_missing_var)
     },
@@ -202,6 +203,7 @@ NULL
   verb_name,
   collection,
   ...,
+  .scalar_args = list(),
   .if_missing_var = NULL,
   .detect_missing = "none",
   .may_change_groups = FALSE
@@ -217,6 +219,17 @@ NULL
   # see a quosure where it expects a string / logical / NSE expression.
   # Bare-name args remain quosures so data-masking semantics work.
   dots <- .unwrap_scalar_dots(dots)
+
+  # Drop NULL entries from `.scalar_args`: dplyr 1.2.0 treats an explicit
+  # `prop = NULL` as "user supplied prop", which (combined with a non-NULL
+  # `n`) raises "Must supply `n` or `prop`, but not both." Verb methods at
+  # the slice family pass scalars via `.scalar_args` so this dispatcher can
+  # drop NULLs uniformly without requiring each verb method to do it.
+  if (length(.scalar_args) > 0L) {
+    .scalar_args <- .scalar_args[
+      !vapply(.scalar_args, is.null, logical(1L))
+    ]
+  }
 
   # Step 2: per-member apply with detection mode.
   results <- vector("list", length(collection@surveys))
@@ -241,7 +254,7 @@ NULL
           class = "surveytidy_error_collection_verb_failed"
         )
       }
-      r <- rlang::inject(fn(survey, !!!dots))
+      r <- rlang::inject(fn(survey, !!!dots, !!!.scalar_args))
     } else if (identical(.detect_missing, "class_catch")) {
       r <- .apply_class_catch(
         fn,
@@ -249,10 +262,11 @@ NULL
         dots,
         nm,
         verb_name,
-        resolved_if_missing_var
+        resolved_if_missing_var,
+        .scalar_args
       )
     } else {
-      r <- rlang::inject(fn(survey, !!!dots))
+      r <- rlang::inject(fn(survey, !!!dots, !!!.scalar_args))
     }
 
     if (is.null(r)) {
