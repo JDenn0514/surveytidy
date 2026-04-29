@@ -25,7 +25,7 @@ in parallel after PR 1.
 - [x] PR 2a: `feature/survey-collection-data-mask-verbs` — `filter` / `filter_out` / `mutate` / `arrange` collection methods (`.detect_missing = "pre_check"`), shared `.by` rejection, per-verb test files
 - [x] PR 2b: `feature/survey-collection-tidyselect-verbs` — `select` / `relocate` / `rename` / `rename_with` / `drop_na` / `distinct` / `rowwise` collection methods (`.detect_missing = "class_catch"`), `select` group-removal pre-flight, `rename`/`rename_with` group-rename pre-flight, per-verb test files
 - [x] PR 2c: `feature/survey-collection-grouping-verbs` — `group_by` / `ungroup` / `group_vars` / `is_rowwise` collection methods, per-verb test files
-- [ ] PR 2d: `feature/survey-collection-slice-verbs` — `slice` / `slice_head` / `slice_tail` / `slice_min` / `slice_max` / `slice_sample` collection methods, slice-zero pre-flight, `slice_sample` reproducibility, per-verb test files
+- [x] PR 2d: `feature/survey-collection-slice-verbs` — `slice` / `slice_head` / `slice_tail` / `slice_min` / `slice_max` / `slice_sample` collection methods, slice-zero pre-flight, `slice_sample` reproducibility, per-verb test files
 - [ ] PR 3: `feature/survey-collection-collapsing` — `pull.survey_collection`, `glimpse.survey_collection` (default + `.by_survey` modes), id-collision pre-flight, type-coercion footer (D7), per-verb test files
 - [ ] PR 4: `feature/survey-collection-joins-and-reexports` — `*_join.survey_collection` error stubs (V8), surveycore setter re-exports, NEWS block, DESCRIPTION pin bumps, final QA
 
@@ -838,31 +838,31 @@ Differences and additions:
 - `changelog/phase-0.7/feature-collection-slice-verbs.md` — NEW
 
 **Acceptance criteria:**
-- [ ] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
-- [ ] `devtools::document()` run; NAMESPACE and man/ in sync
-- [ ] Per-slice-verb test covers happy path with dual invariants,
+- [x] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
+- [x] `devtools::document()` run; NAMESPACE and man/ in sync
+- [x] Per-slice-verb test covers happy path with dual invariants,
       `@id`/`@if_missing_var`, missing-var (where applicable —
       `slice_min`/`slice_max` with `order_by` arg; `slice_sample`
       with `weight_by` arg), empty-result, domain preservation,
       cross-design, per-member `surveycore_warning_physical_subset`
       multiplicity
-- [ ] Slice-zero pre-flight raises
+- [x] Slice-zero pre-flight raises
       `surveytidy_error_collection_slice_zero` BEFORE any member is
       touched (snapshot per slice variant)
-- [ ] `slice_sample` reproducibility: `seed = NULL` consumes ambient
+- [x] `slice_sample` reproducibility: `seed = NULL` consumes ambient
       RNG in iteration order; `seed = <int>` produces identical
       output regardless of collection reorder
-- [ ] `by` rejection (`slice_min`, `slice_max`, `slice_sample`)
+- [x] `by` rejection (`slice_min`, `slice_max`, `slice_sample`)
       raises `surveytidy_error_collection_by_unsupported`
-- [ ] `.if_missing_var` is OMITTED from signatures of `slice`,
+- [x] `.if_missing_var` is OMITTED from signatures of `slice`,
       `slice_head`, `slice_tail`, and `slice_sample` when
       `weight_by = NULL` (per §III.2 exception)
-- [ ] `visible_vars` preservation asserted on every slice variant
+- [x] `visible_vars` preservation asserted on every slice variant
       (`slice`, `slice_head`, `slice_tail`, `slice_min`, `slice_max`,
       `slice_sample`): on a collection where every member has
       `@variables$visible_vars = c("y1", "y2")`, every surviving member
       still has the same `visible_vars` after the verb
-- [ ] `covr::package_coverage()` ≥95% on each modified file
+- [x] `covr::package_coverage()` ≥95% on each modified file
 
 **Tasks:**
 

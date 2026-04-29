@@ -444,4 +444,46 @@
   # for `survey_collection` — no S3 method registration. See R/rowwise.R.
 
   # ── survey_collection: slice verbs (PR 2d) ──
+
+  registerS3method(
+    "slice",
+    "surveycore::survey_collection",
+    get("slice.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "slice_head",
+    "surveycore::survey_collection",
+    get("slice_head.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "slice_tail",
+    "surveycore::survey_collection",
+    get("slice_tail.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "slice_min",
+    "surveycore::survey_collection",
+    get("slice_min.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "slice_max",
+    "surveycore::survey_collection",
+    get("slice_max.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "slice_sample",
+    "surveycore::survey_collection",
+    get("slice_sample.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
 }
