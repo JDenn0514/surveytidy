@@ -63,19 +63,21 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Select by name
+#' # select by name
 #' select(d, gender, agecat)
 #'
-#' # Select by name pattern
-#' select(d, dplyr::starts_with("smuse_"))
+#' # select by name pattern
+#' select(d, tidyselect::starts_with("smuse_"))
 #'
-#' # Select by type
-#' select(d, dplyr::where(is.numeric))
+#' # select by type
+#' select(d, tidyselect::where(is.numeric))
 #'
-#' # Drop columns with !
-#' select(d, !dplyr::starts_with("smuse_"))
+#' # drop columns with !
+#' select(d, !tidyselect::starts_with("smuse_"))
 #'
 #' @family selecting
 #' @seealso [relocate()] to reorder columns, [rename()] to rename them,
@@ -209,15 +211,17 @@ select.survey_result <- function(.data, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Move agecat before gender
+#' # move agecat before gender
 #' relocate(d, agecat, .before = gender)
 #'
-#' # Move all social media columns to the front
-#' relocate(d, dplyr::starts_with("smuse_"))
+#' # move all social media columns to the front
+#' relocate(d, tidyselect::starts_with("smuse_"))
 #'
-#' # After select(), relocate reorders the visible columns
+#' # after select(), relocate reorders the visible columns
 #' d |>
 #'   select(gender, agecat, partysum) |>
 #'   relocate(partysum, .before = gender)
@@ -295,12 +299,14 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Extract a column by name
+#' # extract a column by name
 #' pull(d, agecat)
 #'
-#' # Named vector — values of agecat named by respid
+#' # named vector — values of agecat named by respid
 #' pull(d, agecat, name = respid)
 #'
 #' @family selecting
@@ -334,12 +340,14 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Glimpse all columns
+#' # glimpse all columns
 #' glimpse(d)
 #'
-#' # After select(), shows only the selected columns
+#' # after select(), shows only the selected columns
 #' d |>
 #'   select(gender, agecat, partysum) |>
 #'   glimpse()

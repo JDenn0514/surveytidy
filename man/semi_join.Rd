@@ -63,8 +63,7 @@ from quosures.
 }
 }
 \examples{
-library(dplyr)
-library(surveycore)
+# create a small survey object
 df <- data.frame(
   psu = paste0("psu_", 1:5),
   strata = "s1",
@@ -72,10 +71,20 @@ df <- data.frame(
   wt = 1,
   y1 = 1:5
 )
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
+d <- surveycore::as_survey(
+  df,
+  ids = psu,
+  weights = wt,
+  strata = strata,
+  fpc = fpc,
+  nest = TRUE
+)
 keepers <- data.frame(y1 = c(1, 3, 5))
+
+# semi_join: rows matching keepers stay in-domain
 semi_join(d, keepers, by = "y1")
+
+# anti_join: rows matching keepers are marked out-of-domain
 anti_join(d, keepers, by = "y1")
 
 }

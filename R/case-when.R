@@ -60,8 +60,6 @@
 #' * [recode_values()] for value-mapping with explicit `from`/`to` vectors.
 #'
 #' @examples
-#'
-#' # load the libraries
 #' library(surveycore)
 #' library(surveytidy)
 #'
@@ -71,13 +69,9 @@
 #'   weights = weight
 #' )
 #'
-#' # ---------------------------------------------------------------------
-#' # Basic case_when — identical to dplyr::case_when() -------------------
-#' # ---------------------------------------------------------------------
-#'
+#' # basic case_when — identical to dplyr::case_when()
 #' new <- ns_wave1_svy |>
 #'   mutate(
-#'     # make a new variable for young partisans
 #'     age_pid = case_when(
 #'       age < 30 & pid3 == 1 ~ "18-29 Democrats",
 #'       age < 30 & pid3 == 2 ~ "18-29 Republicans",
@@ -85,79 +79,56 @@
 #'       .default = "Everyone else"
 #'     )
 #'   ) |>
-#'   # keep only only the relevant columns
 #'   select(age, pid3, age_pid)
 #'
-#' # show the new column
+#' # by default, no metadata is attached
 #' new
-#'
-#' # By default, no metadata is attached
 #' new@metadata
 #'
-#'
-#' # --------------------------------------------------------------------
-#' # Set metadata -------------------------------------------------------
-#' # --------------------------------------------------------------------
-#'
-#' # ---- Variable label ----
+#' # attach a variable label via .label
 #' new <- ns_wave1_svy |>
 #'   mutate(
-#'     # make a new variable for young partisans
 #'     age_pid = case_when(
 #'       age < 30 & pid3 == 1 ~ "18-29 Democrats",
 #'       age < 30 & pid3 == 2 ~ "18-29 Republicans",
 #'       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
 #'       .default = "Everyone else",
-#'       # set variable label
 #'       .label = "Age and Partisanship"
 #'     )
 #'   ) |>
-#'   # show the output of the new column relative to original columsn
 #'   select(age, pid3, age_pid)
 #'
-#' # Show variable labels, we can see that age_pid is blank
 #' new@metadata@variable_labels
 #'
-#' # ---- Transformation ----
-#'
-#' # set the plain word description of how the variable was created
+#' # attach a plain-language description of the transformation
 #' new <- ns_wave1_svy |>
 #'   mutate(
-#'     # make a new variable for young partisans
 #'     age_pid = case_when(
 #'       age < 30 & pid3 == 1 ~ "18-29 Democrats",
 #'       age < 30 & pid3 == 2 ~ "18-29 Republicans",
 #'       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
 #'       .default = "Everyone else",
-#'       # set variable label
 #'       .label = "Age and Partisanship",
-#'       # set the description of the transformation
-#'       .description = "Those with age < 30 AND pid3 = 1 were set to '18-29 Democrats',\n
-#'          those with age < 30 AND pid3 = 2 were set to '18-29 Republicans', \n
-#'          those with age < 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \n
-#'          everyone else was set to 'Everyone else'"
+#'       .description = paste(
+#'         "Young (< 30) Democrats, Republicans, and Independents",
+#'         "were grouped by partisanship; everyone else was set to",
+#'         "'Everyone else'."
+#'       )
 #'     )
 #'   ) |>
-#'   # show the output of the new column relative to original columsn
 #'   select(age, pid3, age_pid)
 #'
-#' # Show variable labels, we can see that age_pid is blank
 #' new@metadata@transformations
 #'
-#' # ---- Value labels ----
-#'
-#' # Add value labels
+#' # attach value labels alongside numeric codes
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     age_pid = case_when(
-#'       # set party for 18-29
 #'       age < 30 & pid3 == 1 ~ 1,
 #'       age < 30 & pid3 == 2 ~ 2,
 #'       age < 30 & pid3 %in% c(3:4) ~ 3,
 #'       .default = 4,
-#'       # add variable label
 #'       .label = "Age and Partisanship",
-#'       # add value labels
 #'       .value_labels = c(
 #'         "18-29 Democrats" = 1,
 #'         "18-29 Republicans" = 2,
@@ -170,23 +141,17 @@
 #'
 #' new@metadata@value_labels
 #'
-#' # --------------------------------------------------------------------
-#' # Make output a factor -----------------------------------------------
-#' # --------------------------------------------------------------------
-#'
+#' # return a factor with levels in formula order
 #' new <- ns_wave1_svy |>
 #'   mutate(
-#'     # make a new variable for young partisans
 #'     age_pid = case_when(
 #'       age < 30 & pid3 == 1 ~ "18-29 Democrats",
 #'       age < 30 & pid3 == 2 ~ "18-29 Republicans",
 #'       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
 #'       .default = "Everyone else",
-#'       # make output a factor based on it's appearance
 #'       .factor = TRUE
 #'     )
 #'   ) |>
-#'   # show the output of the new column relative to original columsn
 #'   select(age, pid3, age_pid)
 #'
 #' new

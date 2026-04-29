@@ -54,16 +54,28 @@ Use \code{\link[=left_join]{left_join()}} to add lookup columns from \code{y}. U
 \code{\link[=semi_join]{semi_join()}} to restrict the survey domain.
 }
 \examples{
-\dontrun{
-library(dplyr)
-library(surveycore)
-df <- data.frame(psu = "p1", strata = "s1", fpc = 10, wt = 1, y1 = 1)
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
-lookup <- data.frame(y1 = 1:2, label = c("a", "b"))
-right_join(d, lookup, by = "y1")  # errors
-full_join(d, lookup, by = "y1")   # errors
-}
+# create a tiny survey object and a lookup table with an extra row
+d <- surveycore::as_survey(
+  data.frame(wt = c(1, 1), y1 = c(1, 2)),
+  weights = wt
+)
+lookup <- data.frame(y1 = c(1, 2, 3), label = c("a", "b", "c"))
+
+# right_join() and full_join() always error on a survey object — they would
+# add rows with NA design variables, producing an invalid design
+tryCatch(
+  right_join(d, lookup, by = "y1"),
+  error = function(e) message(conditionMessage(e))
+)
+
+tryCatch(
+  full_join(d, lookup, by = "y1"),
+  error = function(e) message(conditionMessage(e))
+)
+
+# the recommended alternative: use left_join() to add lookup columns
+# without changing the row set
+left_join(d, lookup, by = "y1")
 
 }
 \seealso{

@@ -33,12 +33,14 @@ be piped back into survey verbs.
 \examples{
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Extract a column by name
+# extract a column by name
 pull(d, agecat)
 
-# Named vector — values of agecat named by respid
+# named vector — values of agecat named by respid
 pull(d, agecat, name = respid)
 
 }

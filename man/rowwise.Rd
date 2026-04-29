@@ -30,7 +30,7 @@ collection's stored value. See
 \description{
 \code{rowwise()} enables row-by-row computation in \code{\link[=mutate]{mutate()}}. Each row is
 treated as an independent group, so expressions like
-\code{mutate(d, row_max = max(c_across(starts_with("y"))))} compute the maximum
+\code{mutate(d, row_max = max(dplyr::c_across(tidyselect::starts_with("y"))))} compute the maximum
 across columns for each row independently.
 
 Use \code{\link[=ungroup]{ungroup()}} or \code{\link[=group_by]{group_by()}} to exit rowwise mode.
@@ -75,18 +75,24 @@ rather than blocked.
 }
 
 \examples{
-library(surveytidy)
-library(surveycore)
-library(dplyr)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-# Row-wise max across several columns
+# row-wise max across several columns
 d |>
   rowwise() |>
-  mutate(row_max = max(c_across(starts_with("econ")), na.rm = TRUE))
+  mutate(
+    row_max = max(dplyr::c_across(tidyselect::starts_with("econ")), na.rm = TRUE)
+  )
 
-# Exit rowwise mode
-d |> rowwise() |> ungroup()
+# exit rowwise mode
+d |>
+  rowwise() |>
+  ungroup()
 
 }
 \seealso{

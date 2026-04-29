@@ -42,13 +42,28 @@
 #'   current data context.
 #'
 #' @examples
-#' library(dplyr)
+#' # create a dummy survey object
 #' d <- surveycore::as_survey(
-#'   data.frame(y1 = c(1, 2, 3), y2 = c(4, 5, 6), wt = c(1, 1, 1)),
+#'   data.frame(
+#'     y1 = c(1, 2, 3),
+#'     y2 = c(4, 5, 6),
+#'     wt = c(1, 1, 1)
+#'   ),
 #'   weights = wt
 #' )
+#'
+#' # use a vector of columns to create the score
 #' mutate(d, score = row_means(c(y1, y2)))
-#' mutate(d, score = row_means(starts_with("y"), na.rm = TRUE, .label = "Score"))
+#'
+#' # use tidy-select for columns and add a label
+#' d |>
+#'   mutate(
+#'     score = row_means(
+#'       tidyselect::starts_with("y"),
+#'       na.rm = TRUE,
+#'       .label = "Score"
+#'     )
+#'   )
 #'
 #' @family transformation
 #' @export
@@ -153,13 +168,28 @@ row_means <- function(
 #'   current data context.
 #'
 #' @examples
-#' library(dplyr)
+#' # create a dummy survey object
 #' d <- surveycore::as_survey(
-#'   data.frame(y1 = c(1, 2, 3), y2 = c(4, 5, 6), wt = c(1, 1, 1)),
+#'   data.frame(
+#'     y1 = c(1, 2, 3),
+#'     y2 = c(4, 5, 6),
+#'     wt = c(1, 1, 1)
+#'   ),
 #'   weights = wt
 #' )
+#'
+#' # use a vector of columns to create the total
 #' mutate(d, total = row_sums(c(y1, y2)))
-#' mutate(d, total = row_sums(starts_with("y"), na.rm = TRUE, .label = "Total"))
+#'
+#' # use tidy-select for columns and add a label
+#' d |>
+#'   mutate(
+#'     total = row_sums(
+#'       tidyselect::starts_with("y"),
+#'       na.rm = TRUE,
+#'       .label = "Total"
+#'     )
+#'   )
 #'
 #' @family transformation
 #' @export

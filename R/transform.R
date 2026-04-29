@@ -69,11 +69,7 @@
 #' @return An R factor (ordered if `ordered = TRUE`).
 #'
 #' @examples
-#' library(dplyr)
-#' d <- surveycore::as_survey(
-#'   data.frame(x = c(1, 2, 1, 2), wt = c(1, 1, 1, 1)),
-#'   weights = wt
-#' )
+#' # attach value labels to a numeric vector and convert to a factor
 #' x <- c(1, 2, 1, 2)
 #' attr(x, "labels") <- c("Yes" = 1, "No" = 2)
 #' make_factor(x)
@@ -358,12 +354,23 @@ make_factor <- function(
 #' @return A 2-level R factor.
 #'
 #' @examples
-#' library(dplyr)
+#' # build a 4-level Likert factor
 #' x <- factor(
-#'   c("Always agree", "Sometimes agree", "Sometimes disagree", "Always disagree"),
-#'   levels = c("Always agree", "Sometimes agree", "Sometimes disagree",
-#'              "Always disagree")
+#'   c(
+#'     "Always agree",
+#'     "Sometimes agree",
+#'     "Sometimes disagree",
+#'     "Always disagree"
+#'   ),
+#'   levels = c(
+#'     "Always agree",
+#'     "Sometimes agree",
+#'     "Sometimes disagree",
+#'     "Always disagree"
+#'   )
 #' )
+#'
+#' # collapse to 2 levels by stripping the qualifier word
 #' make_dicho(x)
 #'
 #' @family transformation
@@ -547,9 +554,13 @@ make_dicho <- function(
 #' @return An integer vector with values `0L`, `1L`, or `NA_integer_`.
 #'
 #' @examples
-#' library(dplyr)
-#' x <- factor(c("Agree", "Disagree", "Agree", NA),
-#'             levels = c("Agree", "Disagree"))
+#' # build a 2-level factor with one NA
+#' x <- factor(
+#'   c("Agree", "Disagree", "Agree", NA),
+#'   levels = c("Agree", "Disagree")
+#' )
+#'
+#' # encode as a 0/1 integer indicator
 #' make_binary(x)
 #'
 #' @family transformation
@@ -644,6 +655,7 @@ make_binary <- function(
 #' @return A numeric vector (same `typeof()` as `x`) with reversed values.
 #'
 #' @examples
+#' # reverse a 1–4 numeric scale: 1↔4 and 2↔3
 #' x <- c(1, 2, 3, 4)
 #' make_rev(x)
 #'
@@ -757,9 +769,16 @@ make_rev <- function(x, .label = NULL, .description = NULL) {
 #' @return A numeric vector (same `typeof()` as `x`). Values are unchanged.
 #'
 #' @examples
+#' # build a labelled numeric vector with a 4-level Likert scale
 #' x <- c(1, 2, 3, 4)
-#' attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-#'                         "Disagree" = 3, "Strongly disagree" = 4)
+#' attr(x, "labels") <- c(
+#'   "Strongly agree" = 1,
+#'   "Agree" = 2,
+#'   "Disagree" = 3,
+#'   "Strongly disagree" = 4
+#' )
+#'
+#' # flip the semantic meaning while keeping numeric values unchanged
 #' make_flip(x, "I dislike the color blue")
 #'
 #' @family transformation

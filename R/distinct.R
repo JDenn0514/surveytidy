@@ -66,14 +66,15 @@
 #'
 #' @examples
 #' library(surveytidy)
-#' library(dplyr)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Deduplicate on all non-design columns (issues physical-subset warning)
+#' # deduplicate on all non-design columns (issues physical-subset warning)
 #' distinct(d)
 #'
-#' # Deduplicate by one column (all other columns still retained)
+#' # deduplicate by one column (all other columns still retained)
 #' distinct(d, cregion)
 #'
 #' @family row operations

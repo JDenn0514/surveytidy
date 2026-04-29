@@ -18,12 +18,16 @@ Use this predicate in estimation functions to detect and handle (or
 disallow) rowwise mode.
 }
 \examples{
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-is_rowwise(d)           # FALSE
-is_rowwise(rowwise(d))  # TRUE
+# FALSE for a freshly-built design; TRUE after rowwise()
+is_rowwise(d)
+is_rowwise(rowwise(d))
 
 }
 \seealso{

@@ -42,14 +42,32 @@ standalone function approach used instead).
 }
 }
 \examples{
-\dontrun{
-library(surveytidy)
-library(surveycore)
-df <- data.frame(psu = "p1", strata = "s1", fpc = 10, wt = 1, y1 = 1)
-d <- as_survey(df, ids = psu, weights = wt, strata = strata, fpc = fpc,
-               nest = TRUE)
-bind_rows(d, df)  # errors
-}
+# NOTE: do not load dplyr here — its bind_rows() would mask surveytidy's
+# bind_rows() and bypass the survey-object check shown below.
+
+# two raw data frames that together define a combined survey
+df1 <- data.frame(wt = c(1, 1), y1 = c(1, 2))
+df2 <- data.frame(wt = c(1, 1), y1 = c(3, 4))
+
+# bind_rows() on plain data frames delegates to dplyr::bind_rows()
+bind_rows(df1, df2)
+
+# but bind_rows() on a survey object always errors — stacking two surveys
+# would change the design, requiring a new design specification
+d1 <- surveycore::as_survey(df1, weights = wt)
+
+tryCatch(
+  bind_rows(d1, df2),
+  error = function(e) message(conditionMessage(e))
+)
+
+# the recommended workflow: extract raw data from each survey, bind, then
+# re-specify the design on the combined data frame
+combined <- bind_rows(
+  surveycore::survey_data(d1),
+  df2
+)
+surveycore::as_survey(combined, weights = wt)
 
 }
 \seealso{

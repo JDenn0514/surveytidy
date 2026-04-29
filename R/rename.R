@@ -193,7 +193,7 @@
 #'
 #' Extra arguments to `.fn` can be passed via `...`:
 #' ```r
-#' rename_with(d, stringr::str_replace, .cols = starts_with("y"),
+#' rename_with(d, stringr::str_replace, .cols = tidyselect::starts_with("y"),
 #'             pattern = "y", replacement = "outcome")
 #' ```
 #'
@@ -218,29 +218,30 @@
 #' * Survey design attributes are preserved.
 #'
 #' @examples
-#' library(dplyr)
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
 #' # rename() ----------------------------------------------------------------
 #'
-#' # Rename an outcome column
+#' # rename an outcome column
 #' rename(d, financial_situation = fin_sit)
 #'
-#' # Rename multiple columns at once
+#' # rename multiple columns at once
 #' rename(d, region = cregion, education = educcat)
 #'
-#' # Rename a design variable — warns and updates the design specification
+#' # rename a design variable — warns and updates the design specification
 #' rename(d, survey_weight = weight)
 #'
 #' # rename_with() -----------------------------------------------------------
 #'
-#' # Apply a function to all outcome columns
-#' rename_with(d, toupper, .cols = starts_with("econ"))
+#' # apply a function to all matching columns
+#' rename_with(d, toupper, .cols = tidyselect::starts_with("econ"))
 #'
-#' # Use a formula
-#' rename_with(d, ~ paste0(., "_v2"), .cols = starts_with("econ"))
+#' # use a formula
+#' rename_with(d, ~ paste0(., "_v2"), .cols = tidyselect::starts_with("econ"))
 #'
 #' @family modification
 #' @seealso [mutate()] to add or modify column values, [select()] to drop
@@ -294,7 +295,7 @@ rename_with.survey_base <- function(
   # Step 1: resolve .cols to column names (NOT eval_rename — .cols is a
   # selection expression, not a new = old rename spec).
   # enquo() captures the caller's expression + environment so that tidyselect
-  # helpers like starts_with() are found correctly.
+  # helpers like tidyselect::starts_with() are found correctly.
   selected <- tidyselect::eval_select(rlang::enquo(.cols), .data@data)
   old_names <- names(selected)
 
