@@ -90,8 +90,8 @@ d |>
 \code{\link[=select]{select()}} to keep or drop columns, \code{\link[=rename]{rename()}} to rename them
 
 Other selecting: 
-\code{\link{glimpse}},
-\code{\link{pull}},
+\code{\link{glimpse.survey_collection}()},
+\code{\link{pull.survey_collection}()},
 \code{\link{select}}
 }
 \concept{selecting}

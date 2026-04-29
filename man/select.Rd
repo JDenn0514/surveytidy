@@ -107,8 +107,8 @@ select(d, !tidyselect::starts_with("smuse_"))
 \code{\link[=mutate]{mutate()}} to add new ones
 
 Other selecting: 
-\code{\link{glimpse}},
-\code{\link{pull}},
+\code{\link{glimpse.survey_collection}()},
+\code{\link{pull.survey_collection}()},
 \code{\link{relocate}}
 }
 \concept{selecting}
