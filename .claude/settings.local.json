@@ -70,7 +70,12 @@
       "Bash(NOT_CRAN=true Rscript -e 'devtools::test\\(reporter = \"minimal\"\\)')",
       "Bash(/opt/homebrew/bin/rg *)",
       "Read(//usr/local/bin/**)",
-      "Read(//opt/homebrew/bin/**)"
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(NOT_CRAN=true Rscript -e 'suppressMessages\\({library\\(covr\\); library\\(testthat\\)}\\); cov <- file_coverage\\(\"R/joins.R\", \"tests/testthat/test-joins.R\"\\); cat\\(sprintf\\(\"R/joins.R: %.1f%%\\\\n\", percent_coverage\\(cov\\)\\)\\); zc <- zero_coverage\\(cov\\); print\\(colnames\\(zc\\)\\); cat\\(\"rows:\", nrow\\(zc\\), \"\\\\n\"\\); if \\(nrow\\(zc\\) > 0\\) print\\(zc\\)')",
+      "Read(//private/tmp/**)",
+      "Read(//tmp/**)",
+      "Bash(awk '/@examples/,/^[^#'\\\\'']/' /Users/jacobdennen/surveytidy/R/rowwise.R)",
+      "Bash(awk '/@examples/,/^#'\\\\'' @family/' /Users/jacobdennen/surveytidy/R/rowstats.R)"
     ]
   }
 }

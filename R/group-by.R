@@ -189,3 +189,69 @@ ungroup.survey_base <- function(x, ...) {
 group_vars.survey_base <- function(x) {
   x@groups
 }
+
+
+# ── group_by.survey_collection (PR 2c) ────────────────────────────────────────
+
+#' @rdname group_by
+#' @method group_by survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `group_by()` is dispatched to each
+#' member independently. Every member's `@groups` is updated, and the
+#' rebuilt collection's `@groups` is synchronised from the members. If a
+#' grouping column is missing on some members, `.if_missing_var` controls
+#' whether those members are skipped or the call errors.
+group_by.survey_collection <- function(
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = TRUE,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::group_by,
+    verb_name = "group_by",
+    collection = .data,
+    ...,
+    .add = .add,
+    .drop = .drop,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = TRUE
+  )
+}
+
+
+# ── ungroup.survey_collection (PR 2c) ─────────────────────────────────────────
+
+#' @rdname group_by
+#' @method ungroup survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections (ungroup):
+#' `ungroup()` clears `@groups` on every member and on the collection. The
+#' dispatcher's step-5 sync lifts the cleared per-member `@groups` to the
+#' rebuilt collection. `@id` and `@if_missing_var` are preserved.
+ungroup.survey_collection <- function(x, ..., .if_missing_var = NULL) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::ungroup,
+    verb_name = "ungroup",
+    collection = x,
+    ...,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "none",
+    .may_change_groups = TRUE
+  )
+}
+
+
+# ── group_vars.survey_collection (PR 2c) ──────────────────────────────────────
+
+#' @rdname group_by
+#' @method group_vars survey_collection
+#' @noRd
+group_vars.survey_collection <- function(x) {
+  x@groups
+}

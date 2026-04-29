@@ -4,11 +4,17 @@
 \alias{group_by}
 \alias{group_by.survey_base}
 \alias{ungroup.survey_base}
+\alias{group_by.survey_collection}
+\alias{ungroup.survey_collection}
 \title{Group and ungroup a survey design object}
 \usage{
 \method{group_by}{survey_base}(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
 
 \method{ungroup}{survey_base}(x, ...)
+
+\method{group_by}{survey_collection}(.data, ..., .add = FALSE, .drop = TRUE, .if_missing_var = NULL)
+
+\method{ungroup}{survey_collection}(x, ..., .if_missing_var = NULL)
 
 group_by(.data, ..., .add = FALSE, .drop = group_by_drop_default(.data))
 }
@@ -29,6 +35,11 @@ effect on survey design objects.}
 
 \item{x}{A \code{\link[surveycore:survey_base]{survey_base}} object (for
 \code{ungroup()} and \code{group_vars()}).}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as the input with the following properties:
@@ -78,6 +89,22 @@ With column arguments, it removes only the specified columns from the
 grouping — rowwise mode is \strong{not} affected.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{group_by()} is dispatched to each
+member independently. Every member's \verb{@groups} is updated, and the
+rebuilt collection's \verb{@groups} is synchronised from the members. If a
+grouping column is missing on some members, \code{.if_missing_var} controls
+whether those members are skipped or the call errors.
+}
+
+\section{Survey collections (ungroup)}{
+
+\code{ungroup()} clears \verb{@groups} on every member and on the collection. The
+dispatcher's step-5 sync lifts the cleared per-member \verb{@groups} to the
+rebuilt collection. \verb{@id} and \verb{@if_missing_var} are preserved.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)
