@@ -24,7 +24,7 @@ in parallel after PR 1.
 - [x] PR 1: `feature/survey-collection-dispatch` — dispatcher, `.sc_*` wrappers, test helpers (`make_test_collection`, `make_heterogeneous_collection`, `test_collection_invariants`), error-class registry rows for dispatcher-level conditions, dispatcher unit tests
 - [x] PR 2a: `feature/survey-collection-data-mask-verbs` — `filter` / `filter_out` / `mutate` / `arrange` collection methods (`.detect_missing = "pre_check"`), shared `.by` rejection, per-verb test files
 - [x] PR 2b: `feature/survey-collection-tidyselect-verbs` — `select` / `relocate` / `rename` / `rename_with` / `drop_na` / `distinct` / `rowwise` collection methods (`.detect_missing = "class_catch"`), `select` group-removal pre-flight, `rename`/`rename_with` group-rename pre-flight, per-verb test files
-- [ ] PR 2c: `feature/survey-collection-grouping-verbs` — `group_by` / `ungroup` / `group_vars` / `is_rowwise` collection methods, per-verb test files
+- [x] PR 2c: `feature/survey-collection-grouping-verbs` — `group_by` / `ungroup` / `group_vars` / `is_rowwise` collection methods, per-verb test files
 - [ ] PR 2d: `feature/survey-collection-slice-verbs` — `slice` / `slice_head` / `slice_tail` / `slice_min` / `slice_max` / `slice_sample` collection methods, slice-zero pre-flight, `slice_sample` reproducibility, per-verb test files
 - [ ] PR 3: `feature/survey-collection-collapsing` — `pull.survey_collection`, `glimpse.survey_collection` (default + `.by_survey` modes), id-collision pre-flight, type-coercion footer (D7), per-verb test files
 - [ ] PR 4: `feature/survey-collection-joins-and-reexports` — `*_join.survey_collection` error stubs (V8), surveycore setter re-exports, NEWS block, DESCRIPTION pin bumps, final QA

@@ -125,6 +125,12 @@ rowwise.survey_base <- function(data, ...) {
 #' @family grouping
 #' @export
 is_rowwise <- function(design) {
+  if (S7::S7_inherits(design, surveycore::survey_collection)) {
+    return(
+      length(design@surveys) > 0L &&
+        all(vapply(design@surveys, is_rowwise, logical(1L)))
+    )
+  }
   isTRUE(design@variables$rowwise)
 }
 
@@ -195,4 +201,11 @@ rowwise.survey_collection <- function(
 }
 
 # ── is_rowwise.survey_collection (PR 2c) ──
+#
+# Implemented as a class-check branch inside `is_rowwise()` itself (above)
+# rather than an S3 method, because S7 namespaced class names break S3
+# dispatch for surveytidy-owned generics and registerS3method-only methods
+# trip the R CMD check "Apparent methods for exported generics not
+# registered" note. The single-function form is also what spec §IV.10
+# describes as a one-liner predicate.
 # ── end ──

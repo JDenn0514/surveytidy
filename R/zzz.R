@@ -419,5 +419,29 @@
 
   # ── survey_collection: grouping verbs (PR 2c) ──
 
+  registerS3method(
+    "group_by",
+    "surveycore::survey_collection",
+    get("group_by.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "ungroup",
+    "surveycore::survey_collection",
+    get("ungroup.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "group_vars",
+    "surveycore::survey_collection",
+    get("group_vars.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  # `is_rowwise()` is a plain function with an internal class-check branch
+  # for `survey_collection` — no S3 method registration. See R/rowwise.R.
+
   # ── survey_collection: slice verbs (PR 2d) ──
 }

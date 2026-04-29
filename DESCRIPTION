@@ -33,6 +33,7 @@ URL: https://jdenn0514.github.io/surveytidy/, https://github.com/JDenn0514/surve
 BugReports: https://github.com/JDenn0514/surveytidy/issues
 Suggests:
     covr,
+    mockery,
     pkgdown,
     testthat (>= 3.0.0),
     tibble
