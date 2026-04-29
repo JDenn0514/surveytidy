@@ -486,4 +486,20 @@
     get("slice_sample.survey_collection", envir = ns),
     envir = asNamespace("dplyr")
   )
+
+  # ── survey_collection: collapsing verbs (PR 3) ──
+
+  registerS3method(
+    "pull",
+    "surveycore::survey_collection",
+    get("pull.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "glimpse",
+    "surveycore::survey_collection",
+    get("glimpse.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
 }
