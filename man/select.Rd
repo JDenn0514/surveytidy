@@ -4,6 +4,7 @@
 \alias{select}
 \alias{select.survey_base}
 \alias{select.survey_result}
+\alias{select.survey_collection}
 \title{Keep or drop columns using their names and types}
 \usage{
 select(.data, ...)
@@ -11,6 +12,8 @@ select(.data, ...)
 \method{select}{survey_base}(.data, ...)
 
 \method{select}{survey_result}(.data, ...)
+
+\method{select}{survey_collection}(.data, ..., .if_missing_var = NULL)
 }
 \arguments{
 \item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object, or a
@@ -18,6 +21,11 @@ select(.data, ...)
 
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> One or more unquoted
 column names or tidy-select expressions.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -55,6 +63,25 @@ Variable labels, value labels, and other metadata for dropped columns
 are removed. Metadata for retained columns is preserved.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{select()} is dispatched to each
+member independently. Each member resolves its own tidyselect expression
+against its own \verb{@data}, so members may end up with different visible
+columns when the selection is partial (e.g., \code{any_of()} against a
+heterogeneous collection). Per-member design variables are always retained.
+
+Before dispatching, \code{select.survey_collection} resolves the selection
+against the first member's \verb{@data} and raises
+\code{surveytidy_error_collection_select_group_removed} if any column in
+\code{coll@groups} would be removed. Group columns must remain in every member;
+silently dropping them would violate the surveycore class validator (G1b).
+Use \code{\link[=ungroup]{ungroup()}} first if you intend to remove a group column.
+
+\code{relocate.survey_collection} is \strong{not} subject to this pre-flight —
+\code{dplyr::relocate} only reorders columns and never drops them.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)

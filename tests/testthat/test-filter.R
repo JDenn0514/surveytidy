@@ -454,3 +454,54 @@ test_that("subset() errors when condition matches 0 rows", {
     subset(d, y1 > 1e9)
   )
 })
+
+
+# ── coverage closers: row_id_col collision ──────────────────────────────────
+
+# Covers filter.R L150: when "..surveytidy_filter_id.." already exists in
+# @data, the helper dot-pads the name in a while-loop until it finds a free
+# name. We pre-add the colliding column via mutate() (it is not a protected
+# col) and then call filter().
+test_that("filter() resolves row_id_col collision when sentinel name already exists", {
+  d <- make_all_designs()$taylor
+  # Pre-add the default sentinel column. mutate() preserves arbitrary names.
+  d2 <- dplyr::mutate(d, "..surveytidy_filter_id.." = seq_len(nrow(d@data)))
+  expect_true("..surveytidy_filter_id.." %in% names(d2@data))
+
+  # filter() must succeed despite the collision (the sentinel name is
+  # padded to "...surveytidy_filter_id..." inside filter()).
+  result <- dplyr::filter(d2, y1 > 0)
+  test_invariants(result)
+
+  # Pre-existing user column is preserved untouched
+  expect_identical(
+    result@data[["..surveytidy_filter_id.."]],
+    seq_len(nrow(d@data))
+  )
+  # Domain mask was computed correctly
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    d@data$y1 > 0
+  )
+})
+
+# Covers filter.R L264: identical collision-resolution path inside filter_out()
+test_that("filter_out() resolves row_id_col collision when sentinel name already exists", {
+  d <- make_all_designs()$taylor
+  d2 <- dplyr::mutate(d, "..surveytidy_filter_id.." = seq_len(nrow(d@data)))
+  expect_true("..surveytidy_filter_id.." %in% names(d2@data))
+
+  result <- dplyr::filter_out(d2, y1 > 55)
+  test_invariants(result)
+
+  # Pre-existing user column is preserved untouched
+  expect_identical(
+    result@data[["..surveytidy_filter_id.."]],
+    seq_len(nrow(d@data))
+  )
+  # Domain mask: rows NOT matching the exclusion remain in-domain
+  expect_identical(
+    result@data[[surveycore::SURVEYCORE_DOMAIN_COL]],
+    !(d@data$y1 > 55)
+  )
+})

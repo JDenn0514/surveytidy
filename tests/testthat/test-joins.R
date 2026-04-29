@@ -1012,3 +1012,195 @@ test_that("0-column y: bind_cols is a no-op when no columns added", {
   # No new columns
   expect_equal(sort(names(result@data)), sort(original_cols))
 })
+
+
+# ── Coverage closures ─────────────────────────────────────────────────────────
+# These tests exercise specific branches in R/joins.R that aren't covered by
+# the main test set. Each block targets one or more uncovered lines.
+
+# Covers .check_join_col_conflict() L68-69: is.null(by) → character(0)
+# (bind_cols passes character(0) explicitly; left_join with by = NULL hits
+# the is.null branch in .check_join_col_conflict)
+test_that("left_join() with by = NULL auto-detects join keys", {
+  d <- make_all_designs(seed = 42)$taylor
+  # Use a lookup with the same key column name as the design — implicit join
+  lookup <- data.frame(
+    group = c("A", "B", "C"),
+    label = c("Alpha", "Beta", "Gamma"),
+    stringsAsFactors = FALSE
+  )
+  # by = NULL → dplyr emits an info message about auto-detected keys
+  suppressMessages({
+    result <- dplyr::left_join(d, lookup, by = NULL)
+  })
+  test_invariants(result)
+  expect_equal(nrow(result@data), nrow(d@data))
+  expect_true("label" %in% names(result@data))
+})
+
+# Covers .resolve_by_to_x_names() L214: is.null(by) — semi/anti/inner with
+# implicit by uses intersect() to deduce keys
+test_that("semi_join() with by = NULL deduces keys via intersect()", {
+  d <- make_all_designs(seed = 42)$taylor
+  lookup <- data.frame(
+    group = c("A", "B"),
+    stringsAsFactors = FALSE
+  )
+  suppressMessages({
+    result <- dplyr::semi_join(d, lookup, by = NULL)
+  })
+  test_invariants(result)
+  # Sentinel keys should be the deduced "group" column
+  domain_entries <- result@variables$domain
+  last_entry <- domain_entries[[length(domain_entries)]]
+  expect_true(inherits(last_entry, "surveytidy_join_domain"))
+  expect_equal(last_entry$keys, "group")
+})
+
+# Covers .check_join_col_conflict() L73 and .resolve_by_to_x_names() L229:
+# dplyr::join_by() object — `by$x` extracts the x-side keys
+test_that("semi_join() accepts dplyr::join_by() object as by =", {
+  d <- make_all_designs(seed = 42)$taylor
+  lookup <- data.frame(
+    grp_y = c("A", "B"),
+    stringsAsFactors = FALSE
+  )
+  jb <- dplyr::join_by(group == grp_y)
+  result <- dplyr::semi_join(d, lookup, by = jb)
+  test_invariants(result)
+  # Sentinel keys come from by$x
+  domain_entries <- result@variables$domain
+  last_entry <- domain_entries[[length(domain_entries)]]
+  expect_true(inherits(last_entry, "surveytidy_join_domain"))
+  expect_equal(last_entry$keys, "group")
+})
+
+test_that("left_join() accepts dplyr::join_by() object as by =", {
+  d <- make_all_designs(seed = 42)$taylor
+  lookup <- data.frame(
+    grp_y = c("A", "B", "C"),
+    label = c("a", "b", "c"),
+    stringsAsFactors = FALSE
+  )
+  jb <- dplyr::join_by(group == grp_y)
+  result <- dplyr::left_join(d, lookup, by = jb)
+  test_invariants(result)
+  expect_true("label" %in% names(result@data))
+  expect_equal(nrow(result@data), nrow(d@data))
+})
+
+# Covers .resolve_by_to_x_names() L220-224: mixed named/unnamed by =
+# c("k1", x_key = "y_key") — exercises the named/unnamed split logic
+test_that("semi_join() with mixed named/unnamed by = vector resolves keys", {
+  d <- make_all_designs(seed = 42)$taylor
+  # Add a second key column to x so we can exercise mixed by= with two keys
+  d@data$extra_key <- d@data$y3
+  lookup <- data.frame(
+    group = c("A", "B"),
+    yk = unique(d@data$y3)[1:2],
+    stringsAsFactors = FALSE
+  )
+  # by = c("group", extra_key = "yk") — first unnamed, second named
+  result <- dplyr::semi_join(
+    d,
+    lookup,
+    by = c("group", extra_key = "yk")
+  )
+  test_invariants(result)
+  domain_entries <- result@variables$domain
+  last_entry <- domain_entries[[length(domain_entries)]]
+  expect_true(inherits(last_entry, "surveytidy_join_domain"))
+  # Keys should include both x-side names: "extra_key" (from named) and
+  # "group" (from unnamed)
+  expect_setequal(last_entry$keys, c("group", "extra_key"))
+})
+
+# Covers .check_join_row_expansion() L116-117 (by_label rendering branch).
+# This requires triggering the row-expansion error with a non-NULL by_label.
+# Looking at the code: by_label is a parameter but no caller currently passes
+# a non-NULL value — left_join/inner_join call .check_join_row_expansion()
+# without the by_label arg. Since by_label is reachable only from a future
+# caller, we exercise it directly via the unexported helper.
+test_that(".check_join_row_expansion() renders by_label when provided", {
+  # Direct call to the internal helper — covers the by_msg != "" branch
+  helper <- get(".check_join_row_expansion", envir = asNamespace("surveytidy"))
+  expect_error(
+    helper(original_nrow = 5L, new_nrow = 7L, by_label = "k1"),
+    class = "surveytidy_error_join_row_expansion"
+  )
+})
+
+# Covers .repair_suffix_renames() L184: early return when rename_map is empty
+# but at least one column was renamed. This happens when a column disappears
+# from x but the standard `<old><suffix>` form is not in current_cols (e.g.,
+# the column was dropped rather than suffix-renamed). Direct helper call.
+test_that(".repair_suffix_renames() returns x unchanged when no suffix match", {
+  d <- make_all_designs(seed = 42)$taylor
+  helper <- get(".repair_suffix_renames", envir = asNamespace("surveytidy"))
+  # Pretend old_x_cols had a column "ghost" that no longer exists, but no
+  # "ghost.x" exists either → renamed_old = "ghost", rename_map empty
+  old_x_cols <- c(names(d@data), "ghost")
+  result <- helper(d, old_x_cols = old_x_cols, suffix = c(".x", ".y"))
+  # Should return x unchanged
+  expect_identical(result@data, d@data)
+  expect_identical(result@variables, d@variables)
+})
+
+# Covers bind_cols() L601: passthrough when x is not a survey object.
+# Calling surveytidy::bind_cols(df, df2) should delegate to dplyr::bind_cols
+test_that("bind_cols() delegates to dplyr when x is not a survey object", {
+  df1 <- data.frame(a = 1:3)
+  df2 <- data.frame(b = 4:6)
+  result <- bind_cols(df1, df2)
+  expect_s3_class(result, "data.frame")
+  expect_equal(names(result), c("a", "b"))
+  expect_equal(nrow(result), 3L)
+})
+
+# Covers inner_join() L833-836: visible_vars accumulation when set
+test_that("inner_join() extends visible_vars when it is set", {
+  d <- make_all_designs(seed = 42)$taylor
+  lookup <- data.frame(
+    group = c("A", "B", "C"),
+    label = c("Alpha", "Beta", "Gamma"),
+    stringsAsFactors = FALSE
+  )
+  d_with_vv <- dplyr::select(d, y1, y2, group)
+  result <- dplyr::inner_join(d_with_vv, lookup, by = "group")
+  test_invariants(result)
+  # visible_vars should include the original selection plus new "label"
+  expect_true("label" %in% result@variables$visible_vars)
+  expect_true("y1" %in% result@variables$visible_vars)
+  expect_true("y2" %in% result@variables$visible_vars)
+})
+
+# Covers bind_rows() L1085: dplyr::bind_rows passthrough when x is NOT a survey
+test_that("bind_rows() delegates to dplyr when x is not a survey object", {
+  df1 <- data.frame(a = 1:3, b = letters[1:3], stringsAsFactors = FALSE)
+  df2 <- data.frame(a = 4:6, b = letters[4:6], stringsAsFactors = FALSE)
+  result <- bind_rows(df1, df2)
+  expect_s3_class(result, "data.frame")
+  expect_equal(nrow(result), 6L)
+  expect_equal(result$a, 1:6)
+})
+
+# Covers bind_rows() L1085 with explicit .id argument
+test_that("bind_rows() passes through .id argument when x is not a survey", {
+  df1 <- data.frame(x = 1:2)
+  df2 <- data.frame(x = 3:4)
+  result <- bind_rows(list(first = df1, second = df2), .id = "src")
+  expect_s3_class(result, "data.frame")
+  expect_true("src" %in% names(result))
+  expect_equal(nrow(result), 4L)
+})
+
+# Covers bind_rows.survey_base() L1090 — directly invokes the dispatched
+# method for completeness (it just delegates to bind_rows() and errors).
+test_that("bind_rows.survey_base() errors via the public bind_rows()", {
+  d <- make_all_designs(seed = 42)$taylor
+  helper <- get("bind_rows.survey_base", envir = asNamespace("surveytidy"))
+  expect_error(
+    helper(d, data.frame(a = 1)),
+    class = "surveytidy_error_bind_rows_survey"
+  )
+})

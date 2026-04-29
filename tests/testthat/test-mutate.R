@@ -303,3 +303,48 @@ test_that("mutate() clears stale metadata when column is overwritten without att
   expect_null(d2@metadata@variable_labels[["y_new"]])
   expect_null(d2@metadata@notes[["y_new"]])
 })
+
+# ── coverage closers ─────────────────────────────────────────────────────────
+
+# Covers mutate.R L180: rowwise(d, id_col) followed by mutate() routes to
+# dplyr::rowwise(augmented_data, dplyr::all_of(id_cols)).
+test_that("mutate() after rowwise(d, id_col) re-groups via id_cols (rowwise + id)", {
+  d <- make_all_designs()$taylor
+  d_rw <- dplyr::rowwise(d, group)
+  # Sanity: rowwise_id_cols was set
+  expect_identical(d_rw@variables$rowwise_id_cols, "group")
+  result <- dplyr::mutate(
+    d_rw,
+    row_max = max(dplyr::c_across(dplyr::starts_with("y")))
+  )
+  test_invariants(result)
+  # Row-by-row computation matches per-row max of y columns
+  y_cols <- d@data[, c("y1", "y2", "y3"), drop = FALSE]
+  expected_max <- apply(y_cols, 1, max)
+  expect_equal(result@data$row_max, expected_max)
+})
+
+# Covers mutate.R L272: as.character(rlang::call_name(rlang::quo_get_expr(q))).
+# Reached when surveytidy_recode is set on a result vector but the $fn entry
+# is NULL. The public transform functions never produce that combination, so
+# we attach the attr manually inline.
+test_that("mutate() falls back to call_name() for fn when recode_attr$fn is NULL", {
+  d <- make_all_designs()$taylor
+  result <- dplyr::mutate(
+    d,
+    z = structure(
+      y1 + 1,
+      surveytidy_recode = list(
+        fn = NULL,
+        var = NULL,
+        description = "manual attr"
+      )
+    )
+  )
+  test_invariants(result)
+  trec <- result@metadata@transformations[["z"]]
+  expect_true(is.list(trec))
+  # call_name() of the structure(...) call returns "structure"
+  expect_identical(trec$fn, "structure")
+  expect_identical(trec$description, "manual attr")
+})

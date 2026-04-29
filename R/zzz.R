@@ -368,6 +368,55 @@
 
   # ── survey_collection: tidyselect verbs (PR 2b) ──
 
+  registerS3method(
+    "select",
+    "surveycore::survey_collection",
+    get("select.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "relocate",
+    "surveycore::survey_collection",
+    get("relocate.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "rename",
+    "surveycore::survey_collection",
+    get("rename.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "rename_with",
+    "surveycore::survey_collection",
+    get("rename_with.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "distinct",
+    "surveycore::survey_collection",
+    get("distinct.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "drop_na",
+    "surveycore::survey_collection",
+    get("drop_na.survey_collection", envir = ns),
+    envir = asNamespace("tidyr")
+  )
+
+  registerS3method(
+    "rowwise",
+    "surveycore::survey_collection",
+    get("rowwise.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
   # ── survey_collection: grouping verbs (PR 2c) ──
 
   # ── survey_collection: slice verbs (PR 2d) ──

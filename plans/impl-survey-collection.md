@@ -23,7 +23,7 @@ in parallel after PR 1.
 
 - [x] PR 1: `feature/survey-collection-dispatch` — dispatcher, `.sc_*` wrappers, test helpers (`make_test_collection`, `make_heterogeneous_collection`, `test_collection_invariants`), error-class registry rows for dispatcher-level conditions, dispatcher unit tests
 - [x] PR 2a: `feature/survey-collection-data-mask-verbs` — `filter` / `filter_out` / `mutate` / `arrange` collection methods (`.detect_missing = "pre_check"`), shared `.by` rejection, per-verb test files
-- [ ] PR 2b: `feature/survey-collection-tidyselect-verbs` — `select` / `relocate` / `rename` / `rename_with` / `drop_na` / `distinct` / `rowwise` collection methods (`.detect_missing = "class_catch"`), `select` group-removal pre-flight, `rename`/`rename_with` group-rename pre-flight, per-verb test files
+- [x] PR 2b: `feature/survey-collection-tidyselect-verbs` — `select` / `relocate` / `rename` / `rename_with` / `drop_na` / `distinct` / `rowwise` collection methods (`.detect_missing = "class_catch"`), `select` group-removal pre-flight, `rename`/`rename_with` group-rename pre-flight, per-verb test files
 - [ ] PR 2c: `feature/survey-collection-grouping-verbs` — `group_by` / `ungroup` / `group_vars` / `is_rowwise` collection methods, per-verb test files
 - [ ] PR 2d: `feature/survey-collection-slice-verbs` — `slice` / `slice_head` / `slice_tail` / `slice_min` / `slice_max` / `slice_sample` collection methods, slice-zero pre-flight, `slice_sample` reproducibility, per-verb test files
 - [ ] PR 3: `feature/survey-collection-collapsing` — `pull.survey_collection`, `glimpse.survey_collection` (default + `.by_survey` modes), id-collision pre-flight, type-coercion footer (D7), per-verb test files
@@ -451,9 +451,9 @@ in this order. The TDD cycle below is one full pass per verb.
 - `changelog/phase-0.7/feature-collection-tidyselect-verbs.md` — NEW
 
 **Acceptance criteria:**
-- [ ] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
-- [ ] `devtools::document()` run; NAMESPACE and man/ in sync
-- [ ] Per-verb test files cover every §IX.3 row applicable to tidyselect
+- [x] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
+- [x] `devtools::document()` run; NAMESPACE and man/ in sync
+- [x] Per-verb test files cover every §IX.3 row applicable to tidyselect
       verbs: happy path with dual invariants, `@id`/`@if_missing_var`,
       `.if_missing_var` modes + precedence, empty-result, domain
       preservation, `visible_vars` propagation (select/relocate),
@@ -461,8 +461,8 @@ in this order. The TDD cycle below is one full pass per verb.
       subclass-asymmetric design columns (rename/rename_with/select/
       relocate), per-member warning multiplicity for
       `surveytidy_warning_rename_design_var`
-- [ ] V9 (per-survey distinct, no cross-survey collapse) explicitly tested
-- [ ] `drop_na` test covers happy path with dual invariants,
+- [x] V9 (per-survey distinct, no cross-survey collapse) explicitly tested
+- [x] `drop_na` test covers happy path with dual invariants,
       `@id`/`@if_missing_var` preservation, `.if_missing_var` modes +
       precedence, empty-result, missing-variable detection via
       class-catch on `vctrs_error_subscript_oob`, cross-design via
@@ -472,17 +472,17 @@ in this order. The TDD cycle below is one full pass per verb.
       surviving member after the verb). Domain preservation is
       SKIPPED per spec §IX.3 — `drop_na` legitimately modifies the
       domain column.
-- [ ] `select` group-removal pre-flight raises
+- [x] `select` group-removal pre-flight raises
       `surveytidy_error_collection_select_group_removed` BEFORE any
       member is mutated (snapshot)
-- [ ] `rename`/`rename_with` group-rename pre-flight raises
+- [x] `rename`/`rename_with` group-rename pre-flight raises
       `surveytidy_error_collection_rename_group_partial` BEFORE any
       member is mutated (snapshot)
-- [ ] `relocate` exempt from group-removal pre-flight, with a test
+- [x] `relocate` exempt from group-removal pre-flight, with a test
       asserting it does NOT raise on negative tidyselect of a group
       column (Issue 21)
-- [ ] `covr::package_coverage()` ≥95% on each modified file
-- [ ] All examples include `library(dplyr)` (or `library(tidyr)` for
+- [x] `covr::package_coverage()` ≥95% on each modified file
+- [x] All examples include `library(dplyr)` (or `library(tidyr)` for
       `drop_na`) per CI gotcha
 
 **Tasks:**

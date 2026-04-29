@@ -3,17 +3,25 @@
 \name{rowwise}
 \alias{rowwise}
 \alias{rowwise.survey_base}
+\alias{rowwise.survey_collection}
 \title{Compute row-wise on a survey design object}
 \usage{
 rowwise(data, ...)
 
 \method{rowwise}{survey_base}(data, ...)
+
+\method{rowwise}{survey_collection}(data, ..., .if_missing_var = NULL)
 }
 \arguments{
 \item{data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[tidyselect:language]{tidy-select}}> Optional id columns that
 identify each row (used with \code{\link[dplyr:c_across]{dplyr::c_across()}}). Commonly omitted.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 \code{data} with \verb{@variables$rowwise = TRUE} and
@@ -52,6 +60,20 @@ class is stripped from \verb{@data} after mutation so subsequent operations
 are not accidentally rowwise.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{rowwise()} is dispatched to each
+member independently — every member receives \verb{@variables$rowwise = TRUE}
+and the same \verb{@variables$rowwise_id_cols}. The collection has no rowwise
+marker; rowwise state lives entirely per-member. \verb{@groups}, \verb{@id}, and
+\verb{@if_missing_var} on the collection are unchanged.
+
+Construction-time uniformity is by-construction: every member is rowwise
+after the call. Mixed rowwise state across members is detected later by
+\code{\link[=mutate]{mutate()}} (see §IV.5 of the survey-collection spec) and warned about
+rather than blocked.
+}
+
 \examples{
 library(surveytidy)
 library(surveycore)

@@ -37,6 +37,10 @@ utils::globalVariables("check_fn")
 # Uses ...names() to detect the weight_by argument without evaluating it
 # (weight_by is a tidy-select/NSE argument and evaluating it here would fail).
 .check_slice_sample_weight_by <- function(...) {
+  # Body runs only via the .make_slice_method() closure (passed as `check_fn`);
+  # covr cannot trace closure execution back to source lines. Verified covered
+  # by test-arrange.R "slice_sample() with weight_by = issues additional warning".
+  # nocov start
   if ("weight_by" %in% ...names()) {
     cli::cli_warn(
       c(
@@ -56,6 +60,7 @@ utils::globalVariables("check_fn")
       class = "surveytidy_warning_slice_sample_weight_by"
     )
   }
+  # nocov end
 }
 
 # Factory that produces a slice_*.survey_base function.
@@ -65,6 +70,12 @@ utils::globalVariables("check_fn")
 .make_slice_method <- function(fn_name, dplyr_fn, check_fn = NULL) {
   # force() the closure variables so R CMD check understands they are
   # intentional free variables in the returned function, not typos.
+  # The factory body and its returned closure execute under indirection
+  # (assigned at top-level, then invoked via dplyr's S3 dispatch); covr
+  # cannot trace that execution back to source lines. Verified covered by
+  # every slice_*() test in test-arrange.R (including the n=0 error path
+  # exercised at lines 191–217).
+  # nocov start
   force(fn_name)
   force(dplyr_fn)
   force(check_fn)
@@ -87,6 +98,7 @@ utils::globalVariables("check_fn")
     .data@data <- new_data
     .data
   }
+  # nocov end
 }
 
 #' Physically select rows of a survey design object
