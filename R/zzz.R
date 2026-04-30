@@ -502,4 +502,48 @@
     get("glimpse.survey_collection", envir = ns),
     envir = asNamespace("dplyr")
   )
+
+  # ── survey_collection: join error stubs (PR 4) ──
+
+  registerS3method(
+    "left_join",
+    "surveycore::survey_collection",
+    get("left_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "right_join",
+    "surveycore::survey_collection",
+    get("right_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "inner_join",
+    "surveycore::survey_collection",
+    get("inner_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "full_join",
+    "surveycore::survey_collection",
+    get("full_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "semi_join",
+    "surveycore::survey_collection",
+    get("semi_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
+
+  registerS3method(
+    "anti_join",
+    "surveycore::survey_collection",
+    get("anti_join.survey_collection", envir = ns),
+    envir = asNamespace("dplyr")
+  )
 }

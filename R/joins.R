@@ -1151,3 +1151,132 @@ bind_rows <- function(x, ..., .id = NULL) {
 bind_rows.survey_base <- function(x, ..., .id = NULL) {
   bind_rows(x, ..., .id = .id)
 }
+
+
+# ── survey_collection: unsupported join verbs (PR 4) ──────────────────────────
+
+# Shared internal helper for all 6 *_join.survey_collection error stubs.
+# All join semantics on a survey_collection are unsupported — the contract for
+# how a join should compose with a multi-survey container (apply per member?
+# broadcast across all? error if y has rows that match no member?) is not yet
+# resolved. Error early and direct users to apply the join inside a per-survey
+# pipeline before constructing the collection.
+.collection_join_unsupported <- function(verb_name) {
+  cli::cli_abort(
+    c(
+      "x" = "{.fn {verb_name}} on a {.cls survey_collection} is not supported.",
+      "i" = paste0(
+        "The semantics (apply to each survey? broadcast across all?) are ",
+        "still being designed."
+      ),
+      "v" = paste0(
+        "Apply the join inside a per-survey pipeline before constructing ",
+        "the collection."
+      )
+    ),
+    class = "surveytidy_error_collection_verb_unsupported",
+    call = rlang::caller_env()
+  )
+}
+
+#' @rdname left_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `left_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method left_join survey_collection
+left_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("left_join")
+}
+
+#' @rdname right_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `right_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method right_join survey_collection
+right_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("right_join")
+}
+
+#' @rdname inner_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `inner_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method inner_join survey_collection
+inner_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("inner_join")
+}
+
+#' @rdname right_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `full_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method full_join survey_collection
+full_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("full_join")
+}
+
+#' @rdname semi_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `semi_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method semi_join survey_collection
+semi_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("semi_join")
+}
+
+#' @rdname semi_join
+#'
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When called on a [`surveycore::survey_collection`], `anti_join()` errors
+#' unconditionally with class
+#' `surveytidy_error_collection_verb_unsupported`. The semantics for joining
+#' a plain data frame onto a multi-survey container are still being designed.
+#' Apply the join inside a per-survey pipeline before constructing the
+#' collection.
+#'
+#' @method anti_join survey_collection
+anti_join.survey_collection <- function(x, y, ..., .if_missing_var = NULL) {
+  .collection_join_unsupported("anti_join")
+}

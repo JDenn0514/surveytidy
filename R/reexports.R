@@ -125,3 +125,24 @@ dplyr::full_join
 #' @rdname drop_na
 #' @export
 tidyr::drop_na
+
+# ── surveycore: collection construction and setters ───────────────────────────
+#
+# Re-exported so library(surveytidy) alone is sufficient to construct and
+# modify a survey_collection. surveycore's implementations remain the source
+# of truth for property validation; no thin wrappers here. (Spec §VI.)
+
+#' @export
+surveycore::as_survey_collection
+
+#' @export
+surveycore::set_collection_id
+
+#' @export
+surveycore::set_collection_if_missing_var
+
+#' @export
+surveycore::add_survey
+
+#' @export
+surveycore::remove_survey

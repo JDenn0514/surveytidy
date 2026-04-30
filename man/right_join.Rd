@@ -3,8 +3,14 @@
 \name{right_join}
 \alias{right_join}
 \alias{full_join}
+\alias{right_join.survey_collection}
+\alias{full_join.survey_collection}
 \title{Unsupported joins for survey designs}
 \usage{
+\method{right_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
+\method{full_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
 right_join(
   x,
   y,
@@ -30,13 +36,18 @@ full_join(
 
 \item{y}{A data frame or survey object.}
 
+\item{...}{Additional arguments (ignored; the function always errors).}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
+
 \item{by}{Ignored — the function always errors.}
 
 \item{copy}{Ignored — the function always errors.}
 
 \item{suffix}{Ignored — the function always errors.}
-
-\item{...}{Additional arguments (ignored; the function always errors).}
 
 \item{keep}{Ignored — the function always errors.}
 }
@@ -53,6 +64,24 @@ PSU), producing an invalid design object.
 Use \code{\link[=left_join]{left_join()}} to add lookup columns from \code{y}. Use \code{\link[=filter]{filter()}} or
 \code{\link[=semi_join]{semi_join()}} to restrict the survey domain.
 }
+\section{Survey collections}{
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{right_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{full_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+}
+
 \examples{
 # create a tiny survey object and a lookup table with an extra row
 d <- surveycore::as_survey(

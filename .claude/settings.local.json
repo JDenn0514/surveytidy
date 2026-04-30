@@ -75,7 +75,12 @@
       "Read(//private/tmp/**)",
       "Read(//tmp/**)",
       "Bash(awk '/@examples/,/^[^#'\\\\'']/' /Users/jacobdennen/surveytidy/R/rowwise.R)",
-      "Bash(awk '/@examples/,/^#'\\\\'' @family/' /Users/jacobdennen/surveytidy/R/rowstats.R)"
+      "Bash(awk '/@examples/,/^#'\\\\'' @family/' /Users/jacobdennen/surveytidy/R/rowstats.R)",
+      "Bash(awk NR>=820 && NR<=971 *)",
+      "Bash(awk NR>=723 && NR<=815 *)",
+      "Bash(awk NR>=156 && NR<=369 *)",
+      "Bash(awk NR>=40 && NR<=60 *)",
+      "Bash(awk NR>=189 && NR<=235 *)"
     ]
   }
 }

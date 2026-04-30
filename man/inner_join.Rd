@@ -2,8 +2,11 @@
 % Please edit documentation in R/joins.R, R/reexports.R
 \name{inner_join}
 \alias{inner_join}
+\alias{inner_join.survey_collection}
 \title{Domain-aware inner join for survey designs}
 \usage{
+\method{inner_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
 inner_join(
   x,
   y,
@@ -19,6 +22,13 @@ inner_join(
 
 \item{y}{A plain data frame. Must not be a survey object.}
 
+\item{...}{Additional arguments forwarded to the underlying dplyr function.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
+
 \item{by}{A character vector of column names or a \code{\link[dplyr:join_by]{dplyr::join_by()}}
 specification. \code{NULL} uses all common column names.}
 
@@ -26,8 +36,6 @@ specification. \code{NULL} uses all common column names.}
 
 \item{suffix}{A character vector of length 2. Forwarded to the underlying
 dplyr function for handling shared column names.}
-
-\item{...}{Additional arguments forwarded to the underlying dplyr function.}
 
 \item{keep}{Forwarded to the underlying dplyr function.}
 }
@@ -81,6 +89,16 @@ The surveytidy method adds one argument not present in the dplyr generic:
 \code{surveycore_warning_physical_subset}; errors for \code{survey_twophase}).
 }
 }
+\section{Survey collections}{
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{inner_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+}
+
 \examples{
 # create a small survey object
 df <- data.frame(

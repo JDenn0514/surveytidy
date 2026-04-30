@@ -3,8 +3,14 @@
 \name{semi_join}
 \alias{semi_join}
 \alias{anti_join}
+\alias{semi_join.survey_collection}
+\alias{anti_join.survey_collection}
 \title{Domain-aware semi- and anti-join for survey designs}
 \usage{
+\method{semi_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
+\method{anti_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
 semi_join(x, y, by = NULL, copy = FALSE, ...)
 
 anti_join(x, y, by = NULL, copy = FALSE, ...)
@@ -14,12 +20,17 @@ anti_join(x, y, by = NULL, copy = FALSE, ...)
 
 \item{y}{A plain data frame. Must not be a survey object.}
 
+\item{...}{Additional arguments forwarded to the underlying dplyr function.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
+
 \item{by}{A character vector of column names or a \code{\link[dplyr:join_by]{dplyr::join_by()}}
 specification. \code{NULL} uses all common column names.}
 
 \item{copy}{Forwarded to the underlying dplyr function.}
-
-\item{...}{Additional arguments forwarded to the underlying dplyr function.}
 }
 \value{
 A survey design object of the same type as \code{x} with the domain column
@@ -62,6 +73,24 @@ A typed S3 sentinel of class \code{"surveytidy_join_domain"} is appended to
 from quosures.
 }
 }
+\section{Survey collections}{
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{semi_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{anti_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+}
+
 \examples{
 # create a small survey object
 df <- data.frame(
