@@ -27,7 +27,7 @@ in parallel after PR 1.
 - [x] PR 2c: `feature/survey-collection-grouping-verbs` — `group_by` / `ungroup` / `group_vars` / `is_rowwise` collection methods, per-verb test files
 - [x] PR 2d: `feature/survey-collection-slice-verbs` — `slice` / `slice_head` / `slice_tail` / `slice_min` / `slice_max` / `slice_sample` collection methods, slice-zero pre-flight, `slice_sample` reproducibility, per-verb test files
 - [x] PR 3: `feature/survey-collection-collapsing` — `pull.survey_collection`, `glimpse.survey_collection` (default + `.by_survey` modes), id-collision pre-flight, type-coercion footer (D7), per-verb test files
-- [ ] PR 4: `feature/survey-collection-joins-and-reexports` — `*_join.survey_collection` error stubs (V8), surveycore setter re-exports, NEWS block, DESCRIPTION pin bumps, final QA
+- [x] PR 4: `feature/survey-collection-joins-and-reexports` — `*_join.survey_collection` error stubs (V8), surveycore setter re-exports, NEWS block, DESCRIPTION pin bumps, final QA
 
 ---
 
@@ -1134,27 +1134,27 @@ pre-allocated by PR 1.
   NEW
 
 **Acceptance criteria:**
-- [ ] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
-- [ ] `devtools::document()` run; NAMESPACE and man/ in sync
-- [ ] `*_join.survey_collection` for all 6 join verbs raises
+- [x] `devtools::check()` 0 errors, 0 warnings, ≤2 pre-approved notes
+- [x] `devtools::document()` run; NAMESPACE and man/ in sync
+- [x] `*_join.survey_collection` for all 6 join verbs raises
       `surveytidy_error_collection_verb_unsupported` with the verb
       name interpolated; snapshot per verb
-- [ ] All 5 surveycore re-exports load via
+- [x] All 5 surveycore re-exports load via
       `library(surveytidy)` alone (no `library(surveycore)`)
-- [ ] `print.survey_collection` rendering still discoverable for
+- [x] `print.survey_collection` rendering still discoverable for
       `@id` / `@if_missing_var` / `@groups` after a verb pipeline,
       snapshotted via `expect_snapshot(print(coll))` in the
       cross-verb pipeline test
-- [ ] Cross-verb integration test: pipe through 4–5 verbs from
+- [x] Cross-verb integration test: pipe through 4–5 verbs from
       different families (e.g., `coll |> filter(...) |> select(...)
       |> group_by(...) |> mutate(...)`) and assert the result is a
       well-formed `survey_collection` via dual invariants
-- [ ] `NEWS.md` `## (development version)` section has a `###
+- [x] `NEWS.md` `## (development version)` section has a `###
       survey_collection support` block listing every new method, the
       `.if_missing_var` arg, and the new error/warning/message
       classes
-- [ ] DESCRIPTION pin matches §X gate
-- [ ] `covr::package_coverage()` ≥95% on the new files
+- [x] DESCRIPTION pin matches §X gate
+- [x] `covr::package_coverage()` ≥95% on the new files
 
 **Tasks:**
 

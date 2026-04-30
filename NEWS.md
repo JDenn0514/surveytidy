@@ -1,3 +1,68 @@
+# surveytidy (development version)
+
+## New features
+
+### survey_collection support
+
+Collection-aware methods for all standard dplyr/tidyr verbs are now
+dispatched per-survey when called on a `survey_collection`. The result
+is a new `survey_collection` whose `@id`, `@if_missing_var`, and
+`@groups` properties are preserved.
+
+- Data-masking verbs: `filter()`, `filter_out()`, `mutate()`, `arrange()`
+- Tidyselect verbs: `select()`, `relocate()`, `rename()`, `rename_with()`,
+  `drop_na()`, `distinct()`, `rowwise()`
+- Grouping verbs: `group_by()`, `ungroup()`, `group_vars()`, `is_rowwise()`
+- Slicing verbs: `slice()`, `slice_head()`, `slice_tail()`, `slice_min()`,
+  `slice_max()`, `slice_sample()`
+- Collapsing verbs: `pull()` (returns a vector via `vctrs::vec_c()`),
+  `glimpse()` (default mode binds members; `.by_survey = TRUE` per-member)
+
+The `.if_missing_var` argument on each verb (`"error"` (default) or
+`"skip"`) lets you override the collection's stored missing-variable
+behaviour for a single call. Skipped surveys are reported via the typed
+message class `surveytidy_message_collection_skipped_surveys`.
+
+The 6 join verbs (`left_join()`, `right_join()`, `inner_join()`,
+`full_join()`, `semi_join()`, `anti_join()`) error with
+`surveytidy_error_collection_verb_unsupported` when called on a
+`survey_collection`. Apply joins inside a per-survey pipeline before
+constructing the collection.
+
+### surveycore re-exports
+
+`library(surveytidy)` is now sufficient to use the collection
+construction and setter API. The following surveycore symbols are
+re-exported:
+
+- `as_survey_collection()`
+- `set_collection_id()`
+- `set_collection_if_missing_var()`
+- `add_survey()`
+- `remove_survey()`
+
+## New error / warning / message classes
+
+- `surveytidy_error_collection_verb_emptied`
+- `surveytidy_error_collection_verb_failed`
+- `surveytidy_error_collection_by_unsupported`
+- `surveytidy_error_collection_select_group_removed`
+- `surveytidy_error_collection_rename_group_partial`
+- `surveytidy_error_collection_slice_zero`
+- `surveytidy_error_collection_pull_incompatible_types`
+- `surveytidy_error_collection_glimpse_id_collision`
+- `surveytidy_error_collection_verb_unsupported`
+- `surveytidy_warning_collection_rowwise_mixed`
+- `surveytidy_message_collection_skipped_surveys`
+
+## Dependency changes
+
+- Adds `vctrs (>= 0.6.0)` to `Imports` (used by `pull.survey_collection`
+  and `glimpse.survey_collection`).
+- Bumps `surveycore` minimum-version pin to `(>= 0.8.2)`.
+
+---
+
 # surveytidy 0.5.0
 
 ## New features

@@ -12,6 +12,11 @@
 \alias{slice_min}
 \alias{slice_max}
 \alias{slice_sample}
+\alias{as_survey_collection}
+\alias{set_collection_id}
+\alias{set_collection_if_missing_var}
+\alias{add_survey}
+\alias{remove_survey}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -20,5 +25,7 @@ below to see their documentation.
 
 \describe{
   \item{dplyr}{\code{\link[dplyr:filter]{filter_out}}, \code{\link[dplyr:group_data]{group_vars}}, \code{\link[dplyr:rename]{rename_with}}, \code{\link[dplyr:slice]{slice_head}}, \code{\link[dplyr:slice]{slice_max}}, \code{\link[dplyr:slice]{slice_min}}, \code{\link[dplyr:slice]{slice_sample}}, \code{\link[dplyr:slice]{slice_tail}}, \code{\link[dplyr:group_by]{ungroup}}}
+
+  \item{surveycore}{\code{\link[surveycore]{add_survey}}, \code{\link[surveycore]{as_survey_collection}}, \code{\link[surveycore]{remove_survey}}, \code{\link[surveycore]{set_collection_id}}, \code{\link[surveycore]{set_collection_if_missing_var}}}
 }}
 

@@ -2,8 +2,11 @@
 % Please edit documentation in R/joins.R, R/reexports.R
 \name{left_join}
 \alias{left_join}
+\alias{left_join.survey_collection}
 \title{Add columns from a data frame to a survey design}
 \usage{
+\method{left_join}{survey_collection}(x, y, ..., .if_missing_var = NULL)
+
 left_join(
   x,
   y,
@@ -21,6 +24,13 @@ left_join(
 object. Must not have column names matching any design variable in \code{x}
 (those are dropped with a warning).}
 
+\item{...}{Additional arguments forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
+
 \item{by}{A character vector of column names or a \code{\link[dplyr:join_by]{dplyr::join_by()}}
 specification. \code{NULL} uses all common column names.}
 
@@ -28,8 +38,6 @@ specification. \code{NULL} uses all common column names.}
 
 \item{suffix}{A character vector of length 2 appended to deduplicate column
 names shared between \code{x} and \code{y}. Forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
-
-\item{...}{Additional arguments forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
 
 \item{keep}{Forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
 }
@@ -68,6 +76,16 @@ same name, the corresponding \verb{@metadata@variable_labels} key is updated to
 the new suffixed name.
 }
 }
+\section{Survey collections}{
+
+When called on a \code{\link[surveycore:survey_collection]{surveycore::survey_collection}}, \code{left_join()} errors
+unconditionally with class
+\code{surveytidy_error_collection_verb_unsupported}. The semantics for joining
+a plain data frame onto a multi-survey container are still being designed.
+Apply the join inside a per-survey pipeline before constructing the
+collection.
+}
+
 \examples{
 # create a small survey object
 df <- data.frame(
