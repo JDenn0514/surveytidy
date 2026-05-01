@@ -306,8 +306,9 @@ pull.survey_collection <- function(
 #' @method glimpse survey_collection
 #'
 #' @param .by_survey If `TRUE`, render a separate labelled glimpse block per
-#'   member (`▸ <member_name>`). Default `FALSE` renders a single bound tibble
-#'   with the source survey id prepended as `coll@id` (default `.survey`).
+#'   member, prefixed by the member name. Default `FALSE` renders a single
+#'   bound tibble with the source survey id prepended as `coll@id` (default
+#'   `.survey`).
 #'
 #' @section Survey collections:
 #' Default mode binds every member's `@data` into a single tibble (via

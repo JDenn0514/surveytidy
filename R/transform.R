@@ -655,7 +655,7 @@ make_binary <- function(
 #' @return A numeric vector (same `typeof()` as `x`) with reversed values.
 #'
 #' @examples
-#' # reverse a 1–4 numeric scale: 1↔4 and 2↔3
+#' # reverse a 1-4 numeric scale: 1 swaps with 4, 2 swaps with 3
 #' x <- c(1, 2, 3, 4)
 #' make_rev(x)
 #'

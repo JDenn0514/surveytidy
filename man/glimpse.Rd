@@ -21,8 +21,9 @@ glimpse(x, width = NULL, ...)
 \item{...}{Passed to \code{dplyr::glimpse()}.}
 
 \item{.by_survey}{If \code{TRUE}, render a separate labelled glimpse block per
-member (\verb{▸ <member_name>}). Default \code{FALSE} renders a single bound tibble
-with the source survey id prepended as \code{coll@id} (default \code{.survey}).}
+member, prefixed by the member name. Default \code{FALSE} renders a single
+bound tibble with the source survey id prepended as \code{coll@id} (default
+\code{.survey}).}
 }
 \value{
 \code{x} invisibly.
