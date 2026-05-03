@@ -138,7 +138,8 @@ replace_when <- function(
 
   merged_labels <- .merge_value_labels(
     attr(x, "labels", exact = TRUE),
-    .value_labels
+    .value_labels,
+    result_values = unique(result)
   )
   effective_label <- if (!is.null(.label)) {
     .label

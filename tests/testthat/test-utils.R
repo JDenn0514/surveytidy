@@ -115,6 +115,39 @@ test_that(".merge_value_labels() merges base + override; override wins on shared
   expect_true(all(c("Yes", "No", "Missing") %in% names(merged)))
 })
 
+# ── .merge_value_labels() with result_values ─────────────────────────────────
+# Tests for the result_values parameter that prunes stale base label entries
+# before merging. Four branches: NULL default, prune stale, keep present, empty.
+
+test_that(".merge_value_labels() result_values = NULL default skips pruning", {
+  base <- c("Low" = 1L, "Medium" = 2L, "High" = 3L, "Extra" = 4L)
+  # Extra = 4L is not in result_values, but result_values = NULL means no pruning
+  result <- .merge_value_labels(base, NULL, result_values = NULL)
+  expect_true("Extra" %in% names(result))
+  expect_identical(result, base)
+})
+
+test_that(".merge_value_labels() result_values prunes stale base entry", {
+  base <- c("Low" = 1L, "Medium" = 2L, "High" = 3L, "Extra" = 4L)
+  result <- .merge_value_labels(base, NULL, result_values = c(1L, 2L, 3L))
+  expect_false("Extra" %in% names(result))
+  expect_true(all(c("Low", "Medium", "High") %in% names(result)))
+})
+
+test_that(".merge_value_labels() result_values keeps base entries still in result", {
+  base <- c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+  result <- .merge_value_labels(base, NULL, result_values = c(1L, 2L, 3L, 4L))
+  expect_true(all(c("Low", "Med-Low", "Med-High", "High") %in% names(result)))
+})
+
+test_that(".merge_value_labels() result_values pruning to empty returns NULL", {
+  # Base labels only for values 3 and 4; result_values only has 1 and 2 — no overlap.
+  # All base labels pruned, no override labels → should return NULL.
+  base <- c("Three" = 3L, "Four" = 4L)
+  result <- .merge_value_labels(base, NULL, result_values = c(1L, 2L))
+  expect_null(result)
+})
+
 # ── .apply_result_rename_map() ──────────────────────────────────────────────
 # Direct unit tests for branches that the public rename.survey_result and
 # rename_with.survey_result paths cannot reach because their rename maps are
