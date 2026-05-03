@@ -41,6 +41,13 @@ re-exported:
 - `add_survey()`
 - `remove_survey()`
 
+## Bug fixes
+
+* `replace_when()` and `replace_values()` no longer retain stale value labels
+  for values absent from the recoded result. Previously, collapsing or replacing
+  values left label entries (e.g. `"High" = 4`) attached to a vector that
+  contained no such values. User-supplied `.value_labels` are always preserved.
+
 ## New error / warning / message classes
 
 - `surveytidy_error_collection_verb_emptied`
