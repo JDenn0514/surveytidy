@@ -1,4 +1,4 @@
-# surveytidy (development version)
+# surveytidy 0.6.0
 
 ## New features
 

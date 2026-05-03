@@ -1,6 +1,6 @@
 Package: surveytidy
 Title: Tidy 'dplyr'/'tidyr' Verbs for Survey Design Objects
-Version: 0.5.0.9000
+Version: 0.6.0
 Authors@R:
     person(
         "Jacob", "Dennen",
@@ -8,11 +8,12 @@ Authors@R:
         role = c("aut", "cre", "cph"),
         comment = c(ORCID = "0000-0003-3006-7364")
     )
-Description: Provides 'dplyr' and 'tidyr' verbs (filter, select, mutate,
-    rename, group_by, arrange, slice_*, drop_na) for survey design objects
-    created with the 'surveycore' package. filter() uses domain estimation to
-    preserve variance estimation validity; all other verbs preserve design
-    variables and metadata automatically.
+Description: Provides 'dplyr' and 'tidyr' verbs, survey-aware recoding
+    helpers, and row-wise statistics for survey design objects created with
+    the 'surveycore' package. filter() uses domain estimation to preserve
+    variance estimation validity; other verbs preserve design variables and
+    metadata automatically. Also supports 'survey_collection' objects for
+    applying the same operation across a list of surveys.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
