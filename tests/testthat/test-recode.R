@@ -319,8 +319,11 @@ test_that("replace_when() .value_labels merges with x labels [all designs]", {
     )
     test_invariants(result)
     vl <- result@metadata@value_labels$y3_r
+    # "No" = 0L is preserved (0 still appears in result)
     expect_true("No" %in% names(vl))
-    expect_true("Yes" %in% names(vl))
+    # "Yes" = 1L is pruned because value 1 no longer appears after the recode
+    expect_false("Yes" %in% names(vl))
+    # User-supplied "Maybe" = 2L is present (the new value)
     expect_true("Maybe" %in% names(vl))
   }
 })
@@ -339,6 +342,88 @@ test_that("replace_when() error: .value_labels unnamed -> surveytidy_error_recod
     mutate(d, y3_r = replace_when(y3, y3 == 1L ~ 2L, .value_labels = c(2L))),
     class = "surveytidy_error_recode_value_labels_unnamed"
   )
+})
+
+# ── 4b. replace_when() stale value label pruning ─────────────────────────────
+
+test_that("replace_when() preserves all inherited labels when no value is eliminated [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Winsorize values above 90 — no value is eliminated from the 1-4 range
+    result <- replace_when(x, x > 90 ~ 90L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_true(all(c("Low", "Med-Low", "Med-High", "High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() drops inherited labels for values no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3 so value 4 no longer appears
+    result <- replace_when(x, x == 4L ~ 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() preserves .value_labels entries even when value absent from result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3; user explicitly supplies a label for 4 in .value_labels
+    result <- replace_when(
+      x,
+      x == 4L ~ 3L,
+      .value_labels = c("Something else" = 4L)
+    )
+    vl <- attr(result, "labels", exact = TRUE)
+    # User-supplied label for 4 must survive even though 4 is gone from result
+    expect_true("Something else" %in% names(vl))
+  }
+})
+
+test_that("replace_when() auto-prunes stale labels with no .value_labels supplied [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3, no .value_labels
+    result <- replace_when(x, x == 4L ~ 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() prunes inherited NA-value label when NA no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    # Build a labelled vector that includes NA as a labelled value
+    vals <- as.integer(round(d@data$y1 %% 3)) + 1L
+    vals[1L] <- NA_integer_
+    x <- haven::labelled(
+      vals,
+      labels = c("Low" = 1L, "Mid" = 2L, "High" = 3L, "Missing" = NA_integer_)
+    )
+    # Replace NA with 0 so NA no longer appears in result
+    result <- replace_when(x, is.na(x) ~ 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("Missing" %in% names(vl))
+  }
 })
 
 # ── 5. if_else() ──────────────────────────────────────────────────────────────
@@ -757,6 +842,89 @@ test_that("replace_values() error: .value_labels unnamed -> surveytidy_error_rec
     ),
     class = "surveytidy_error_recode_value_labels_unnamed"
   )
+})
+
+# ── 8b. replace_values() stale value label pruning ───────────────────────────
+
+test_that("replace_values() preserves all inherited labels when no value is eliminated [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Replace value 99 (absent) with 0 — no existing value is eliminated
+    result <- replace_values(x, from = 99L, to = 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_true(all(c("Low", "Med-Low", "Med-High", "High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() drops inherited labels for values no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3 so value 4 no longer appears
+    result <- replace_values(x, from = 4L, to = 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() preserves .value_labels entries even when value absent from result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3; user explicitly supplies a label for 4 in .value_labels
+    result <- replace_values(
+      x,
+      from = 4L,
+      to = 3L,
+      .value_labels = c("Something else" = 4L)
+    )
+    vl <- attr(result, "labels", exact = TRUE)
+    # User-supplied label for 4 must survive even though 4 is gone from result
+    expect_true("Something else" %in% names(vl))
+  }
+})
+
+test_that("replace_values() auto-prunes stale labels with no .value_labels supplied [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3, no .value_labels
+    result <- replace_values(x, from = 4L, to = 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() prunes inherited NA-value label when NA no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    # Build a labelled vector that includes NA as a labelled value
+    vals <- as.integer(round(d@data$y1 %% 3)) + 1L
+    vals[1L] <- NA_integer_
+    x <- haven::labelled(
+      vals,
+      labels = c("Low" = 1L, "Mid" = 2L, "High" = 3L, "Missing" = NA_integer_)
+    )
+    # Replace NA with 0 so NA no longer appears in result
+    result <- replace_values(x, from = NA_integer_, to = 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("Missing" %in% names(vl))
+  }
 })
 
 # ── 9. Domain preservation ────────────────────────────────────────────────────

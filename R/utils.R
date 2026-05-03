@@ -360,7 +360,21 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # (e.g. base has "Independent" = 3 and override adds "Independent/Other" = 3),
 # the later (override) entry wins and the earlier (base) entry is dropped.
 # Returns NULL when both inputs are NULL.
-.merge_value_labels <- function(base_labels, override_labels) {
+#
+# result_values: optional vector of values that appear in the recoded result.
+#   When non-NULL, base_labels entries whose value does NOT appear in
+#   result_values are pruned before the merge. override_labels is never
+#   pruned — user-supplied entries survive even if the value is absent.
+#   Default NULL means no pruning (backward-compatible).
+.merge_value_labels <- function(base_labels, override_labels,
+                                result_values = NULL) {
+  # Prune stale base entries before any other logic. override_labels is never
+  # touched here — user-supplied labels survive even for absent values.
+  if (!is.null(base_labels) && !is.null(result_values)) {
+    base_labels <- base_labels[unname(base_labels) %in% result_values]
+    if (length(base_labels) == 0L) base_labels <- NULL
+  }
+
   if (is.null(base_labels) && is.null(override_labels)) {
     return(NULL)
   }
