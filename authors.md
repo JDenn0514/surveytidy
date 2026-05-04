@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/JDenn0514/surveytidy/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/JDenn0514/surveytidy/blob/v0.6.0/DESCRIPTION)
 
 Dennen J (2026). *surveytidy: Tidy 'dplyr'/'tidyr' Verbs for Survey
 Design Objects*. R package version 0.6.0,
