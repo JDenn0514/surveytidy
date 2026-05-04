@@ -34,9 +34,16 @@ When called inside \code{\link[=mutate]{mutate()}}, metadata is recorded in
 \verb{@metadata@transformations[[col]]}.
 }
 \examples{
+# build a labelled numeric vector with a 4-level Likert scale
 x <- c(1, 2, 3, 4)
-attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-                        "Disagree" = 3, "Strongly disagree" = 4)
+attr(x, "labels") <- c(
+  "Strongly agree" = 1,
+  "Agree" = 2,
+  "Disagree" = 3,
+  "Strongly disagree" = 4
+)
+
+# flip the semantic meaning while keeping numeric values unchanged
 make_flip(x, "I dislike the color blue")
 
 }
@@ -45,6 +52,8 @@ Other transformation:
 \code{\link{make_binary}()},
 \code{\link{make_dicho}()},
 \code{\link{make_factor}()},
-\code{\link{make_rev}()}
+\code{\link{make_rev}()},
+\code{\link{row_means}()},
+\code{\link{row_sums}()}
 }
 \concept{transformation}

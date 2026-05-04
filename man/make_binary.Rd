@@ -40,9 +40,13 @@ When called inside \code{\link[=mutate]{mutate()}}, metadata is recorded in
 \verb{@metadata@transformations[[col]]}.
 }
 \examples{
-library(dplyr)
-x <- factor(c("Agree", "Disagree", "Agree", NA),
-            levels = c("Agree", "Disagree"))
+# build a 2-level factor with one NA
+x <- factor(
+  c("Agree", "Disagree", "Agree", NA),
+  levels = c("Agree", "Disagree")
+)
+
+# encode as a 0/1 integer indicator
 make_binary(x)
 
 }
@@ -51,6 +55,8 @@ Other transformation:
 \code{\link{make_dicho}()},
 \code{\link{make_factor}()},
 \code{\link{make_flip}()},
-\code{\link{make_rev}()}
+\code{\link{make_rev}()},
+\code{\link{row_means}()},
+\code{\link{row_sums}()}
 }
 \concept{transformation}

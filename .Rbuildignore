@@ -18,3 +18,5 @@
 ^pkgdown$
 ^data-raw$
 ^surveytidy\.png$
+^cran-comments\.md$
+^\.covrignore$

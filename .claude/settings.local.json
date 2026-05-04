@@ -60,7 +60,27 @@
       "Bash(do:*)",
       "Bash(mkdir:*)",
       "Bash(mv:*)",
-      "WebFetch(domain:tidyverse.org)"
+      "WebFetch(domain:tidyverse.org)",
+      "Bash(R --vanilla --quiet -e 'packageVersion\\(\"dplyr\"\\); formals\\(dplyr::recode_values\\); formals\\(dplyr::replace_values\\); formals\\(dplyr::replace_when\\); formals\\(dplyr::case_when\\); formals\\(dplyr::if_else\\); formals\\(dplyr::na_if\\); formals\\(dplyr::coalesce\\)')",
+      "Bash(R --vanilla --quiet -e ' *)",
+      "Bash(awk '/^### PR 2a/,/^### PR 2b/' /Users/jacobdennen/surveytidy/plans/impl-survey-collection.md)",
+      "Bash(awk '/^### PR 2b/,/^### PR 2c/' /Users/jacobdennen/surveytidy/plans/impl-survey-collection.md)",
+      "Bash(NOT_CRAN=true Rscript -e 'devtools::load_all\\(quiet = TRUE\\); testthat::test_file\\(\"tests/testthat/test-collection-dispatch.R\", reporter = \"summary\"\\)')",
+      "Bash(NOT_CRAN=true Rscript -e 'devtools::test\\(reporter = \"summary\"\\)')",
+      "Bash(NOT_CRAN=true Rscript -e 'devtools::test\\(reporter = \"minimal\"\\)')",
+      "Bash(/opt/homebrew/bin/rg *)",
+      "Read(//usr/local/bin/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(NOT_CRAN=true Rscript -e 'suppressMessages\\({library\\(covr\\); library\\(testthat\\)}\\); cov <- file_coverage\\(\"R/joins.R\", \"tests/testthat/test-joins.R\"\\); cat\\(sprintf\\(\"R/joins.R: %.1f%%\\\\n\", percent_coverage\\(cov\\)\\)\\); zc <- zero_coverage\\(cov\\); print\\(colnames\\(zc\\)\\); cat\\(\"rows:\", nrow\\(zc\\), \"\\\\n\"\\); if \\(nrow\\(zc\\) > 0\\) print\\(zc\\)')",
+      "Read(//private/tmp/**)",
+      "Read(//tmp/**)",
+      "Bash(awk '/@examples/,/^[^#'\\\\'']/' /Users/jacobdennen/surveytidy/R/rowwise.R)",
+      "Bash(awk '/@examples/,/^#'\\\\'' @family/' /Users/jacobdennen/surveytidy/R/rowstats.R)",
+      "Bash(awk NR>=820 && NR<=971 *)",
+      "Bash(awk NR>=723 && NR<=815 *)",
+      "Bash(awk NR>=156 && NR<=369 *)",
+      "Bash(awk NR>=40 && NR<=60 *)",
+      "Bash(awk NR>=189 && NR<=235 *)"
     ]
   }
 }

@@ -91,22 +91,26 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Keep adults 50 and older
+#' # keep adults 50 and older
 #' filter(d, agecat >= 3)
 #'
-#' # Multiple conditions are AND-ed together
+#' # multiple conditions are AND-ed together
 #' filter(d, agecat >= 3, gender == 2)
 #'
 #' # filter_out() excludes matching rows — complement of filter()
 #' filter_out(d, agecat == 1)
 #'
-#' # Chained calls accumulate (these are equivalent)
+#' # chained calls accumulate (these are equivalent)
 #' filter(d, agecat >= 3, gender == 2)
-#' filter(d, agecat >= 3) |> filter(gender == 2)
+#' d |>
+#'   filter(agecat >= 3) |>
+#'   filter(gender == 2)
 #'
-#' # Multi-column conditions with if_any() and if_all()
+#' # multi-column conditions with if_any() and if_all()
 #' filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #' filter(d, dplyr::if_all(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #'
@@ -188,6 +192,51 @@ filter.survey_result <- function(.data, ...) {
   NextMethod() |> .restore_survey_result(old_class, old_meta)
 }
 
+#' @rdname filter
+#' @method filter survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `filter()` is dispatched to each
+#' member independently. Each member's domain column is updated per
+#' `filter.survey_base`'s contract; the per-member empty-domain warning
+#' (`surveycore_warning_empty_domain`) fires N times on an N-member collection
+#' if every member's filter is empty. The output `survey_collection` preserves
+#' the input's `@id`, `@if_missing_var`, and `@groups`. Use `.if_missing_var`
+#' to override the collection's stored missing-variable behavior for this call.
+#'
+#' `.by` is rejected at the collection layer with
+#' `surveytidy_error_collection_by_unsupported`. Set grouping with
+#' [group_by()] on the collection instead.
+filter.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .preserve = FALSE,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+  .dispatch_verb_over_collection(
+    fn = dplyr::filter,
+    verb_name = "filter",
+    collection = .data,
+    ...,
+    .preserve = .preserve,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
+}
+
 
 # ── filter_out() ─────────────────────────────────────────────────────────────
 
@@ -249,6 +298,38 @@ filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
   .data
 }
 
+#' @rdname filter
+#' @method filter_out survey_collection
+#' @inheritParams survey_collection_args
+filter_out.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .preserve = FALSE,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+  .dispatch_verb_over_collection(
+    fn = filter_out,
+    verb_name = "filter_out",
+    collection = .data,
+    ...,
+    .preserve = .preserve,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
+}
+
 
 # ── subset() ─────────────────────────────────────────────────────────────────
 
@@ -281,9 +362,11 @@ filter_out.survey_base <- function(.data, ..., .by = NULL, .preserve = FALSE) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Physical row removal — always issues a warning
+#' # physical row removal — always issues a warning
 #' subset(d, agecat >= 3)
 #'
 #' @seealso [filter()] for domain-aware row marking (preferred for

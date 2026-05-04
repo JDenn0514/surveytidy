@@ -54,18 +54,20 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Sort by age category ascending
+#' # sort by age category ascending
 #' arrange(d, agecat)
 #'
-#' # Sort by age category descending
+#' # sort by age category descending
 #' arrange(d, dplyr::desc(agecat))
 #'
-#' # Sort by multiple variables
+#' # sort by multiple variables
 #' arrange(d, gender, dplyr::desc(agecat))
 #'
-#' # Sort by grouping variables first
+#' # sort by grouping variables first
 #' d_grouped <- group_by(d, gender)
 #' arrange(d_grouped, .by_group = TRUE, agecat)
 #'
@@ -107,4 +109,35 @@ arrange.survey_result <- function(.data, ..., .by_group = FALSE) {
   old_class <- class(.data)
   old_meta <- attr(.data, ".meta")
   NextMethod() |> .restore_survey_result(old_class, old_meta)
+}
+
+#' @rdname arrange
+#' @method arrange survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `arrange()` is dispatched to each
+#' member independently. Each member's rows are sorted in place; per-member
+#' domain columns travel with the sorted rows. The output `survey_collection`
+#' preserves the input's `@id`, `@if_missing_var`, and `@groups`. Use
+#' `.if_missing_var` to override the collection's stored missing-variable
+#' behavior for this call.
+arrange.survey_collection <- function(
+  .data,
+  ...,
+  .by_group = FALSE,
+  .locale = NULL,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::arrange,
+    verb_name = "arrange",
+    collection = .data,
+    ...,
+    .by_group = .by_group,
+    .locale = .locale,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
 }

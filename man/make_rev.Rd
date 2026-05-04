@@ -30,6 +30,7 @@ When called inside \code{\link[=mutate]{mutate()}}, metadata is recorded in
 \verb{@metadata@transformations[[col]]}.
 }
 \examples{
+# reverse a 1-4 numeric scale: 1 swaps with 4, 2 swaps with 3
 x <- c(1, 2, 3, 4)
 make_rev(x)
 
@@ -39,6 +40,8 @@ Other transformation:
 \code{\link{make_binary}()},
 \code{\link{make_dicho}()},
 \code{\link{make_factor}()},
-\code{\link{make_flip}()}
+\code{\link{make_flip}()},
+\code{\link{row_means}()},
+\code{\link{row_sums}()}
 }
 \concept{transformation}

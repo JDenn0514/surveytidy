@@ -40,12 +40,23 @@ When called inside \code{\link[=mutate]{mutate()}}, metadata is recorded in
 \verb{@metadata@transformations[[col]]}.
 }
 \examples{
-library(dplyr)
+# build a 4-level Likert factor
 x <- factor(
-  c("Always agree", "Sometimes agree", "Sometimes disagree", "Always disagree"),
-  levels = c("Always agree", "Sometimes agree", "Sometimes disagree",
-             "Always disagree")
+  c(
+    "Always agree",
+    "Sometimes agree",
+    "Sometimes disagree",
+    "Always disagree"
+  ),
+  levels = c(
+    "Always agree",
+    "Sometimes agree",
+    "Sometimes disagree",
+    "Always disagree"
+  )
 )
+
+# collapse to 2 levels by stripping the qualifier word
 make_dicho(x)
 
 }
@@ -54,6 +65,8 @@ Other transformation:
 \code{\link{make_binary}()},
 \code{\link{make_factor}()},
 \code{\link{make_flip}()},
-\code{\link{make_rev}()}
+\code{\link{make_rev}()},
+\code{\link{row_means}()},
+\code{\link{row_sums}()}
 }
 \concept{transformation}

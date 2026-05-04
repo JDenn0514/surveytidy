@@ -73,6 +73,23 @@ reference:
       - group_by
       - rowwise
 
+  - subtitle: "Joins"
+    desc: >
+      Join a survey design object with a plain data frame. `left_join()` adds
+      lookup columns without changing row count. `semi_join()` and `anti_join()`
+      are domain-aware: unmatched rows are marked out-of-domain rather than
+      removed, preserving variance estimation validity. `inner_join()` defaults
+      to domain-aware mode and supports an explicit `.domain_aware = FALSE`
+      for physical row removal. `right_join()`, `full_join()`, and `bind_rows()`
+      always error — they would add rows with missing design variables.
+    contents:
+      - left_join
+      - semi_join
+      - inner_join
+      - bind_cols
+      - right_join
+      - bind_rows
+
   - subtitle: "Predicates"
     desc: >
       Test the current grouping and rowwise state of a survey design object.
@@ -108,3 +125,5 @@ reference:
       - make_binary
       - make_rev
       - make_flip
+      - row_means
+      - row_sums

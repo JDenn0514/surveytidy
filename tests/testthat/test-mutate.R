@@ -170,3 +170,181 @@ test_that("mutate() does not alter the domain column", {
   )
   test_invariants(d3)
 })
+
+# ── mutate() — metadata attribute extraction ─────────────────────────────────
+
+test_that("mutate() syncs variable label from haven::labelled() to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(d, age_f = haven::labelled(y1, label = "Age in years"))
+  test_invariants(result)
+  expect_identical(
+    result@metadata@variable_labels[["age_f"]],
+    "Age in years"
+  )
+})
+
+test_that("mutate() syncs value labels from haven::labelled() to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    grp_lab = haven::labelled(
+      y1,
+      labels = c("low" = 0, "high" = 100),
+      label = "Group label"
+    )
+  )
+  test_invariants(result)
+  expect_identical(
+    result@metadata@variable_labels[["grp_lab"]],
+    "Group label"
+  )
+  expect_identical(
+    result@metadata@value_labels[["grp_lab"]],
+    c("low" = 0, "high" = 100)
+  )
+})
+
+test_that("mutate() syncs label from structure(, label =) to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(d, y_new = structure(y1 * 2, label = "Double Y1"))
+  test_invariants(result)
+  expect_identical(
+    result@metadata@variable_labels[["y_new"]],
+    "Double Y1"
+  )
+})
+
+test_that("mutate() syncs question_preface attr to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    y_new = structure(y1, question_preface = "How old are you?")
+  )
+  test_invariants(result)
+  expect_identical(
+    result@metadata@question_prefaces[["y_new"]],
+    "How old are you?"
+  )
+})
+
+test_that("mutate() syncs note attr to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(d, y_new = structure(y1, note = "Analyst note here"))
+  test_invariants(result)
+  expect_identical(
+    result@metadata@notes[["y_new"]],
+    "Analyst note here"
+  )
+})
+
+test_that("mutate() syncs universe attr to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(d, y_new = structure(y1, universe = "Adults 18+"))
+  test_invariants(result)
+  expect_identical(
+    result@metadata@universe[["y_new"]],
+    "Adults 18+"
+  )
+})
+
+test_that("mutate() syncs missing_codes attr to @metadata", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    y_new = structure(y1, missing_codes = c("Refused" = 99, "DK" = 98))
+  )
+  test_invariants(result)
+  expect_identical(
+    result@metadata@missing_codes[["y_new"]],
+    c("Refused" = 99, "DK" = 98)
+  )
+})
+
+test_that("mutate() syncs multiple metadata attrs at once", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    y_new = structure(
+      y1,
+      label = "Age",
+      question_preface = "How old are you?",
+      note = "Top-coded at 90"
+    )
+  )
+  test_invariants(result)
+  expect_identical(result@metadata@variable_labels[["y_new"]], "Age")
+  expect_identical(
+    result@metadata@question_prefaces[["y_new"]],
+    "How old are you?"
+  )
+  expect_identical(result@metadata@notes[["y_new"]], "Top-coded at 90")
+})
+
+test_that("mutate() syncs metadata attrs for all three design types", {
+  designs <- make_all_designs()
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- mutate(d, y_lab = haven::labelled(y1, label = "Test label"))
+    test_invariants(result)
+    expect_identical(
+      result@metadata@variable_labels[["y_lab"]],
+      "Test label",
+      label = paste0(nm, ": variable label synced")
+    )
+  }
+})
+
+test_that("mutate() clears stale metadata when column is overwritten without attrs", {
+  d <- make_all_designs()$taylor
+  d <- mutate(d, y_new = structure(y1, label = "Old label", note = "Old note"))
+  expect_identical(d@metadata@variable_labels[["y_new"]], "Old label")
+  # Overwrite without any attrs — should clear
+  d2 <- mutate(d, y_new = y1 * 2)
+  expect_null(d2@metadata@variable_labels[["y_new"]])
+  expect_null(d2@metadata@notes[["y_new"]])
+})
+
+# ── coverage closers ─────────────────────────────────────────────────────────
+
+# Covers mutate.R L180: rowwise(d, id_col) followed by mutate() routes to
+# dplyr::rowwise(augmented_data, dplyr::all_of(id_cols)).
+test_that("mutate() after rowwise(d, id_col) re-groups via id_cols (rowwise + id)", {
+  d <- make_all_designs()$taylor
+  d_rw <- dplyr::rowwise(d, group)
+  # Sanity: rowwise_id_cols was set
+  expect_identical(d_rw@variables$rowwise_id_cols, "group")
+  result <- dplyr::mutate(
+    d_rw,
+    row_max = max(dplyr::c_across(dplyr::starts_with("y")))
+  )
+  test_invariants(result)
+  # Row-by-row computation matches per-row max of y columns
+  y_cols <- d@data[, c("y1", "y2", "y3"), drop = FALSE]
+  expected_max <- apply(y_cols, 1, max)
+  expect_equal(result@data$row_max, expected_max)
+})
+
+# Covers mutate.R L272: as.character(rlang::call_name(rlang::quo_get_expr(q))).
+# Reached when surveytidy_recode is set on a result vector but the $fn entry
+# is NULL. The public transform functions never produce that combination, so
+# we attach the attr manually inline.
+test_that("mutate() falls back to call_name() for fn when recode_attr$fn is NULL", {
+  d <- make_all_designs()$taylor
+  result <- dplyr::mutate(
+    d,
+    z = structure(
+      y1 + 1,
+      surveytidy_recode = list(
+        fn = NULL,
+        var = NULL,
+        description = "manual attr"
+      )
+    )
+  )
+  test_invariants(result)
+  trec <- result@metadata@transformations[["z"]]
+  expect_true(is.list(trec))
+  # call_name() of the structure(...) call returns "structure"
+  expect_identical(trec$fn, "structure")
+  expect_identical(trec$description, "manual attr")
+})

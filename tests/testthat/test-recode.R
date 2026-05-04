@@ -319,8 +319,11 @@ test_that("replace_when() .value_labels merges with x labels [all designs]", {
     )
     test_invariants(result)
     vl <- result@metadata@value_labels$y3_r
+    # "No" = 0L is preserved (0 still appears in result)
     expect_true("No" %in% names(vl))
-    expect_true("Yes" %in% names(vl))
+    # "Yes" = 1L is pruned because value 1 no longer appears after the recode
+    expect_false("Yes" %in% names(vl))
+    # User-supplied "Maybe" = 2L is present (the new value)
     expect_true("Maybe" %in% names(vl))
   }
 })
@@ -339,6 +342,88 @@ test_that("replace_when() error: .value_labels unnamed -> surveytidy_error_recod
     mutate(d, y3_r = replace_when(y3, y3 == 1L ~ 2L, .value_labels = c(2L))),
     class = "surveytidy_error_recode_value_labels_unnamed"
   )
+})
+
+# ── 4b. replace_when() stale value label pruning ─────────────────────────────
+
+test_that("replace_when() preserves all inherited labels when no value is eliminated [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Winsorize values above 90 — no value is eliminated from the 1-4 range
+    result <- replace_when(x, x > 90 ~ 90L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_true(all(c("Low", "Med-Low", "Med-High", "High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() drops inherited labels for values no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3 so value 4 no longer appears
+    result <- replace_when(x, x == 4L ~ 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() preserves .value_labels entries even when value absent from result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3; user explicitly supplies a label for 4 in .value_labels
+    result <- replace_when(
+      x,
+      x == 4L ~ 3L,
+      .value_labels = c("Something else" = 4L)
+    )
+    vl <- attr(result, "labels", exact = TRUE)
+    # User-supplied label for 4 must survive even though 4 is gone from result
+    expect_true("Something else" %in% names(vl))
+  }
+})
+
+test_that("replace_when() auto-prunes stale labels with no .value_labels supplied [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3, no .value_labels
+    result <- replace_when(x, x == 4L ~ 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_when() prunes inherited NA-value label when NA no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    # Build a labelled vector that includes NA as a labelled value
+    vals <- as.integer(round(d@data$y1 %% 3)) + 1L
+    vals[1L] <- NA_integer_
+    x <- haven::labelled(
+      vals,
+      labels = c("Low" = 1L, "Mid" = 2L, "High" = 3L, "Missing" = NA_integer_)
+    )
+    # Replace NA with 0 so NA no longer appears in result
+    result <- replace_when(x, is.na(x) ~ 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("Missing" %in% names(vl))
+  }
 })
 
 # ── 5. if_else() ──────────────────────────────────────────────────────────────
@@ -555,11 +640,126 @@ test_that("recode_values() .factor = TRUE + .label -> surveytidy_error_recode_fa
   )
 })
 
-test_that("recode_values() from = NULL + .use_labels = FALSE -> surveytidy_error_recode_from_to_missing", {
+test_that("recode_values() no formulas + from = NULL + .use_labels = FALSE -> surveytidy_error_recode_from_to_missing", {
   d <- make_all_designs(seed = 42)$taylor
+  # No formulas in ..., no from, and .use_labels = FALSE — no map supplied
   expect_error(
     mutate(d, y3_r = recode_values(y3, .use_labels = FALSE)),
     class = "surveytidy_error_recode_from_to_missing"
+  )
+})
+
+# ── 7b. recode_values() formula interface ────────────────────────────────────
+
+test_that("recode_values() formula interface matches dplyr [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", 1L ~ "yes")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@data$y3_r,
+      dplyr::recode_values(d@data$y3, 0L ~ "no", 1L ~ "yes")
+    )
+  }
+})
+
+test_that("recode_values() formula interface with default [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(y3, 1L ~ "yes", default = "other")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@data$y3_r,
+      dplyr::recode_values(d@data$y3, 1L ~ "yes", default = "other")
+    )
+  }
+})
+
+test_that("recode_values() formula interface with .unmatched = 'error' on unmatched values", {
+  d <- make_all_designs(seed = 42)$taylor
+  # y3 has values 0L and 1L; formula only matches 1L — 0L is unmatched
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(y3, 1L ~ "yes", .unmatched = "error")
+    ),
+    class = "surveytidy_error_recode_unmatched_values"
+  )
+})
+
+test_that("recode_values() formula interface + .label sets variable label [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        0L ~ "no",
+        1L ~ "yes",
+        .label = "Y3 recoded"
+      )
+    )
+    test_invariants(result)
+    expect_identical(result@metadata@variable_labels$y3_r, "Y3 recoded")
+  }
+})
+
+test_that("recode_values() formula interface + .value_labels sets value labels [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        0L ~ 10L,
+        1L ~ 20L,
+        .value_labels = c("Low" = 10L, "High" = 20L)
+      )
+    )
+    test_invariants(result)
+    expect_identical(
+      result@metadata@value_labels$y3_r,
+      c("Low" = 10L, "High" = 20L)
+    )
+  }
+})
+
+test_that("recode_values() formula interface + .factor = TRUE uses formula RHS order [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_f = recode_values(y3, 1L ~ "yes", 0L ~ "no", .factor = TRUE)
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$y3_f))
+    # Levels follow formula RHS order, not sorted data order
+    expect_identical(levels(result@data$y3_f), c("yes", "no"))
+  }
+})
+
+test_that("recode_values() .use_labels = TRUE combined with formulas errors", {
+  d <- make_all_designs(seed = 42)$taylor
+  d@metadata@value_labels[["y3"]] <- c("No" = 0L, "Yes" = 1L)
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE)
+    ),
+    class = "surveytidy_error_recode_use_labels_with_formulas"
+  )
+  expect_snapshot(
+    error = TRUE,
+    mutate(
+      d,
+      y3_r = recode_values(y3, 0L ~ "no", .use_labels = TRUE)
+    )
   )
 })
 
@@ -642,6 +842,89 @@ test_that("replace_values() error: .value_labels unnamed -> surveytidy_error_rec
     ),
     class = "surveytidy_error_recode_value_labels_unnamed"
   )
+})
+
+# ── 8b. replace_values() stale value label pruning ───────────────────────────
+
+test_that("replace_values() preserves all inherited labels when no value is eliminated [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Replace value 99 (absent) with 0 — no existing value is eliminated
+    result <- replace_values(x, from = 99L, to = 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_true(all(c("Low", "Med-Low", "Med-High", "High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() drops inherited labels for values no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3 so value 4 no longer appears
+    result <- replace_values(x, from = 4L, to = 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() preserves .value_labels entries even when value absent from result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3; user explicitly supplies a label for 4 in .value_labels
+    result <- replace_values(
+      x,
+      from = 4L,
+      to = 3L,
+      .value_labels = c("Something else" = 4L)
+    )
+    vl <- attr(result, "labels", exact = TRUE)
+    # User-supplied label for 4 must survive even though 4 is gone from result
+    expect_true("Something else" %in% names(vl))
+  }
+})
+
+test_that("replace_values() auto-prunes stale labels with no .value_labels supplied [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    x <- haven::labelled(
+      as.integer(round(d@data$y1 %% 4)) + 1L,
+      labels = c("Low" = 1L, "Med-Low" = 2L, "Med-High" = 3L, "High" = 4L)
+    )
+    # Collapse 4 -> 3, no .value_labels
+    result <- replace_values(x, from = 4L, to = 3L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("High" %in% names(vl))
+    expect_true(all(c("Low", "Med-Low", "Med-High") %in% names(vl)))
+  }
+})
+
+test_that("replace_values() prunes inherited NA-value label when NA no longer in result [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    # Build a labelled vector that includes NA as a labelled value
+    vals <- as.integer(round(d@data$y1 %% 3)) + 1L
+    vals[1L] <- NA_integer_
+    x <- haven::labelled(
+      vals,
+      labels = c("Low" = 1L, "Mid" = 2L, "High" = 3L, "Missing" = NA_integer_)
+    )
+    # Replace NA with 0 so NA no longer appears in result
+    result <- replace_values(x, from = NA_integer_, to = 0L)
+    vl <- attr(result, "labels", exact = TRUE)
+    expect_false("Missing" %in% names(vl))
+  }
 })
 
 # ── 9. Domain preservation ────────────────────────────────────────────────────
@@ -913,5 +1196,70 @@ test_that("mutate() warns surveytidy_warning_mutate_weight_col when mutating wei
       class = "surveytidy_warning_mutate_weight_col"
     )
     test_invariants(result)
+  }
+})
+
+# ── 11. Coverage gap: non-literal RHS in case_when() .factor branch ──────────
+
+test_that("case_when() .factor = TRUE with non-literal RHS uses unique result values for levels [all designs]", {
+  # Covers R/case-when.R:242 — the all_literal == FALSE branch where
+  # formula_values is derived from unique(result) rather than from the
+  # syntactic literals on the RHS of each formula.
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      cat = case_when(
+        y1 > 50 ~ paste0("hi", "gh"),
+        .default = "low",
+        .factor = TRUE
+      )
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$cat))
+    # Levels come from unique non-NA values in result; "low" is the .default
+    expect_setequal(levels(result@data$cat), c("high", "low"))
+  }
+})
+
+# ── 12. Coverage gap: recode_values() rethrows non-unmatched errors ──────────
+
+test_that("recode_values() rethrows errors that aren't vctrs_error_combine_unmatched", {
+  # Covers R/recode-values.R:339 — `stop(e)` re-throws errors thrown by
+  # dplyr::recode_values() that are NOT vctrs_error_combine_unmatched (e.g.,
+  # incompatible from/to lengths produce vctrs_error_incompatible_size).
+  d <- make_all_designs(seed = 42)$taylor
+
+  # from has 2 elements but to has 3 — vctrs_error_incompatible_size, which
+  # doesn't match the unmatched-values branch and falls through to stop(e).
+  expect_error(
+    mutate(
+      d,
+      y3_r = recode_values(
+        y3,
+        from = c(0L, 1L),
+        to = c("a", "b", "c")
+      )
+    ),
+    class = "vctrs_error_incompatible_size"
+  )
+})
+
+# ── 13. Coverage gap: replace_values() .label argument propagates ────────────
+
+test_that("replace_values() .label sets variable label in @metadata [all designs]", {
+  # Covers R/replace-values.R:161 — the !is.null(.label) branch where the
+  # caller-supplied .label takes precedence over attr(x, "label").
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
+      d,
+      y3_r = replace_values(y3, from = 0L, to = 9L, .label = "Recoded outcome")
+    )
+    test_invariants(result)
+    expect_identical(
+      result@metadata@variable_labels$y3_r,
+      "Recoded outcome"
+    )
   }
 })

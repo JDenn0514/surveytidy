@@ -7,7 +7,7 @@
 
 [![R-CMD-check](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
-coverage](https://codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg)](https://codecov.io/gh/JDenn0514/surveytidy)
+coverage](https://app.codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JDenn0514/surveytidy)
 [![pkgdown](https://github.com/JDenn0514/surveytidy/actions/workflows/pkgdown.yaml/badge.svg)](https://jdenn0514.github.io/surveytidy/)
 <!-- badges: end -->
 
@@ -75,6 +75,12 @@ rows for correct variance estimation. Simply put, this calculates the
 variance for subpopulations correctly.
 
 ## Installation
+
+``` r
+install.packages("surveytidy")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 # install.packages("pak")

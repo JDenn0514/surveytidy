@@ -9,14 +9,22 @@
 #' Recode values using an explicit mapping
 #'
 #' @description
-#' `recode_values()` replaces each value of `x` found in `from` with the
-#' corresponding value from `to`. Values not found in `from` are either kept
-#' unchanged (`.unmatched = "default"`, the default) or trigger an error
+#' `recode_values()` replaces each value of `x` with a corresponding new
+#' value. The mapping can be supplied in any of three ways:
+#'
+#' * **Formula interface** — pass `old_value ~ new_value` formulas in `...`:
+#'   `recode_values(score, 1 ~ "SD", 2 ~ "D", 3 ~ "N", 4 ~ "A", 5 ~ "SA")`.
+#' * **Lookup-table interface** — pass parallel `from` and `to` vectors.
+#' * **Label-driven interface** — set `.use_labels = TRUE` to build the map
+#'   from `attr(x, "labels")` (values become `from`, label strings become `to`).
+#'
+#' Values not found in the map are either kept unchanged
+#' (`.unmatched = "default"`, the default) or trigger an error
 #' (`.unmatched = "error"`).
 #'
 #' Unlike [replace_values()], which updates only specific matching values and
 #' retains everything else, `recode_values()` is intended for full remapping:
-#' every possible value in `x` typically has a corresponding entry in `from`.
+#' every possible value in `x` typically has a corresponding entry in the map.
 #'
 #' When any of `.label`, `.value_labels`, `.factor`, or `.description` are
 #' supplied, output label metadata is written to `@metadata` after [mutate()].
@@ -24,8 +32,11 @@
 #' `dplyr::recode_values()`.
 #'
 #' @param x Vector to recode.
-#' @param ... These dots are for future extensions and must be empty.
-#' @param from Vector of old values to recode from. Required unless
+#' @param ... `old_value ~ new_value` formulas describing the recoding map.
+#'   Equivalent to supplying parallel `from`/`to` vectors. When `...` is
+#'   non-empty, `from` and `.use_labels = TRUE` must not be used.
+#' @param from Vector (or list of vectors, for many-to-one mapping) of old
+#'   values. Required unless formulas are supplied in `...` or
 #'   `.use_labels = TRUE`. Must be the same type as `x`.
 #' @param to Vector of new values corresponding to `from`. Must be the same
 #'   length as `from`.
@@ -42,12 +53,14 @@
 #' @param .value_labels Named vector or `NULL`. Value labels stored in
 #'   `@metadata@value_labels`. Names are the label strings; values are the
 #'   data values.
-#' @param .factor `logical(1)`. If `TRUE`, returns a factor with levels in
-#'   `to` order (or `.value_labels` name order if supplied). Cannot be
-#'   combined with `.label`.
+#' @param .factor `logical(1)`. If `TRUE`, returns a factor. Levels are taken
+#'   from `.value_labels` names if supplied, otherwise from `to` in lookup
+#'   mode or from the right-hand sides of the `...` formulas in formula mode.
+#'   Cannot be combined with `.label`.
 #' @param .use_labels `logical(1)`. If `TRUE`, reads `attr(x, "labels")` to
 #'   build the `from`/`to` map automatically: values become `from`, label
-#'   strings become `to`. `x` must carry value labels; errors if not.
+#'   strings become `to`. `x` must carry value labels; errors if not. Cannot
+#'   be combined with formulas in `...`.
 #' @param .description `character(1)` or `NULL`. Plain-language description
 #'   of how the variable was created. Stored in
 #'   `@metadata@transformations[[col]]$description` after [mutate()].
@@ -64,16 +77,37 @@
 #' * [case_when()] for condition-based remapping.
 #'
 #' @examples
-#'
 #' library(surveycore)
 #' library(surveytidy)
+#'
+#' # create the survey design
 #' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
-#' # ---------------------------------------------------------------------
-#' # Basic recode_values — explicit from/to mapping ----------------------
-#' # ---------------------------------------------------------------------
+#' # formula interface — recode pid3 using `old ~ new` formulas in `...`
+#' new <- ns_wave1_svy |>
+#'   mutate(
+#'     party = recode_values(
+#'       pid3,
+#'       1 ~ "Democrat",
+#'       2 ~ "Republican",
+#'       3 ~ "Independent",
+#'       4 ~ "Other"
+#'     )
+#'   ) |>
+#'   select(pid3, party)
 #'
-#' # Recode pid3 numeric codes to character labels
+#' new
+#'
+#' # formula interface with default for unmatched values
+#' new <- ns_wave1_svy |>
+#'   mutate(
+#'     dem = recode_values(pid3, 1 ~ "Democrat", default = "Non-Democrat")
+#'   ) |>
+#'   select(pid3, dem)
+#'
+#' new
+#'
+#' # explicit from/to mapping — recode numeric codes to character labels
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     party = recode_values(
@@ -86,10 +120,7 @@
 #'
 #' new
 #'
-#'
-#' # ---- Use default to catch unmatched values ----
-#'
-#' # Only recode Democrats; everything else becomes "Non-Democrat"
+#' # use default to catch unmatched values
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     dem = recode_values(
@@ -103,26 +134,14 @@
 #'
 #' new
 #'
-#'
-#' # ---------------------------------------------------------------------
-#' # .use_labels — build the map from existing value labels --------------
-#' # ---------------------------------------------------------------------
-#'
-#' # pid3 carries value labels (1=Democrat, 2=Republican, 3=Independent,
-#' # 4=Something else). .use_labels = TRUE converts codes to label strings.
+#' # .use_labels = TRUE builds the from/to map from existing value labels
 #' new <- ns_wave1_svy |>
 #'   mutate(party = recode_values(pid3, .use_labels = TRUE)) |>
 #'   select(pid3, party)
 #'
 #' new
 #'
-#'
-#' # ---------------------------------------------------------------------
-#' # Set metadata --------------------------------------------------------
-#' # ---------------------------------------------------------------------
-#'
-#' # ---- Variable label ----
-#'
+#' # attach a variable label via .label
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     party = recode_values(
@@ -136,10 +155,7 @@
 #'
 #' new@metadata@variable_labels
 #'
-#'
-#' # ---- Value labels ----
-#'
-#' # Collapse 4 categories to 3 and add updated value labels
+#' # collapse 4 categories to 3 and document via .value_labels
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     party = recode_values(
@@ -158,10 +174,7 @@
 #'
 #' new@metadata@value_labels
 #'
-#'
-#' # ---- Make output a factor ----
-#'
-#' # Levels are ordered by the to vector
+#' # return a factor with levels in `to` order
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     party = recode_values(
@@ -175,9 +188,7 @@
 #'
 #' new
 #'
-#'
-#' # ---- Transformation ----
-#'
+#' # attach a plain-language description of the transformation
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     party = recode_values(
@@ -185,7 +196,10 @@
 #'       from = c(1, 2, 3, 4),
 #'       to = c("Democrat", "Republican", "Independent", "Other"),
 #'       .label = "Party identification",
-#'       .description = "pid3 recoded: 1->Democrat, 2->Republican, 3->Independent, 4->Other."
+#'       .description = paste(
+#'         "pid3 recoded: 1->Democrat, 2->Republican,",
+#'         "3->Independent, 4->Other."
+#'       )
 #'     )
 #'   ) |>
 #'   select(pid3, party)
@@ -223,6 +237,22 @@ recode_values <- function(
     )
   }
 
+  has_formulas <- ...length() > 0L
+
+  if (isTRUE(.use_labels) && has_formulas) {
+    cli::cli_abort(
+      c(
+        "x" = "{.code .use_labels = TRUE} cannot be combined with formulas in {.arg ...}.",
+        "i" = "Both describe the {.arg from}/{.arg to} map.",
+        "v" = paste0(
+          "Remove the formulas, or set {.code .use_labels = FALSE} and let ",
+          "the formulas define the map."
+        )
+      ),
+      class = "surveytidy_error_recode_use_labels_with_formulas"
+    )
+  }
+
   if (isTRUE(.use_labels)) {
     labels_attr <- attr(x, "labels", exact = TRUE)
     if (is.null(labels_attr)) {
@@ -237,13 +267,13 @@ recode_values <- function(
     }
     from <- unname(labels_attr)
     to <- names(labels_attr)
-  } else if (is.null(from)) {
+  } else if (!has_formulas && is.null(from)) {
     cli::cli_abort(
       c(
-        "x" = "{.arg from} must be supplied when {.code .use_labels = FALSE}.",
+        "x" = "No recoding map supplied.",
         "v" = paste0(
-          "Supply {.arg from} and {.arg to}, or set ",
-          "{.code .use_labels = TRUE} to build the map from {.arg x}'s value labels."
+          "Pass {.code old ~ new} formulas in {.arg ...}, supply ",
+          "{.arg from} and {.arg to}, or set {.code .use_labels = TRUE}."
         )
       ),
       class = "surveytidy_error_recode_from_to_missing"
@@ -281,7 +311,12 @@ recode_values <- function(
   )
 
   if (isTRUE(.factor)) {
-    result <- .factor_from_result(result, .value_labels, unique(to))
+    factor_source <- if (!is.null(to)) {
+      unique(to)
+    } else {
+      .formula_rhs_values(...)
+    }
+    result <- .factor_from_result(result, .value_labels, factor_source)
     attr(result, "surveytidy_recode") <- list(
       fn = "recode_values",
       var = var_name,
@@ -291,8 +326,14 @@ recode_values <- function(
   }
 
   if (!is.null(.label) || !is.null(.value_labels)) {
-    return(.wrap_labelled(result, .label, .value_labels, .description,
-                          fn = "recode_values", var = var_name))
+    return(.wrap_labelled(
+      result,
+      .label,
+      .value_labels,
+      .description,
+      fn = "recode_values",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {

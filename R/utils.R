@@ -8,6 +8,8 @@
 #   .warn_physical_subset()         — standard warning for row-removal verbs
 #   dplyr_reconstruct.survey_base() — class preservation in complex pipelines
 #                                     (moved from R/filter.R on feature/select)
+#   .validate_transform_args()      — validate .label/.description for transform fns
+#   .set_recode_attrs()             — set label, labels, surveytidy_recode attrs
 
 # ── surveycore internal wrappers ─────────────────────────────────────────────
 
@@ -26,6 +28,27 @@
 .sc_rename_metadata_keys <- function(metadata, rename_map) {
   fn <- get(".rename_metadata_keys", envir = asNamespace("surveycore"))
   fn(metadata, rename_map)
+}
+
+
+# ── survey_collection internal accessors ────────────────────────────────────
+
+# Wrappers around surveycore internals used by the collection-layer
+# group_by helper. Same get() + asNamespace() pattern as the rename wrappers
+# above to avoid the ":::" R CMD check NOTE.
+#
+# .sc_propagate_or_match() and .sc_check_groups_match() are documented in
+# surveycore as @keywords internal helpers shared with surveytidy's
+# group_by.survey_collection (PR 2c).
+
+.sc_propagate_or_match <- function(...) {
+  fn <- get(".propagate_or_match", envir = asNamespace("surveycore"))
+  fn(...)
+}
+
+.sc_check_groups_match <- function(...) {
+  fn <- get(".check_groups_match", envir = asNamespace("surveycore"))
+  fn(...)
 }
 
 
@@ -118,82 +141,126 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 }
 
 
-# ── mutate() label helpers ────────────────────────────────────────────────────
+# ── mutate() metadata attribute helpers ──────────────────────────────────────
 
-# Pre-attachment: copy label attrs from @metadata into the data.frame so
-# recode functions called inside mutate() can read them via attr(x, "labels")
-# and attr(x, "label"). Does NOT set the "haven_labelled" class — attrs only.
+# Mapping from metadata property → column attribute name. Used by
+# .attach_metadata_attrs(), .extract_metadata_attrs(), and .strip_metadata_attrs()
+# to keep the mapping in one place.
+.METADATA_ATTR_MAP <- list(
+  variable_labels = "label",
+  value_labels = "labels",
+  question_prefaces = "question_preface",
+  notes = "note",
+  universe = "universe",
+  missing_codes = "missing_codes"
+)
+
+# Pre-attachment: copy metadata into column attrs on the data.frame so
+# recode functions called inside mutate() can read them via attr().
+# Does NOT set the "haven_labelled" class — attrs only.
 # Always-on: runs on every mutate() call; fast path returns early when
-# @metadata has no labels (negligible overhead for the common case).
-.attach_label_attrs <- function(data, metadata) {
-  if (
-    length(metadata@value_labels) == 0L &&
-      length(metadata@variable_labels) == 0L
-  ) {
-    return(data)
-  }
-  for (col in names(metadata@value_labels)) {
-    if (col %in% names(data)) {
-      attr(data[[col]], "labels") <- metadata@value_labels[[col]]
+# @metadata has nothing to attach (negligible overhead for the common case).
+.attach_metadata_attrs <- function(data, metadata) {
+  data_cols <- names(data)
+  for (prop in names(.METADATA_ATTR_MAP)) {
+    entries <- S7::prop(metadata, prop)
+    if (length(entries) == 0L) {
+      next
     }
-  }
-  for (col in names(metadata@variable_labels)) {
-    if (col %in% names(data)) {
-      attr(data[[col]], "label") <- metadata@variable_labels[[col]]
+    attr_name <- .METADATA_ATTR_MAP[[prop]]
+    for (col in names(entries)) {
+      if (col %in% data_cols) {
+        attr(data[[col]], attr_name) <- entries[[col]]
+      }
     }
   }
   data
 }
 
-# Post-detection: inspect changed_cols in new_data for the "surveytidy_recode"
-# attribute set by recode functions. When found, extract label attrs into
-# metadata. When the column was previously labelled and the new output carries
-# no "surveytidy_recode" attr, clear stale labels.
+# Post-detection: inspect changed_cols in new_data for metadata attrs and sync
+# them into @metadata. Three cases:
+#   1. Column has "surveytidy_recode" attr → extract all attrs (recode path)
+#   2. Column has any metadata attr without "surveytidy_recode" →
+#      extract into metadata (haven::labelled / structure(, label =) path)
+#   3. Column has no metadata attrs and previously had metadata → clear stale
 #
 # changed_cols : character vector — names of explicitly-named LHS expressions
 #                from rlang::quos(...). Unnamed mutate expressions (e.g.,
 #                across()) are not covered — accepted limitation for Phase 0.6.
 # Returns updated metadata object (does NOT assign internally).
-.extract_labelled_outputs <- function(data, metadata, changed_cols) {
+.extract_metadata_attrs <- function(data, metadata, changed_cols) {
+  # Batch-read: pull all 6 metadata properties into a plain named list so we
+
+  # can use `[[` freely (S7 objects don't support `[[`).
+  meta_lists <- lapply(
+    stats::setNames(names(.METADATA_ATTR_MAP), names(.METADATA_ATTR_MAP)),
+    function(prop) S7::prop(metadata, prop)
+  )
+
   for (col in changed_cols) {
     if (!col %in% names(data)) {
       next
     }
+
     recode_attr <- attr(data[[col]], "surveytidy_recode")
+
+    # Read all metadata attrs from the column
+    col_attrs <- lapply(.METADATA_ATTR_MAP, function(attr_name) {
+      attr(data[[col]], attr_name, exact = TRUE)
+    })
+    has_any_attr <- any(!vapply(col_attrs, is.null, logical(1L)))
+
     if (!is.null(recode_attr)) {
-      # Recode function output: extract label attrs.
-      # attr(x, "label") and attr(x, "labels") are both NULL for factor and
-      # plain-with-description outputs; assigning NULL clears the entry, which
-      # is correct — the old encoding labels are no longer valid.
-      metadata@variable_labels[[col]] <- attr(
-        data[[col]],
-        "label",
-        exact = TRUE
-      )
-      metadata@value_labels[[col]] <- attr(data[[col]], "labels", exact = TRUE)
-    } else if (
-      !is.null(metadata@variable_labels[[col]]) ||
-        !is.null(metadata@value_labels[[col]])
-    ) {
-      # Non-recode overwrite of a previously-labelled column: clear stale labels.
-      metadata@variable_labels[[col]] <- NULL
-      metadata@value_labels[[col]] <- NULL
+      # Recode function output: extract all attrs. NULL values clear the entry,
+      # which is correct — the old metadata is no longer valid.
+      for (prop in names(.METADATA_ATTR_MAP)) {
+        meta_lists[[prop]][[col]] <- col_attrs[[prop]]
+      }
+    } else if (has_any_attr) {
+      # User-applied attrs (e.g., haven::labelled(), structure(, label =)):
+      # sync non-NULL attrs into metadata; leave existing entries for attrs
+      # that weren't set.
+      for (prop in names(.METADATA_ATTR_MAP)) {
+        if (!is.null(col_attrs[[prop]])) {
+          meta_lists[[prop]][[col]] <- col_attrs[[prop]]
+        }
+      }
+    } else {
+      # No attrs and no recode: clear any stale metadata for this column.
+      has_existing <- any(vapply(
+        names(.METADATA_ATTR_MAP),
+        function(prop) !is.null(meta_lists[[prop]][[col]]),
+        logical(1L)
+      ))
+      if (has_existing) {
+        for (prop in names(.METADATA_ATTR_MAP)) {
+          meta_lists[[prop]][[col]] <- NULL
+        }
+      }
     }
+  }
+
+  # Batch-write: push all 6 properties back into the S7 metadata object.
+  for (prop in names(.METADATA_ATTR_MAP)) {
+    S7::prop(metadata, prop) <- meta_lists[[prop]]
   }
   metadata
 }
 
-# Strip: remove all haven label attrs and the surveytidy_recode attr from
+# Strip: remove all metadata attrs and the surveytidy_recode attr from
 # every column before storing new_data in @data. haven::zap_labels() removes
-# "label", "labels", "format.spss", "display_width", and the "haven_labelled"
-# class. "surveytidy_recode" is not a haven attr, so it is removed separately.
-.strip_label_attrs <- function(data) {
+# "labels", "format.spss", "display_width", and the "haven_labelled"
+# class. Additional attrs are removed explicitly.
+.strip_metadata_attrs <- function(data) {
+  all_metadata_attrs <- c(
+    unname(unlist(.METADATA_ATTR_MAP)),
+    "surveytidy_recode"
+  )
   for (col in names(data)) {
     data[[col]] <- haven::zap_labels(data[[col]])
-    # haven::zap_labels() removes "labels", "format.spss", "display_width",
-    # and the "haven_labelled" class, but KEEPS the "label" attr. Remove it.
-    attr(data[[col]], "label") <- NULL
-    attr(data[[col]], "surveytidy_recode") <- NULL
+    for (a in all_metadata_attrs) {
+      attr(data[[col]], a) <- NULL
+    }
   }
   data
 }
@@ -243,8 +310,14 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # fn:  character(1) — the recode function name (e.g., "recode_values")
 # var: character(1) or NULL — the column name; NULL for multi-input functions
 #      (case_when, if_else) that may consume multiple source columns.
-.wrap_labelled <- function(x, label, value_labels, description = NULL,
-                           fn = NULL, var = NULL) {
+.wrap_labelled <- function(
+  x,
+  label,
+  value_labels,
+  description = NULL,
+  fn = NULL,
+  var = NULL
+) {
   result <- haven::labelled(x, labels = value_labels, label = label)
   attr(result, "surveytidy_recode") <- list(
     fn = fn,
@@ -252,6 +325,22 @@ dplyr_reconstruct.survey_base <- function(data, template) {
     description = description
   )
   result
+}
+
+# Extract unique right-hand-side values from `old ~ new` formulas passed
+# through `...`. Used by recode_values() to derive factor levels when the
+# formula interface is used instead of explicit `to`. Non-formula elements
+# in `...` are ignored (dplyr::recode_values() will error on them anyway).
+.formula_rhs_values <- function(...) {
+  dots <- rlang::list2(...)
+  rhs <- lapply(dots, function(e) {
+    if (rlang::is_formula(e)) rlang::eval_tidy(rlang::f_rhs(e)) else NULL
+  })
+  rhs <- rhs[!vapply(rhs, is.null, logical(1L))]
+  if (length(rhs) == 0L) {
+    return(NULL)
+  }
+  unique(unlist(rhs, use.names = FALSE))
 }
 
 # Convert result to a factor with levels ordered by value_labels (if provided)
@@ -271,7 +360,21 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 # (e.g. base has "Independent" = 3 and override adds "Independent/Other" = 3),
 # the later (override) entry wins and the earlier (base) entry is dropped.
 # Returns NULL when both inputs are NULL.
-.merge_value_labels <- function(base_labels, override_labels) {
+#
+# result_values: optional vector of values that appear in the recoded result.
+#   When non-NULL, base_labels entries whose value does NOT appear in
+#   result_values are pruned before the merge. override_labels is never
+#   pruned — user-supplied entries survive even if the value is absent.
+#   Default NULL means no pruning (backward-compatible).
+.merge_value_labels <- function(base_labels, override_labels,
+                                result_values = NULL) {
+  # Prune stale base entries before any other logic. override_labels is never
+  # touched here — user-supplied labels survive even for absent values.
+  if (!is.null(base_labels) && !is.null(result_values)) {
+    base_labels <- base_labels[unname(base_labels) %in% result_values]
+    if (length(base_labels) == 0L) base_labels <- NULL
+  }
+
   if (is.null(base_labels) && is.null(override_labels)) {
     return(NULL)
   }
@@ -289,6 +392,51 @@ dplyr_reconstruct.survey_base <- function(data, template) {
   # label name for an existing value, drop the earlier (base) entry so the
   # override takes precedence. fromLast = TRUE keeps the last occurrence.
   merged[!duplicated(unname(merged), fromLast = TRUE)]
+}
+
+
+# ── transform helpers ─────────────────────────────────────────────────────────
+
+# Validate .label and .description for transform functions.
+# error_class: the class to raise (different per function).
+# Returns invisible(TRUE) on success.
+.validate_transform_args <- function(label, description, error_class) {
+  if (!is.null(label) && !rlang::is_string(label)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .label} must be a single character string or {.code NULL}.",
+        "i" = "Got {.cls {class(label)}} of length {length(label)}."
+      ),
+      class = error_class
+    )
+  }
+  if (!is.null(description) && !rlang::is_string(description)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .description} must be a single character string or {.code NULL}.",
+        "i" = "Got {.cls {class(description)}} of length {length(description)}."
+      ),
+      class = error_class
+    )
+  }
+  invisible(TRUE)
+}
+
+# Set label, labels, and surveytidy_recode attrs on a result vector.
+# label:       character(1) or NULL - variable label
+# labels:      named vector or NULL - value labels
+# fn:          character(1) - function name (hardcoded per function)
+# var:         character(1) or NULL - column name
+# description: character(1) or NULL - user-supplied description
+.set_recode_attrs <- function(result, label, labels, fn, var, description) {
+  attr(result, "label") <- label
+  attr(result, "labels") <- labels
+  attr(result, "surveytidy_recode") <- list(
+    fn = fn,
+    var = var,
+    description = description
+  )
+  result
 }
 
 

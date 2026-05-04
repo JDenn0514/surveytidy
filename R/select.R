@@ -63,19 +63,21 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Select by name
+#' # select by name
 #' select(d, gender, agecat)
 #'
-#' # Select by name pattern
-#' select(d, dplyr::starts_with("smuse_"))
+#' # select by name pattern
+#' select(d, tidyselect::starts_with("smuse_"))
 #'
-#' # Select by type
-#' select(d, dplyr::where(is.numeric))
+#' # select by type
+#' select(d, tidyselect::where(is.numeric))
 #'
-#' # Drop columns with !
-#' select(d, !dplyr::starts_with("smuse_"))
+#' # drop columns with !
+#' select(d, !tidyselect::starts_with("smuse_"))
 #'
 #' @family selecting
 #' @seealso [relocate()] to reorder columns, [rename()] to rename them,
@@ -209,15 +211,17 @@ select.survey_result <- function(.data, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Move agecat before gender
+#' # move agecat before gender
 #' relocate(d, agecat, .before = gender)
 #'
-#' # Move all social media columns to the front
-#' relocate(d, dplyr::starts_with("smuse_"))
+#' # move all social media columns to the front
+#' relocate(d, tidyselect::starts_with("smuse_"))
 #'
-#' # After select(), relocate reorders the visible columns
+#' # after select(), relocate reorders the visible columns
 #' d |>
 #'   select(gender, agecat, partysum) |>
 #'   relocate(partysum, .before = gender)
@@ -295,12 +299,14 @@ relocate.survey_base <- function(.data, ..., .before = NULL, .after = NULL) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Extract a column by name
+#' # extract a column by name
 #' pull(d, agecat)
 #'
-#' # Named vector — values of agecat named by respid
+#' # named vector — values of agecat named by respid
 #' pull(d, agecat, name = respid)
 #'
 #' @family selecting
@@ -334,12 +340,14 @@ pull.survey_base <- function(.data, var = -1, name = NULL, ...) {
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#'
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Glimpse all columns
+#' # glimpse all columns
 #' glimpse(d)
 #'
-#' # After select(), shows only the selected columns
+#' # after select(), shows only the selected columns
 #' d |>
 #'   select(gender, agecat, partysum) |>
 #'   glimpse()
@@ -358,4 +366,140 @@ glimpse.survey_base <- function(x, width = NULL, ...) {
     dplyr::glimpse(x@data, width, ...)
   }
   invisible(x)
+}
+
+
+# ── select.survey_collection / relocate.survey_collection (PR 2b) ─────────────
+
+# Pre-flight helper: resolve the user's tidyselect against the first member's
+# @data and raise typed surveytidy_error_collection_select_group_removed if
+# the selection would remove any column listed in coll@groups.
+#
+# Spec §IV.3: per V2 each member resolves its own tidyselect; the first
+# member's resolution is sufficient for the group-column safety check
+# because G1b guarantees every group column exists in every member's @data.
+# If tidyselect cannot resolve against the first member (e.g., all_of() of a
+# column missing on m1), the pre-flight silently defers to per-member
+# dispatch where class-catch + .if_missing_var govern.
+.check_select_group_removal <- function(coll, ...) {
+  if (length(coll@groups) == 0L) {
+    return(invisible(NULL))
+  }
+  first_data <- coll@surveys[[1L]]@data
+  resolved <- tryCatch(
+    tidyselect::eval_select(rlang::expr(c(...)), first_data),
+    error = function(e) NULL
+  )
+  if (is.null(resolved)) {
+    return(invisible(NULL))
+  }
+  selected_cols <- names(resolved)
+  removed <- setdiff(coll@groups, selected_cols)
+  if (length(removed) > 0L) {
+    n_removed <- length(removed)
+    cli::cli_abort(
+      c(
+        "x" = "{cli::qty(n_removed)}{.fn select} would remove group column{?s} {.field {removed}} from the {.cls survey_collection}.",
+        "i" = "Group columns must remain in every member's {.code @data}; the surveycore class validator (G1b) requires this.",
+        "v" = "{cli::qty(n_removed)}Include the group column{?s} in the selection, or call {.fn ungroup} on the collection first."
+      ),
+      class = "surveytidy_error_collection_select_group_removed"
+    )
+  }
+  invisible(NULL)
+}
+
+#' @rdname select
+#' @method select survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `select()` is dispatched to each
+#' member independently. Each member resolves its own tidyselect expression
+#' against its own `@data`, so members may end up with different visible
+#' columns when the selection is partial (e.g., `any_of()` against a
+#' heterogeneous collection). Per-member design variables are always retained.
+#'
+#' Before dispatching, `select.survey_collection` resolves the selection
+#' against the first member's `@data` and raises
+#' `surveytidy_error_collection_select_group_removed` if any column in
+#' `coll@groups` would be removed. Group columns must remain in every member;
+#' silently dropping them would violate the surveycore class validator (G1b).
+#' Use [ungroup()] first if you intend to remove a group column.
+#'
+#' `relocate.survey_collection` is **not** subject to this pre-flight —
+#' `dplyr::relocate` only reorders columns and never drops them.
+select.survey_collection <- function(.data, ..., .if_missing_var = NULL) {
+  .check_select_group_removal(.data, ...)
+  .dispatch_verb_over_collection(
+    fn = dplyr::select,
+    verb_name = "select",
+    collection = .data,
+    ...,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
+}
+
+#' @rdname relocate
+#' @method relocate survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `relocate()` is dispatched to each
+#' member independently. Each member's `relocate.survey_base` reorders
+#' columns according to the user's tidyselect (and `.before`/`.after`),
+#' preserving design variables and `@groups`. Negative tidyselect like
+#' `relocate(coll, -group, .before = wt)` is permitted because `relocate`
+#' only reorders — it never removes columns. The `select` group-removal
+#' pre-flight does not apply.
+relocate.survey_collection <- function(
+  .data,
+  ...,
+  .before = NULL,
+  .after = NULL,
+  .if_missing_var = NULL
+) {
+  # Capture .before / .after as quosures so the per-member dplyr::relocate
+  # call can resolve them against each member's @data via tidyselect. The
+  # dispatcher's .unwrap_scalar_dots eval_tidy's dotted-name args, which
+  # would force a bare-name reference like `.before = wt` in the wrong
+  # environment. Forwarding the quosures through a closure with rlang::inject
+  # avoids that and matches the relocate.survey_base pattern.
+  before_quo <- rlang::enquo(.before)
+  after_quo <- rlang::enquo(.after)
+  has_before <- !rlang::quo_is_null(before_quo)
+  has_after <- !rlang::quo_is_null(after_quo)
+
+  fn <- if (has_before && has_after) {
+    function(survey, ...) {
+      rlang::inject(dplyr::relocate(
+        survey,
+        ...,
+        .before = !!before_quo,
+        .after = !!after_quo
+      ))
+    }
+  } else if (has_before) {
+    function(survey, ...) {
+      rlang::inject(dplyr::relocate(survey, ..., .before = !!before_quo))
+    }
+  } else if (has_after) {
+    function(survey, ...) {
+      rlang::inject(dplyr::relocate(survey, ..., .after = !!after_quo))
+    }
+  } else {
+    function(survey, ...) dplyr::relocate(survey, ...)
+  }
+
+  .dispatch_verb_over_collection(
+    fn = fn,
+    verb_name = "relocate",
+    collection = .data,
+    ...,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
 }

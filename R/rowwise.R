@@ -27,7 +27,7 @@
 #' @description
 #' `rowwise()` enables row-by-row computation in [mutate()]. Each row is
 #' treated as an independent group, so expressions like
-#' `mutate(d, row_max = max(c_across(starts_with("y"))))` compute the maximum
+#' `mutate(d, row_max = max(dplyr::c_across(tidyselect::starts_with("y"))))` compute the maximum
 #' across columns for each row independently.
 #'
 #' Use [ungroup()] or [group_by()] to exit rowwise mode.
@@ -58,18 +58,24 @@
 #'   `@variables$rowwise_id_cols` set. All other properties are unchanged.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' library(dplyr)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' # Row-wise max across several columns
+#' # row-wise max across several columns
 #' d |>
 #'   rowwise() |>
-#'   mutate(row_max = max(c_across(starts_with("econ")), na.rm = TRUE))
+#'   mutate(
+#'     row_max = max(dplyr::c_across(tidyselect::starts_with("econ")), na.rm = TRUE)
+#'   )
 #'
-#' # Exit rowwise mode
-#' d |> rowwise() |> ungroup()
+#' # exit rowwise mode
+#' d |>
+#'   rowwise() |>
+#'   ungroup()
 #'
 #' @family grouping
 #' @name rowwise
@@ -105,16 +111,26 @@ rowwise.survey_base <- function(data, ...) {
 #' @return A scalar logical.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' is_rowwise(d)           # FALSE
-#' is_rowwise(rowwise(d))  # TRUE
+#' # FALSE for a freshly-built design; TRUE after rowwise()
+#' is_rowwise(d)
+#' is_rowwise(rowwise(d))
 #'
 #' @family grouping
 #' @export
 is_rowwise <- function(design) {
+  if (S7::S7_inherits(design, surveycore::survey_collection)) {
+    return(
+      length(design@surveys) > 0L &&
+        all(vapply(design@surveys, is_rowwise, logical(1L)))
+    )
+  }
   isTRUE(design@variables$rowwise)
 }
 
@@ -133,17 +149,63 @@ is_rowwise <- function(design) {
 #' @return A scalar logical.
 #'
 #' @examples
-#' library(surveytidy)
-#' library(surveycore)
-#' library(dplyr)
-#' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+#' # create a survey object from the bundled NPORS dataset
+#' d <- surveycore::as_survey(
+#'   surveycore::pew_npors_2025,
+#'   weights = weight,
+#'   strata = stratum
+#' )
 #'
-#' is_grouped(d)                   # FALSE
-#' is_grouped(group_by(d, gender)) # TRUE
-#' is_grouped(rowwise(d))          # FALSE (rowwise != grouped)
+#' # only group_by() makes is_grouped() TRUE; rowwise() does not count
+#' is_grouped(d)
+#' is_grouped(group_by(d, gender))
+#' is_grouped(rowwise(d))
 #'
 #' @family grouping
 #' @export
 is_grouped <- function(design) {
   length(design@groups) > 0L
 }
+
+# ── rowwise.survey_collection (PR 2b) ────────────────────────────────────────
+
+#' @rdname rowwise
+#' @method rowwise survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `rowwise()` is dispatched to each
+#' member independently — every member receives `@variables$rowwise = TRUE`
+#' and the same `@variables$rowwise_id_cols`. The collection has no rowwise
+#' marker; rowwise state lives entirely per-member. `@groups`, `@id`, and
+#' `@if_missing_var` on the collection are unchanged.
+#'
+#' Construction-time uniformity is by-construction: every member is rowwise
+#' after the call. Mixed rowwise state across members is detected later by
+#' [mutate()] (see §IV.5 of the survey-collection spec) and warned about
+#' rather than blocked.
+rowwise.survey_collection <- function(
+  data,
+  ...,
+  .if_missing_var = NULL
+) {
+  .dispatch_verb_over_collection(
+    fn = dplyr::rowwise,
+    verb_name = "rowwise",
+    collection = data,
+    ...,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "class_catch",
+    .may_change_groups = FALSE
+  )
+}
+
+# ── is_rowwise.survey_collection (PR 2c) ──
+#
+# Implemented as a class-check branch inside `is_rowwise()` itself (above)
+# rather than an S3 method, because S7 namespaced class names break S3
+# dispatch for surveytidy-owned generics and registerS3method-only methods
+# trip the R CMD check "Apparent methods for exported generics not
+# registered" note. The single-function form is also what spec §IV.10
+# describes as a one-liner predicate.
+# ── end ──

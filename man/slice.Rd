@@ -14,6 +14,12 @@
 \alias{slice_min.survey_result}
 \alias{slice_max.survey_result}
 \alias{slice_sample.survey_result}
+\alias{slice.survey_collection}
+\alias{slice_head.survey_collection}
+\alias{slice_tail.survey_collection}
+\alias{slice_min.survey_collection}
+\alias{slice_max.survey_collection}
+\alias{slice_sample.survey_collection}
 \title{Physically select rows of a survey design object}
 \usage{
 slice(.data, ..., .by = NULL, .preserve = FALSE)
@@ -41,17 +47,102 @@ slice(.data, ..., .by = NULL, .preserve = FALSE)
 \method{slice_max}{survey_result}(.data, ...)
 
 \method{slice_sample}{survey_result}(.data, ...)
+
+\method{slice}{survey_collection}(.data, ...)
+
+\method{slice_head}{survey_collection}(.data, ..., n = NULL, prop = NULL)
+
+\method{slice_tail}{survey_collection}(.data, ..., n = NULL, prop = NULL)
+
+\method{slice_min}{survey_collection}(
+  .data,
+  order_by,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  with_ties = TRUE,
+  na_rm = FALSE,
+  .if_missing_var = NULL
+)
+
+\method{slice_max}{survey_collection}(
+  .data,
+  order_by,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  with_ties = TRUE,
+  na_rm = FALSE,
+  .if_missing_var = NULL
+)
+
+\method{slice_sample}{survey_collection}(
+  .data,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  weight_by = NULL,
+  replace = FALSE,
+  seed = NULL,
+  .if_missing_var = NULL
+)
 }
 \arguments{
-\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object, or a
-\code{survey_result} object returned by a surveycore estimation function.}
+\item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object, a
+\code{survey_result} object returned by a surveycore estimation function, or
+a \code{\link[surveycore:survey_collection]{survey_collection}}.}
 
-\item{...}{Passed to the corresponding \verb{dplyr::slice_*()} function.}
+\item{...}{Passed to the corresponding \verb{dplyr::slice_*()} function. For
+\code{slice()} only, the \code{...} accepts a vector of row indices.}
 
-\item{.by}{Accepted for interface compatibility; not used by survey methods.}
+\item{.by}{Accepted for interface compatibility; not used by survey
+methods.}
 
 \item{.preserve}{Accepted for interface compatibility; not used by survey
 methods.}
+
+\item{n}{Number of rows to keep. See \code{\link[dplyr:slice]{dplyr::slice_head()}}.}
+
+\item{prop}{Fraction of rows to keep (between 0 and 1). See
+\code{\link[dplyr:slice]{dplyr::slice_head()}}.}
+
+\item{order_by}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variable to
+order by, used by \code{slice_min()} and \code{slice_max()}. See
+\code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+
+\item{by}{Per-call grouping override accepted by \code{slice_min()},
+\code{slice_max()}, and \code{slice_sample()}. Not supported on
+\code{survey_collection} — passing a non-NULL value raises
+\code{surveytidy_error_collection_by_unsupported}. Use \code{\link[=group_by]{group_by()}} on the
+collection (or set \code{coll@groups}) instead.}
+
+\item{with_ties}{Should ties be kept together? Used by \code{slice_min()} and
+\code{slice_max()}. See \code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+
+\item{na_rm}{Should missing values in \code{order_by} be removed before
+slicing? Used by \code{slice_min()} and \code{slice_max()}. See
+\code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
+
+\item{weight_by}{<\code{\link[rlang:args_data_masking]{data-masking}}> Sampling
+weights for \code{slice_sample()}. See \code{\link[dplyr:slice]{dplyr::slice_sample()}}. Independent
+of the survey design weights — issues
+\code{surveytidy_warning_slice_sample_weight_by} as a reminder.}
+
+\item{replace}{Should sampling be performed with replacement? Used by
+\code{slice_sample()}. See \code{\link[dplyr:slice]{dplyr::slice_sample()}}.}
+
+\item{seed}{Used by \code{slice_sample.survey_collection} only. \code{NULL} (the
+default) leaves the ambient RNG state alone; an integer seed makes
+per-survey samples deterministic and order-independent (see
+"Survey collections" below).}
 }
 \value{
 An object of the same type as \code{.data} with the following properties:
@@ -88,18 +179,64 @@ reminder. If you intend probability-proportional sampling, use the
 design weights directly.
 }
 }
-\examples{
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+\section{Survey collections}{
 
-# First 10 rows (issues a physical subset warning)
+Slice variants are dispatched to each member independently. Each member's
+\code{slice_*.survey_base} call emits \code{surveycore_warning_physical_subset} — an
+N-member collection therefore surfaces N warnings.
+
+Before dispatching, a verb-specific pre-flight raises
+\code{surveytidy_error_collection_slice_zero} when the supplied arguments would
+produce a 0-row result on every member (e.g., \code{n = 0}, literal
+\code{slice(integer(0))}). This stops dispatch before any member is touched, so
+users see a slice-specific message instead of a misleading per-member
+validator failure.
+
+\code{slice}, \code{slice_head}, \code{slice_tail}, and \code{slice_sample} (when \code{weight_by = NULL}) reference no user columns — their signatures omit \code{.if_missing_var}.
+\code{slice_min}, \code{slice_max}, and \code{slice_sample} with a non-NULL \code{weight_by}
+do reference user columns; their signatures include \code{.if_missing_var}.
+
+\code{slice_min}, \code{slice_max}, and \code{slice_sample} reject the per-call \code{by}
+argument with \code{surveytidy_error_collection_by_unsupported}; use
+\code{\link[=group_by]{group_by()}} on the collection (or \code{coll@groups}) instead.
+}
+
+\section{\code{slice_sample.survey_collection} reproducibility}{
+
+\code{slice_sample.survey_collection} adds a \code{seed = NULL} argument absent from
+\code{slice_sample.survey_base}.
+\itemize{
+\item \code{seed = NULL} (default): no seed manipulation. Per-survey
+\code{slice_sample()} calls draw from the ambient RNG state in iteration
+order. Reproducibility requires a single upstream \code{set.seed()} AND a
+stable collection size and member order — adding or removing a survey
+changes the samples drawn from every subsequent survey.
+\item \verb{seed = <integer>}: each per-survey call is wrapped with a deterministic
+per-survey seed derived as
+\code{strtoi(substr(rlang::hash(paste0(survey_name, "::", seed)), 1, 7), 16L)}.
+Per-survey samples are stable regardless of collection order, additions,
+or removals. The ambient \code{.Random.seed} is restored on exit.
+}
+
+For any analysis intended to be reproducible, pass an explicit integer
+\code{seed}.
+}
+
+\examples{
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
+
+# first 10 rows (issues a physical subset warning)
 slice_head(d, n = 10)
 
-# Rows with the 5 lowest survey weights
+# rows with the 5 lowest survey weights
 slice_min(d, order_by = weight, n = 5)
 
-# Random sample of 50 rows
+# random sample of 50 rows
 slice_sample(d, n = 50)
 
 }

@@ -15,246 +15,207 @@ description: >
 
 You are implementing R package code for surveytidy.
 
----
-
-## Entry Mode — Determine This First
-
-**Mode A: Normal** — starting a new implementation section from the plan.
-Signs: user says "implement", "start coding", "let's build this", or similar.
-→ Go to **Pre-flight**.
-
-**Mode B: CI-fix** — fixing a failure surfaced by commit-and-pr after push.
-Signs: user provides a "CI Failure — Handoff to r-implement" block, or says
-"CI is failing", "fix the CI failure", "commit-and-pr handed off to you", etc.
-→ Read `references/ci-fix.md`. Skip Pre-flight entirely.
-
-**Mode C: Subagent-Driven** — dispatching fresh subagents per plan section.
-Signs: "subagent mode", "drive it yourself", "auto-implement the plan".
-→ Read `references/mode-c-subagent.md`. Skip Pre-flight.
+The surveytidy coding rules (code style, conventions, testing standards) are
+already loaded into context at session start from `.claude/rules/` via
+`CLAUDE.md`. Do not re-read them — assume they are present and authoritative.
+The only rules-adjacent file you may need to touch is
+`plans/error-messages.md` (the registry of error/warning classes).
 
 ---
 
-## Pre-flight (Normal Mode — do these FIRST, before writing any code)
+## Step 0 — Choose a mode (ask, do not infer)
 
-### Step 1: Check the branch
+Before anything else, use the `AskUserQuestion` tool to ask which mode to
+run. Always ask — do not infer from trigger phrases, conversation context,
+or the presence of a CI failure block. The user's explicit answer
+determines the path. This avoids accidentally falling into the
+context-heavy inline path when the user actually wanted subagent dispatch.
+
+Call `AskUserQuestion` with one question, header `"Mode"`, and these three
+options (in this order, with Mode C marked Recommended):
+
+1. **Mode C: Subagent-Driven (Recommended)** — Main thread reads the plan
+   once, then dispatches a fresh implementer subagent per section, with
+   spec-compliance and code-quality reviewer subagents after each. Lowest
+   main-context usage; best for plans with multiple sections.
+2. **Mode A: Inline** — Main agent reads plan/spec and writes code
+   directly in this session. Suitable for tiny one-off changes or
+   interactive driving. Highest main-context usage on multi-section work.
+3. **Mode B: CI-fix** — Triages a `CI Failure — Handoff to r-implement`
+   block from `commit-and-pr`, reproduces locally, fixes within 3
+   attempts. Use only when the user has handed over a CI failure block.
+
+Branch on the answer:
+- **Mode A** → continue with Pre-flight below.
+- **Mode B** → read `references/ci-fix.md`. Skip Pre-flight.
+- **Mode C** → read `references/mode-c-subagent.md`. Skip Pre-flight.
+
+---
+
+## Pre-flight (Mode A)
+
+### Step 1 — Branch
 
 ```bash
 git branch --show-current
 ```
 
-**If on `main`:**
+- On `main`: stop. Tell the user "Feature branches start from `develop`. Run
+  `git checkout develop` and re-invoke `/r-implement`." Do not proceed.
+- On `develop`: ask for the plan path (if not given), find the first
+  unchecked `- [ ]` section, propose a branch name from that section, and
+  on confirmation create it: `git checkout -b feature/X`.
+- On a feature branch: continue.
 
-Stop. Feature branches must be cut from `develop`, not `main`. Tell the user:
+### Step 2 — surveycore version
 
-> "Feature branches should start from `develop`. Please run `git checkout develop`
-> and re-invoke `/r-implement`."
-
-Do not proceed until the user is on `develop` or a feature branch.
-
-**If on `develop`:**
-
-1. Ask the user for the implementation plan path if not already provided
-2. Read the plan and find the first unchecked `- [ ]` section
-3. Determine the branch name from that section's entry
-4. Show: "I'll create branch `feature/X` from `develop` — is that right?"
-5. On confirmation: `git checkout -b feature/X`
-6. Continue to Step 2
-
-**If already on a feature branch:** continue to Step 2.
-
-### Step 2: Check surveycore version
-
-`surveycore` is a co-developed ecosystem dependency installed from GitHub. Working
-against a stale version risks implementing against the wrong class definitions or API.
-
-Run both of these:
+surveycore is a co-developed GitHub-only dependency. A stale install means
+you'd implement against the wrong API:
 
 ```bash
-gh release view --repo JDenn0514/surveycore --json tagName,publishedAt,body \
-  --template '{{.tagName}} ({{.publishedAt}})\n{{.body}}'
-Rscript -e "cat(as.character(packageVersion('surveycore')), '\n')"
+gh release view --repo JDenn0514/surveycore --json tagName \
+  --template '{{.tagName}}'
+Rscript -e "cat(as.character(packageVersion('surveycore')))"
 ```
 
-Compare the installed version against the latest release tag.
+If installed < latest tag, stop and tell the user to run
+`pak::pak('JDenn0514/surveycore')` and re-invoke `/r-implement`. If `gh`
+fails (no auth/network), warn and ask whether to proceed.
 
-**If installed version is behind the latest release:**
+### Step 3 — Locate the plan section (do NOT read the full plan)
 
-Stop and tell the user:
+Plan files are 1,000+ lines. Reading the whole file blows the cache budget
+before you've started. Instead:
 
-> "surveycore `<installed>` is installed but `<latest>` is available.
-> Update before implementing to avoid working against a stale API:
-> ```r
-> pak::pak('JDenn0514/surveycore')
-> ```
-> Re-invoke `/r-implement` after updating."
+```bash
+grep -n "^- \[ \]\|^## \|^### " plans/<plan-file>.md
+```
 
-Do not proceed until the user confirms they have updated or explicitly chooses
-to continue with the current version.
+Use the line numbers to locate the first unchecked `- [ ]` and its enclosing
+section headers. Then `Read` only that range with `offset` and `limit`. The
+section you read is the **entire scope** for this session — do not implement
+anything outside it.
 
-**If installed version matches the latest release:** note it briefly and continue.
+If all sections are checked, report "All sections complete — nothing to
+implement" and stop.
 
-**If the `gh` call fails** (no network, no auth): warn that the check could not
-be completed and ask the user whether to proceed.
+### Step 4 — Locate the spec section (same approach)
 
-### Step 3: Read the implementation plan
+```bash
+grep -n "^## \|^### " plans/<spec-file>.md
+```
 
-Ask the user for the path if not provided (e.g., `plans/impl-phase-0.5.md`).
+Find the section that maps to your plan section. `Read` only that range.
 
-Find the **first unchecked `- [ ]` section**. That section defines the scope for this
-entire session. Do not implement anything outside that scope.
+Before writing any code, confirm the spec section gives you:
+- Every function signature (inputs, outputs, defaults)
+- Every error condition with a class name that exists in
+  `plans/error-messages.md`
+- Every edge case and its expected behavior
 
-If all sections are checked: report "All sections complete — nothing left to implement."
-and stop.
+If anything is ambiguous or underspecified, **stop and ask the user**. Do not
+guess at architecture — surface the question.
 
-### Step 4: Read the spec section
+### Step 5 — Survey existing patterns via Explore subagent
 
-Read the spec file for the section you are about to implement. Before writing any code,
-verify:
+Skip this step only if the section is the first verb in a new family — when
+there are no patterns to mirror yet. Otherwise, do not skim the codebase
+yourself; reading 5–10 R/ and test files in full is the single biggest
+context drain in this workflow.
 
-- Every function's behavior is fully specified (inputs, outputs, errors)
-- All error conditions exist in `plans/error-messages.md`
-- All argument types and defaults are defined
-- All edge cases are explicitly handled
+Dispatch an `Explore` subagent at `medium` thoroughness. Brief it explicitly
+to **navigate, not abstract** — its job is to point you at the right line
+ranges so you can do precise verbatim reads, not to paraphrase the code into
+a summary you'd implement from. Surveytidy's conventions (exact helper
+signatures, exact `test_invariants()` placement, exact error class names)
+need to be copied character-for-character, and a summary loses that.
 
-**If anything is ambiguous or underspecified: STOP. Ask the user to clarify before
-writing a single line of code.** Do not make architectural guesses — surface the question.
+Suggested brief:
 
-### Step 5: Update `plans/error-messages.md`
+> "We're implementing **<section name>** for surveytidy. Survey the codebase
+> and return **navigation pointers, not summaries**. For the verbs and tests
+> most similar to what we're building, report:
+> - File path + exact line range of each relevant function or test block
+> - Function/test signature (def line + arg names only — not the body)
+> - 5-line pseudocode shape of the body
+> - Error/warning classes referenced
+> - Helper functions called from `R/utils.R` or `R/collection-dispatch.R`
+>
+> Cap the report at 250 lines. I'll do verbatim `Read` of the spans you
+> point to — your job is navigation, not abstraction."
 
-Add any new error/warning classes you will need **before** writing code that uses them.
+When the report comes back, do precision reads with `offset`/`limit` on the
+spans the subagent pointed to. Do not re-survey the codebase yourself.
 
----
+### Step 6 — Stage new error classes
 
-## TDD Iron Law
-
-NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
-
-Write code before the test? Delete it. Start over. No exceptions.
-
-Do not keep it "as reference" — delete means delete. Implement fresh from tests.
-
-| Rationalization | Reality |
-|---|---|
-| "Too simple to need a test" | Simple code breaks. The test takes 2 minutes. |
-| "I'll add tests after" | Tests written after pass immediately, proving nothing. |
-| "I already know it works" | Tests-first force edge case discovery. Tests-after verify memory. |
-| "Just this once" | That's how untested code accumulates. |
-| "I manually tested it" | Manual testing is ad-hoc, unrepeatable, and undocumented. |
-
-The red phase isn't ceremony — it's proof. A test written after implementation almost
-always passes immediately, which tells you nothing about whether it's testing real
-behavior. Watching it fail proves the test is exercising what you think it is.
-
----
-
-## Implementation
-
-Follow this order for each sub-task:
-
-1. Write the test file (from the spec's test categories for this section)
-2. Run `devtools::test()` — **confirm all new tests fail (red phase)**
-   Expected output: failures like `── Failure: my_fn() rejects X ──` with
-   "did not throw" or "object not found." If tests pass before any source code
-   exists, the tests are not testing anything — stop and investigate before proceeding.
-3. Write the R source file to make the tests pass
-4. Run `devtools::document()` if any roxygen2 tags changed
-5. Update `_pkgdown.yml` if any new functions were exported — add them to the
-   correct `reference:` section (match the `@family` tag used in roxygen)
-
-**Red flags — stop immediately if:**
-- All new tests pass before any source code is written
-- You are writing source before running `devtools::test()` to confirm failures
-- A spec error condition has no corresponding failing test in the test file
+If your section adds error or warning classes, add rows to
+`plans/error-messages.md` *before* writing code that uses them.
 
 ---
 
-## Verification
+## Implementation (TDD — red phase mandatory)
 
-Run both checks after implementation:
+For each sub-task in the section:
+
+1. Write the test file first, drawing categories from the spec
+   (happy path + every error class + every listed edge case).
+2. Run `devtools::test()` and **confirm the new tests fail** with messages
+   like "did not throw" or "object not found." If anything passes before
+   source code exists, the tests aren't exercising real behavior — stop and
+   investigate.
+3. Write the R source file to make the tests pass.
+4. Run `devtools::document()` if roxygen2 tags changed.
+5. Update `_pkgdown.yml` if new exports were added — place them in the
+   reference section that matches the `@family` tag.
+
+**No production code before a failing test.** A test written after the code
+almost always passes immediately, which proves nothing. The red phase is the
+evidence that the test exercises what you think it does.
+
+When studying existing R/ or test files for patterns, `Read` with
+`offset`/`limit` on the relevant function — full files are 200–500 lines.
+
+---
+
+## Verification & Sub-task Gate
+
+After a sub-task's new tests pass, run both:
 
 ```r
 devtools::test()
 devtools::check()
 ```
 
-**If either fails:** attempt to diagnose and fix, then re-run. After **3 failed attempts
-on the same failure**, stop and report:
+Then verify before marking the sub-task `[x]`:
 
+- **Spec** — every error condition fires, every listed edge case has a test,
+  return-value visibility matches the spec.
+- **Conventions** — `class=` on every `cli_abort`/`cli_warn`; no
+  `@importFrom`; no `:::` (use `R/utils.R` wrappers); S3 methods registered
+  in `.onLoad()`, not via `UseMethod()`; `test_invariants()` is the first
+  assertion in every verb test block; dual pattern (`class=` + snapshot) on
+  user-facing error tests; domain column preserved through the operation;
+  all 3 design types covered via `make_all_designs()`; examples that use
+  dplyr/tidyr verbs open with `library(dplyr)` or `library(tidyr)`.
+
+If either reveals a gap, fix before moving to the next sub-task.
+
+After **3 failed attempts on the same failure**, stop and report:
 - The exact error output
-- What was tried
-- Why it is still failing
-
-Do not mark the section complete until both pass.
-
----
-
-## Sub-task Self-Check
-
-After each sub-task (one `- [ ]` item) passes `devtools::test()`, run these two
-checks before marking it `[x]`. This is the spec compliance + conventions gate —
-the equivalent of a two-stage review after each unit of work.
-
-**Spec compliance** — does the implementation match the spec's exact contracts?
-- Every error condition in the spec fires correctly and has a corresponding test?
-- Every explicitly listed edge case has a test?
-- Return type visibility matches the spec (`invisible()` vs. visible)?
-
-**Conventions** — does it follow the package rules?
-- S3 methods registered correctly via `registerS3method()` in `.onLoad()`? No `UseMethod()` on survey objects?
-- `class=` on every `cli_abort()` and `cli_warn()`?
-- No `@importFrom` anywhere; all external calls use `::`?
-- `test_invariants()` first assertion in every verb test block?
-- Dual pattern (snapshot + `class=`) on all user-facing error tests?
-- Domain column preserved through operation (tested)?
-- All 3 design types tested via `make_all_designs()`?
-
-If either check reveals a gap, fix it before moving to the next sub-task.
+- What you tried
+- Why it's still failing
 
 ---
 
 ## Completion
 
-When `devtools::test()` and `devtools::check()` both pass:
+When `devtools::test()` and `devtools::check()` both pass (0 errors,
+0 warnings, ≤2 notes) and every sub-task has cleared the gate:
 
-1. Mark the section complete in the implementation plan: `- [ ]` → `- [x]`
-2. Report:
+1. Mark the section `[x]` in the plan.
+2. Confirm: `document()` was run if roxygen changed, `_pkgdown.yml` updated
+   if exports were added, `error-messages.md` updated if classes were added.
+3. Report:
 
 > "Section complete. Start a new session with `/commit-and-pr` to create the PR."
-
----
-
-## Conventions (always in context — no need to re-read)
-
-All surveytidy coding conventions are in the rule files loaded at session start.
-Quick index:
-
-| What you need | Where it is |
-|---|---|
-| S3 dispatch, verb method patterns, special columns | `surveytidy-conventions.md` |
-| `cli_abort()` / `cli_warn()` structure and `class=` | `code-style.md §3` |
-| Argument order, return visibility, helper placement | `code-style.md §4` |
-| `::` everywhere, no `@importFrom`, roxygen2 | `r-package-conventions.md §2` |
-| Test structure, design loops, domain preservation | `testing-standards.md` + `testing-surveytidy.md` |
-| Error class names | `plans/error-messages.md` — update this file BEFORE using any new class |
-
----
-
-## Done Criteria
-
-Do not mark the section complete until ALL are true:
-
-- [ ] `devtools::test()` — no failures
-- [ ] `devtools::check()` — 0 errors, 0 warnings, ≤2 notes
-- [ ] `devtools::document()` run (if roxygen2 content changed)
-- [ ] `_pkgdown.yml` updated (if new exports added — add to correct `reference:` section)
-- [ ] `plans/error-messages.md` updated (if new error classes added)
-- [ ] No `cli_abort()` or `cli_warn()` calls missing `class=`
-- [ ] No `@importFrom` in any file
-- [ ] No `:::` usage (use wrapper functions from `R/utils.R` instead)
-- [ ] All three design types tested via `make_all_designs()`
-- [ ] `test_invariants(design)` called first in every verb test block
-- [ ] Dual pattern (`class=` + snapshot) on all user-facing error tests
-- [ ] Domain column preserved through operation (asserted in tests)
-- [ ] All examples begin with `library(dplyr)` or `library(tidyr)`
-- [ ] Sub-task self-check passed (spec compliance + conventions) for each `- [x]` item
-- [ ] Implementation plan section marked `[x]`

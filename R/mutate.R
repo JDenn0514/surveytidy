@@ -82,22 +82,29 @@
 #' @examples
 #' library(surveytidy)
 #' library(surveycore)
+#' # create a survey design from the pew_npors_2025 example dataset
 #' d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 #'
-#' # Add a new column
+#' # add a new column
 #' mutate(d, college_grad = educcat == 1)
 #'
-#' # Conditional recoding
-#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
+#' # conditional recoding
+#' mutate(
+#'   d,
+#'   college = dplyr::if_else(educcat == 1, "college+", "non-college")
+#' )
 #'
-#' # Grouped mutate — within-group mean centring
+#' # grouped mutate — within-group mean centring
 #' d |>
 #'   group_by(gender) |>
 #'   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
 #'
 #' # .keep = "none" keeps only new columns plus design vars (always preserved)
-#' mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
-#'   .keep = "none")
+#' mutate(
+#'   d,
+#'   college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+#'   .keep = "none"
+#' )
 #'
 #' @family modification
 #' @seealso [rename()] to rename columns, [select()] to drop columns
@@ -172,7 +179,7 @@ mutate.survey_base <- function(
 
   # Step 2: Pre-attach label attrs from @metadata so recode functions can
   # read them via attr(x, "labels") / attr(x, "label").
-  augmented_data <- .attach_label_attrs(.data@data, .data@metadata)
+  augmented_data <- .attach_metadata_attrs(.data@data, .data@metadata)
 
   if (rowwise_mode) {
     effective_by <- NULL
@@ -219,7 +226,7 @@ mutate.survey_base <- function(
   }
 
   # Step 4: Post-detect labelled outputs and update @metadata.
-  updated_metadata <- .extract_labelled_outputs(
+  updated_metadata <- .extract_metadata_attrs(
     new_data,
     .data@metadata,
     mutated_names
@@ -235,7 +242,7 @@ mutate.survey_base <- function(
   names(recode_attrs) <- mutated_names
 
   # Step 5b: Strip haven attrs and surveytidy_recode attr from @data.
-  new_data <- .strip_label_attrs(new_data)
+  new_data <- .strip_metadata_attrs(new_data)
 
   # Step 6: Re-attach protected columns that .keep dropped
   protected_in_data <- intersect(.protected_cols(.data), names(.data@data))
@@ -276,6 +283,37 @@ mutate.survey_base <- function(
       } else {
         setdiff(all.vars(rlang::quo_squash(q)), col)
       }
+      # For row_means() / row_sums(): (a) warn if .cols includes design vars,
+      # (b) fall back to the column name as label when .label was not supplied
+      # (cur_column() is unavailable in regular mutate() context).
+      if (isTRUE(recode_fn %in% c("row_means", "row_sums"))) {
+        # (a) design-variable overlap warning
+        design_vars <- .survey_design_var_names(.data)
+        overlap <- intersect(source_cols, design_vars)
+        if (length(overlap) > 0L) {
+          cli::cli_warn(
+            c(
+              "!" = paste0(
+                ".cols includes {length(overlap)} design variable ",
+                "column{?s}: {.field {overlap}}."
+              ),
+              "i" = paste0(
+                "Row aggregation across design variables produces ",
+                "methodologically meaningless results."
+              ),
+              "i" = paste0(
+                "Use a targeted selector such as ",
+                "{.code starts_with(\"y\")} to restrict to substantive columns."
+              )
+            ),
+            class = "surveytidy_warning_rowstats_includes_design_var"
+          )
+        }
+        # (b) label fallback: use column name when .label was not supplied
+        if (is.null(updated_metadata@variable_labels[[col]])) {
+          updated_metadata@variable_labels[[col]] <- col
+        }
+      }
       updated_metadata@transformations[[col]] <- list(
         fn = fn_name,
         source_cols = source_cols,
@@ -303,4 +341,83 @@ mutate.survey_result <- function(.data, ...) {
   new_meta <- .prune_result_meta(attr(result, ".meta"), names(result))
   attr(result, ".meta") <- new_meta
   result
+}
+
+#' @rdname mutate
+#' @method mutate survey_collection
+#' @inheritParams survey_collection_args
+#'
+#' @section Survey collections:
+#' When applied to a `survey_collection`, `mutate()` is dispatched to each
+#' member independently. Per-member warnings (e.g.,
+#' `surveytidy_warning_mutate_weight_col` when modifying the weight column)
+#' fire once per member in which they apply — an N-member collection that
+#' all modify the weight column will surface N warnings.
+#'
+#' If members have non-uniform rowwise state (some are rowwise, some are not),
+#' `mutate()` emits `surveytidy_warning_collection_rowwise_mixed` once before
+#' dispatch as a soft-invariant diagnostic. Dispatch still proceeds; per-member
+#' rowwise/non-rowwise semantics apply for the call. To resolve, call
+#' [rowwise()] or [ungroup()] on the entire collection first.
+#'
+#' `.by` is rejected at the collection layer with
+#' `surveytidy_error_collection_by_unsupported`. Set grouping with
+#' [group_by()] on the collection instead.
+mutate.survey_collection <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .keep = c("all", "used", "unused", "none"),
+  .before = NULL,
+  .after = NULL,
+  .if_missing_var = NULL
+) {
+  if (!is.null(.by)) {
+    cli::cli_abort(
+      c(
+        "x" = "{.arg .by} is not supported on {.cls survey_collection}.",
+        "i" = "Per-call grouping overrides do not compose cleanly with {.code coll@groups}.",
+        "v" = "Use {.fn group_by} on the collection (or set {.code coll@groups}) instead."
+      ),
+      class = "surveytidy_error_collection_by_unsupported"
+    )
+  }
+
+  rowwise_state <- vapply(.data@surveys, is_rowwise, logical(1L))
+  if (any(rowwise_state) && !all(rowwise_state)) {
+    rw_names <- names(.data@surveys)[rowwise_state]
+    nrw_names <- names(.data@surveys)[!rowwise_state]
+    cli::cli_warn(
+      c(
+        "!" = paste0(
+          "{.fn mutate} called on a {.cls survey_collection} with mixed ",
+          "rowwise state."
+        ),
+        "i" = paste0(
+          "Rowwise: {.val {rw_names}}; non-rowwise: {.val {nrw_names}}. ",
+          "Each member will be mutated under its own semantics, which may ",
+          "give inconsistent results."
+        ),
+        "i" = paste0(
+          "Call {.code rowwise(coll)} or {.code ungroup(coll)} on the ",
+          "collection first to make rowwise state uniform."
+        )
+      ),
+      class = "surveytidy_warning_collection_rowwise_mixed"
+    )
+  }
+
+  .keep <- match.arg(.keep)
+  .dispatch_verb_over_collection(
+    fn = dplyr::mutate,
+    verb_name = "mutate",
+    collection = .data,
+    ...,
+    .keep = .keep,
+    .before = .before,
+    .after = .after,
+    .if_missing_var = .if_missing_var,
+    .detect_missing = "pre_check",
+    .may_change_groups = FALSE
+  )
 }

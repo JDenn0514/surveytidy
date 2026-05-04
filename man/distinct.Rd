@@ -3,9 +3,12 @@
 \name{distinct}
 \alias{distinct}
 \alias{distinct.survey_base}
+\alias{distinct.survey_collection}
 \title{Remove duplicate rows from a survey design object}
 \usage{
 \method{distinct}{survey_base}(.data, ..., .keep_all = FALSE)
+
+\method{distinct}{survey_collection}(.data, ..., .keep_all = FALSE, .if_missing_var = NULL)
 
 distinct(.data, ..., .keep_all = FALSE)
 }
@@ -18,6 +21,11 @@ Note: \code{.keep_all} is always \code{TRUE} regardless of what is specified her
 
 \item{.keep_all}{Accepted for interface compatibility; \strong{has no effect}.
 The survey implementation always retains all columns in \verb{@data}.}
+
+\item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
+One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
+collection's stored value. See
+\code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 }
 \value{
 An object of the same class as \code{.data} with the following properties:
@@ -65,16 +73,32 @@ is issued before the operation. The operation still proceeds after the
 warning — the user is assumed to know what they are doing.
 }
 }
+\section{Survey collections}{
+
+When applied to a \code{survey_collection}, \code{distinct()} is dispatched to each
+member independently — there is no cross-survey deduplication. Two
+members that share a literally identical row will both retain that row
+in their post-\code{distinct()} results. This is the V9 contract from the
+survey-collection spec; collections deliberately avoid the
+\code{bind_rows()} analogy here because cross-survey deduplication has no
+coherent variance interpretation across designs.
+
+Each member's \code{distinct.survey_base} issues
+\code{surveycore_warning_physical_subset} independently — N firings on an
+N-member collection. Capture with \code{withCallingHandlers()}.
+}
+
 \examples{
 library(surveytidy)
-library(dplyr)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Deduplicate on all non-design columns (issues physical-subset warning)
+# deduplicate on all non-design columns (issues physical-subset warning)
 distinct(d)
 
-# Deduplicate by one column (all other columns still retained)
+# deduplicate by one column (all other columns still retained)
 distinct(d, cregion)
 
 }

@@ -54,34 +54,23 @@
 #' * [na_if()] to replace specific values with `NA`.
 #'
 #' @examples
-#'
 #' library(surveycore)
 #' library(surveytidy)
+#'
+#' # create the survey design
 #' ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 #'
-#' # ---------------------------------------------------------------------
-#' # Basic replace_values — replace specific values ----------------------
-#' # ---------------------------------------------------------------------
-#'
-#' # Replace "Something else" (4) with 3 (Independent) in pid3.
-#' # Only matching rows change; all others keep their original value.
+#' # basic replace_values — replace pid3 == 4 ("Something else") with 3
 #' new <- ns_wave1_svy |>
 #'   mutate(pid3_clean = replace_values(pid3, from = 4, to = 3)) |>
 #'   select(pid3, pid3_clean)
 #'
 #' new
 #'
-#' # Value labels from pid3 carry over to pid3_clean automatically
+#' # value labels from pid3 carry over to pid3_clean automatically
 #' new@metadata@value_labels
 #'
-#'
-#' # ---------------------------------------------------------------------
-#' # Set metadata --------------------------------------------------------
-#' # ---------------------------------------------------------------------
-#'
-#' # ---- Variable label ----
-#'
-#' # Override the variable label inherited from pid3
+#' # override the inherited variable label via .label
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     pid3_clean = replace_values(
@@ -95,10 +84,7 @@
 #'
 #' new@metadata@variable_labels
 #'
-#'
-#' # ---- Value labels ----
-#'
-#' # Provide updated value labels that reflect the recoded categories
+#' # provide updated value labels that reflect the recoded categories
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     pid3_clean = replace_values(
@@ -117,9 +103,7 @@
 #'
 #' new@metadata@value_labels
 #'
-#'
-#' # ---- Transformation ----
-#'
+#' # attach a plain-language description of the transformation
 #' new <- ns_wave1_svy |>
 #'   mutate(
 #'     pid3_clean = replace_values(
@@ -127,7 +111,10 @@
 #'       from = 4,
 #'       to = 3,
 #'       .label = "Party ID (3 categories)",
-#'       .description = "'Something else' (pid3 == 4) replaced with value 3 (Independent)."
+#'       .description = paste(
+#'         "'Something else' (pid3 == 4) replaced with",
+#'         "value 3 (Independent)."
+#'       )
 #'     )
 #'   ) |>
 #'   select(pid3, pid3_clean)
@@ -155,7 +142,8 @@ replace_values <- function(
 
   merged_labels <- .merge_value_labels(
     attr(x, "labels", exact = TRUE),
-    .value_labels
+    .value_labels,
+    result_values = unique(result)
   )
   effective_label <- if (!is.null(.label)) {
     .label
@@ -164,8 +152,14 @@ replace_values <- function(
   }
 
   if (!is.null(merged_labels) || !is.null(effective_label)) {
-    return(.wrap_labelled(result, effective_label, merged_labels, .description,
-                          fn = "replace_values", var = var_name))
+    return(.wrap_labelled(
+      result,
+      effective_label,
+      merged_labels,
+      .description,
+      fn = "replace_values",
+      var = var_name
+    ))
   }
 
   if (!is.null(.description)) {

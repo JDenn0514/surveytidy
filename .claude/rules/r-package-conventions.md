@@ -76,6 +76,79 @@ If an example is slow, use a smaller inline dataset instead of `\dontrun{}`:
 #' result <- my_function(df)
 ```
 
+### `@examples`: style and formatting
+
+`air` does **not** reformat code inside roxygen comments — author the example
+the way `air` would format equivalent source code. Apply these rules manually:
+
+- **Width:** 80 chars (counted from after `#'`, same budget as source).
+- **Indent:** 2 spaces.
+- **Long calls:** break args across lines, one per line, with the closing `)`
+  on its own line.
+- **Pipelines:** chains of 2+ verbs use `|>` with each step on its own line and
+  multi-arg calls broken further.
+- **Comments:** preface each logical block with a short `# ...` comment
+  describing what the block does. A new comment per chunk, not per line.
+- **Never `library(dplyr)` in examples.** surveytidy re-exports the dplyr
+  verbs it supports (`mutate`, `select`, `filter`, `arrange`, `group_by`,
+  `slice`, `slice_*`, `rowwise`, `rename`, `rename_with`, `relocate`,
+  `distinct`, `pull`, `glimpse`, `ungroup`, `group_vars`, all `*_join`s) and
+  `tidyr::drop_na`, so they work bare under just `library(surveytidy)`.
+  Loading dplyr also masks surveytidy's own `case_when()`, `if_else()`,
+  `na_if()`, `recode()`, and `bind_rows()` — examples that touch any of those
+  must not load dplyr.
+- **Namespace non-re-exported helpers explicitly:**
+  - `dplyr::if_any()`, `dplyr::if_all()`, `dplyr::desc()`, `dplyr::across()`,
+    `dplyr::c_across()`, `dplyr::cur_column()`, `dplyr::n()`
+  - `tidyselect::starts_with()`, `tidyselect::ends_with()`,
+    `tidyselect::contains()`, `tidyselect::matches()`, `tidyselect::where()`,
+    `tidyselect::all_of()`, `tidyselect::any_of()`
+  - Any `tidyr::*` function (`pivot_longer`, `pivot_wider`, etc.)
+- **Blank lines:** use `#'` (empty roxygen line) to separate logical blocks.
+
+**Bad** — cramped, no comments, loads dplyr (which would mask surveytidy
+helpers), bare `starts_with()`:
+
+```r
+#' @examples
+#' library(dplyr)
+#' d <- surveycore::as_survey(
+#'   data.frame(y1 = c(1, 2, 3), y2 = c(4, 5, 6), wt = c(1, 1, 1)),
+#'   weights = wt
+#' )
+#' mutate(d, score = row_means(c(y1, y2)))
+#' mutate(d, score = row_means(starts_with("y"), na.rm = TRUE, .label = "Score"))
+```
+
+**Good** — no `library(dplyr)`, helpers prefixed, blocks commented, pipeline
+expanded:
+
+```r
+#' @examples
+#' # create a dummy survey object
+#' d <- surveycore::as_survey(
+#'   data.frame(
+#'     y1 = c(1, 2, 3),
+#'     y2 = c(4, 5, 6),
+#'     wt = c(1, 1, 1)
+#'   ),
+#'   weights = wt
+#' )
+#'
+#' # use a vector of columns to create the score
+#' mutate(d, score = row_means(c(y1, y2)))
+#'
+#' # use tidy-select for columns and add a label
+#' d |>
+#'   mutate(
+#'     score = row_means(
+#'       tidyselect::starts_with("y"),
+#'       na.rm = TRUE,
+#'       .label = "Score"
+#'     )
+#'   )
+```
+
 ### `@family` grouping
 
 Organize exported functions into families using `@family`:
