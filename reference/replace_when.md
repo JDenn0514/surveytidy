@@ -95,14 +95,11 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic replace_when — identical to dplyr::replace_when() -------------
-# ---------------------------------------------------------------------
-
-# Replace "Something else" (pid3 == 4) with 3 (Independent).
-# Only matching rows change; all others keep their original value.
+# basic replace_when — replace pid3 == 4 ("Something else") with 3
 new <- ns_wave1_svy |>
   mutate(pid3_clean = replace_when(pid3, pid3 == 4 ~ 3)) |>
   select(pid3, pid3_clean)
@@ -110,7 +107,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -131,21 +128,18 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# Value labels from pid3 carry over to pid3_clean automatically
+# value labels from pid3 carry over to pid3_clean automatically
 new@metadata@value_labels
 #> $pid3
 #>       Democrat     Republican    Independent Something else 
 #>              1              2              3              4 
 #> 
+#> $pid3_clean
+#>    Democrat  Republican Independent 
+#>           1           2           3 
+#> 
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
-# Override the variable label inherited from pid3
+# override the inherited variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_when(
@@ -155,12 +149,6 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_when(pid3, pid3 == 4 ~ 3, .label =
-#>   "Party ID (3 categories)")`.
-#> Caused by error in `replace_when()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic argument:
-#> • .label = "Party ID (3 categories)"
 
 new@metadata@variable_labels
 #> $pid3
@@ -169,11 +157,11 @@ new@metadata@variable_labels
 #> $weight
 #> [1] "Survey weight, continuous value from 0-5"
 #> 
+#> $pid3_clean
+#> [1] "Party ID (3 categories)"
+#> 
 
-
-# ---- Value labels ----
-
-# Provide updated value labels that reflect the collapsed categories
+# provide updated value labels reflecting the collapsed categories
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_when(
@@ -188,42 +176,50 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_when(...)`.
-#> Caused by error in `replace_when()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party ID (3 categories)"
-#> • .value_labels = c(Democrat = 1, Republican = 2, `Independent/Other` = 3)
 
 new@metadata@value_labels
 #> $pid3
 #>       Democrat     Republican    Independent Something else 
 #>              1              2              3              4 
 #> 
+#> $pid3_clean
+#>          Democrat        Republican Independent/Other 
+#>                 1                 2                 3 
+#> 
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_when(
       pid3,
       pid3 == 4 ~ 3,
       .label = "Party ID (3 categories)",
-      .description = "Recoded pid3: 'Something else' (4) merged into Independent (3)."
+      .description = paste(
+        "Recoded pid3: 'Something else' (4) merged into",
+        "Independent (3)."
+      )
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_when(...)`.
-#> Caused by error in `replace_when()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party ID (3 categories)"
-#> • .description = "Recoded pid3: 'Something else' (4) merged into Independent
-#>   (3)."
 
 new@metadata@transformations
 #> $pid3_clean
-#> [1] "replace_when(pid3, pid3 == 4 ~ 3)"
+#> $pid3_clean$fn
+#> [1] "replace_when"
+#> 
+#> $pid3_clean$source_cols
+#> [1] "pid3"
+#> 
+#> $pid3_clean$expr
+#> [1] "replace_when(pid3, pid3 == 4 ~ 3, .label = \"Party ID (3 categories)\", "     
+#> [2] "    .description = paste(\"Recoded pid3: 'Something else' (4) merged into\", "
+#> [3] "        \"Independent (3).\"))"                                               
+#> 
+#> $pid3_clean$output_type
+#> [1] "vector"
+#> 
+#> $pid3_clean$description
+#> [1] "Recoded pid3: 'Something else' (4) merged into Independent (3)."
+#> 
 #> 
 ```

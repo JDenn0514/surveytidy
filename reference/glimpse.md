@@ -9,6 +9,9 @@ variables are hidden from the display.
 ## Usage
 
 ``` r
+# S3 method for class 'survey_collection'
+glimpse(x, width = NULL, ..., .by_survey = FALSE)
+
 glimpse(x, width = NULL, ...)
 
 # S3 method for class 'survey_base'
@@ -32,9 +35,43 @@ glimpse(x, width = NULL, ...)
   Passed to
   [`dplyr::glimpse()`](https://pillar.r-lib.org/reference/glimpse.html).
 
+- .by_survey:
+
+  If `TRUE`, render a separate labelled glimpse block per member,
+  prefixed by the member name. Default `FALSE` renders a single bound
+  tibble with the source survey id prepended as `coll@id` (default
+  `.survey`).
+
 ## Value
 
 `x` invisibly.
+
+`x` invisibly.
+
+## Survey collections
+
+Default mode binds every member's `@data` into a single tibble (via
+[`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+with `.id = coll@id`) and glimpses the result. If any member's `@data`
+already contains a column named `coll@id`, the
+surveytidy_error_collection_glimpse_id_collision error is raised BEFORE
+binding — symmetric with surveycore's
+`surveycore_error_collection_id_collision` for the construction-time
+case. Resolve by renaming the colliding column or setting a different
+`coll@id` via
+[`surveycore::set_collection_id()`](https://jdenn0514.github.io/surveycore/reference/set_collection_id.html).
+
+Internal column rename: when the member `@data` contains
+[surveycore::SURVEYCORE_DOMAIN_COL](https://jdenn0514.github.io/surveycore/reference/SURVEYCORE_DOMAIN_COL.html)
+(`..surveycore_domain..`), the column is renamed to `.in_domain` for the
+rendered output. Per-member `@data` is untouched.
+
+Type-coercion footer: when
+[`bind_rows()`](https://jdenn0514.github.io/surveytidy/reference/bind_rows.md)
+coerces conflicting types across members (e.g., `<chr>` vs `<dbl>`), a
+footer enumerates the affected columns. Truncates after 5 columns; line
+width capped at 80 characters. No opt-out — the footer renders only when
+conflicts exist.
 
 ## See also
 
@@ -42,7 +79,7 @@ glimpse(x, width = NULL, ...)
 to control which columns are visible
 
 Other selecting:
-[`pull`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
+[`pull.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
 [`relocate`](https://jdenn0514.github.io/surveytidy/reference/relocate.md),
 [`select`](https://jdenn0514.github.io/surveytidy/reference/select.md)
 
@@ -51,9 +88,11 @@ Other selecting:
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Glimpse all columns
+# glimpse all columns
 glimpse(d)
 #> Rows: 5,022
 #> Columns: 65
@@ -123,7 +162,7 @@ glimpse(d)
 #> $ basewt            <dbl> 0.8022005, 0.5324945, 1.2496416, 1.6044009, 0.676350…
 #> $ weight            <dbl> 0.4970381, 0.3070815, 0.6468503, 1.3112448, 0.241760…
 
-# After select(), shows only the selected columns
+# after select(), shows only the selected columns
 d |>
   select(gender, agecat, partysum) |>
   glimpse()

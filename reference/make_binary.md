@@ -61,14 +61,20 @@ Other transformation:
 [`make_dicho()`](https://jdenn0514.github.io/surveytidy/reference/make_dicho.md),
 [`make_factor()`](https://jdenn0514.github.io/surveytidy/reference/make_factor.md),
 [`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md),
-[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md)
+[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md),
+[`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md),
+[`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
 
 ## Examples
 
 ``` r
-library(dplyr)
-x <- factor(c("Agree", "Disagree", "Agree", NA),
-            levels = c("Agree", "Disagree"))
+# build a 2-level factor with one NA
+x <- factor(
+  c("Agree", "Disagree", "Agree", NA),
+  levels = c("Agree", "Disagree")
+)
+
+# encode as a 0/1 integer indicator
 make_binary(x)
 #> [1]  1  0  1 NA
 #> attr(,"label")

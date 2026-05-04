@@ -46,11 +46,14 @@ Other transformation:
 [`make_binary()`](https://jdenn0514.github.io/surveytidy/reference/make_binary.md),
 [`make_dicho()`](https://jdenn0514.github.io/surveytidy/reference/make_dicho.md),
 [`make_factor()`](https://jdenn0514.github.io/surveytidy/reference/make_factor.md),
-[`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md)
+[`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md),
+[`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md),
+[`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
 
 ## Examples
 
 ``` r
+# reverse a 1-4 numeric scale: 1 swaps with 4, 2 swaps with 3
 x <- c(1, 2, 3, 4)
 make_rev(x)
 #> [1] 4 3 2 1

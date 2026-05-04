@@ -22,8 +22,14 @@ filter(.data, ..., .by = NULL, .preserve = FALSE)
 # S3 method for class 'survey_result'
 filter(.data, ...)
 
+# S3 method for class 'survey_collection'
+filter(.data, ..., .by = NULL, .preserve = FALSE, .if_missing_var = NULL)
+
 # S3 method for class 'survey_base'
 filter_out(.data, ..., .by = NULL, .preserve = FALSE)
+
+# S3 method for class 'survey_collection'
+filter_out(.data, ..., .by = NULL, .preserve = FALSE, .if_missing_var = NULL)
 
 filter(.data, ..., .by = NULL, .preserve = FALSE)
 ```
@@ -52,6 +58,13 @@ filter(.data, ..., .by = NULL, .preserve = FALSE)
 - .preserve:
 
   Ignored. Included for compatibility with the dplyr generic.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -103,6 +116,22 @@ condition evaluates to `NA` are treated as out-of-domain.
 The domain status of each row is stored in the `..surveycore_domain..`
 column of `@data`. `TRUE` means in-domain; `FALSE` means out-of-domain.
 
+## Survey collections
+
+When applied to a `survey_collection`, `filter()` is dispatched to each
+member independently. Each member's domain column is updated per
+`filter.survey_base`'s contract; the per-member empty-domain warning
+(`surveycore_warning_empty_domain`) fires N times on an N-member
+collection if every member's filter is empty. The output
+`survey_collection` preserves the input's `@id`, `@if_missing_var`, and
+`@groups`. Use `.if_missing_var` to override the collection's stored
+missing-variable behavior for this call.
+
+`.by` is rejected at the collection layer with
+`surveytidy_error_collection_by_unsupported`. Set grouping with
+[`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+on the collection instead.
+
 ## See also
 
 [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) for
@@ -114,9 +143,11 @@ physical row removal
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Keep adults 50 and older
+# keep adults 50 and older
 filter(d, agecat >= 3)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -145,7 +176,7 @@ filter(d, agecat >= 3)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Multiple conditions are AND-ed together
+# multiple conditions are AND-ed together
 filter(d, agecat >= 3, gender == 2)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -203,7 +234,7 @@ filter_out(d, agecat == 1)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Chained calls accumulate (these are equivalent)
+# chained calls accumulate (these are equivalent)
 filter(d, agecat >= 3, gender == 2)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -231,7 +262,9 @@ filter(d, agecat >= 3, gender == 2)
 #> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
-filter(d, agecat >= 3) |> filter(gender == 2)
+d |>
+  filter(agecat >= 3) |>
+  filter(gender == 2)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -259,7 +292,7 @@ filter(d, agecat >= 3) |> filter(gender == 2)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Multi-column conditions with if_any() and if_all()
+# multi-column conditions with if_any() and if_all()
 filter(d, dplyr::if_any(c(smuse_fb, smuse_yt), ~ !is.na(.x)))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────

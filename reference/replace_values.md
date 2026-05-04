@@ -107,14 +107,11 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic replace_values — replace specific values ----------------------
-# ---------------------------------------------------------------------
-
-# Replace "Something else" (4) with 3 (Independent) in pid3.
-# Only matching rows change; all others keep their original value.
+# basic replace_values — replace pid3 == 4 ("Something else") with 3
 new <- ns_wave1_svy |>
   mutate(pid3_clean = replace_values(pid3, from = 4, to = 3)) |>
   select(pid3, pid3_clean)
@@ -122,7 +119,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -143,21 +140,18 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# Value labels from pid3 carry over to pid3_clean automatically
+# value labels from pid3 carry over to pid3_clean automatically
 new@metadata@value_labels
 #> $pid3
 #>       Democrat     Republican    Independent Something else 
 #>              1              2              3              4 
 #> 
+#> $pid3_clean
+#>    Democrat  Republican Independent 
+#>           1           2           3 
+#> 
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
-# Override the variable label inherited from pid3
+# override the inherited variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_values(
@@ -168,12 +162,6 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_values(pid3, from = 4, to = 3,
-#>   .label = "Party ID (3 categories)")`.
-#> Caused by error in `replace_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic argument:
-#> • .label = "Party ID (3 categories)"
 
 new@metadata@variable_labels
 #> $pid3
@@ -182,11 +170,11 @@ new@metadata@variable_labels
 #> $weight
 #> [1] "Survey weight, continuous value from 0-5"
 #> 
+#> $pid3_clean
+#> [1] "Party ID (3 categories)"
+#> 
 
-
-# ---- Value labels ----
-
-# Provide updated value labels that reflect the recoded categories
+# provide updated value labels that reflect the recoded categories
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_values(
@@ -202,22 +190,18 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_values(...)`.
-#> Caused by error in `replace_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party ID (3 categories)"
-#> • .value_labels = c(Democrat = 1, Republican = 2, `Independent/Other` = 3)
 
 new@metadata@value_labels
 #> $pid3
 #>       Democrat     Republican    Independent Something else 
 #>              1              2              3              4 
 #> 
+#> $pid3_clean
+#>          Democrat        Republican Independent/Other 
+#>                 1                 2                 3 
+#> 
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = replace_values(
@@ -225,20 +209,32 @@ new <- ns_wave1_svy |>
       from = 4,
       to = 3,
       .label = "Party ID (3 categories)",
-      .description = "'Something else' (pid3 == 4) replaced with value 3 (Independent)."
+      .description = paste(
+        "'Something else' (pid3 == 4) replaced with",
+        "value 3 (Independent)."
+      )
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = replace_values(...)`.
-#> Caused by error in `replace_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party ID (3 categories)"
-#> • .description = "'Something else' (pid3 == 4) replaced with value 3
-#>   (Independent)."
 
 new@metadata@transformations
 #> $pid3_clean
-#> [1] "replace_values(pid3, from = 4, to = 3)"
+#> $pid3_clean$fn
+#> [1] "replace_values"
+#> 
+#> $pid3_clean$source_cols
+#> [1] "pid3"
+#> 
+#> $pid3_clean$expr
+#> [1] "replace_values(pid3, from = 4, to = 3, .label = \"Party ID (3 categories)\", "
+#> [2] "    .description = paste(\"'Something else' (pid3 == 4) replaced with\", "    
+#> [3] "        \"value 3 (Independent).\"))"                                         
+#> 
+#> $pid3_clean$output_type
+#> [1] "vector"
+#> 
+#> $pid3_clean$description
+#> [1] "'Something else' (pid3 == 4) replaced with value 3 (Independent)."
+#> 
 #> 
 ```

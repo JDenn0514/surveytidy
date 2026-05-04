@@ -1,15 +1,27 @@
 # Recode values using an explicit mapping
 
-`recode_values()` replaces each value of `x` found in `from` with the
-corresponding value from `to`. Values not found in `from` are either
-kept unchanged (`.unmatched = "default"`, the default) or trigger an
-error (`.unmatched = "error"`).
+`recode_values()` replaces each value of `x` with a corresponding new
+value. The mapping can be supplied in any of three ways:
+
+- **Formula interface** — pass `old_value ~ new_value` formulas in
+  `...`:
+  `recode_values(score, 1 ~ "SD", 2 ~ "D", 3 ~ "N", 4 ~ "A", 5 ~ "SA")`.
+
+- **Lookup-table interface** — pass parallel `from` and `to` vectors.
+
+- **Label-driven interface** — set `.use_labels = TRUE` to build the map
+  from `attr(x, "labels")` (values become `from`, label strings become
+  `to`).
+
+Values not found in the map are either kept unchanged
+(`.unmatched = "default"`, the default) or trigger an error
+(`.unmatched = "error"`).
 
 Unlike
 [`replace_values()`](https://jdenn0514.github.io/surveytidy/reference/replace_values.md),
 which updates only specific matching values and retains everything else,
 `recode_values()` is intended for full remapping: every possible value
-in `x` typically has a corresponding entry in `from`.
+in `x` typically has a corresponding entry in the map.
 
 When any of `.label`, `.value_labels`, `.factor`, or `.description` are
 supplied, output label metadata is written to `@metadata` after
@@ -44,11 +56,14 @@ recode_values(
 
 - ...:
 
-  These dots are for future extensions and must be empty.
+  `old_value ~ new_value` formulas describing the recoding map.
+  Equivalent to supplying parallel `from`/`to` vectors. When `...` is
+  non-empty, `from` and `.use_labels = TRUE` must not be used.
 
 - from:
 
-  Vector of old values to recode from. Required unless
+  Vector (or list of vectors, for many-to-one mapping) of old values.
+  Required unless formulas are supplied in `...` or
   `.use_labels = TRUE`. Must be the same type as `x`.
 
 - to:
@@ -86,15 +101,17 @@ recode_values(
 
 - .factor:
 
-  `logical(1)`. If `TRUE`, returns a factor with levels in `to` order
-  (or `.value_labels` name order if supplied). Cannot be combined with
-  `.label`.
+  `logical(1)`. If `TRUE`, returns a factor. Levels are taken from
+  `.value_labels` names if supplied, otherwise from `to` in lookup mode
+  or from the right-hand sides of the `...` formulas in formula mode.
+  Cannot be combined with `.label`.
 
 - .use_labels:
 
   `logical(1)`. If `TRUE`, reads `attr(x, "labels")` to build the
   `from`/`to` map automatically: values become `from`, label strings
-  become `to`. `x` must carry value labels; errors if not.
+  become `to`. `x` must carry value labels; errors if not. Cannot be
+  combined with formulas in `...`.
 
 - .description:
 
@@ -138,19 +155,19 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic recode_values — explicit from/to mapping ----------------------
-# ---------------------------------------------------------------------
-
-# Recode pid3 numeric codes to character labels
+# formula interface — recode pid3 using `old ~ new` formulas in `...`
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
       pid3,
-      from = c(1, 2, 3, 4),
-      to = c("Democrat", "Republican", "Independent", "Other")
+      1 ~ "Democrat",
+      2 ~ "Republican",
+      3 ~ "Independent",
+      4 ~ "Other"
     )
   ) |>
   select(pid3, party)
@@ -158,7 +175,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -179,10 +196,73 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
+# formula interface with default for unmatched values
+new <- ns_wave1_svy |>
+  mutate(
+    dem = recode_values(pid3, 1 ~ "Democrat", default = "Non-Democrat")
+  ) |>
+  select(pid3, dem)
 
-# ---- Use default to catch unmatched values ----
+new
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_nonprob> (non-probability) [experimental]
+#> Sample size: 6422
+#> 
+#> # A tibble: 6,422 × 2
+#>     pid3 dem         
+#>    <dbl> <chr>       
+#>  1     1 Democrat    
+#>  2     1 Democrat    
+#>  3     1 Democrat    
+#>  4     3 Non-Democrat
+#>  5     2 Non-Democrat
+#>  6     1 Democrat    
+#>  7     4 Non-Democrat
+#>  8     2 Non-Democrat
+#>  9     2 Non-Democrat
+#> 10     1 Democrat    
+#> # ℹ 6,412 more rows
+#> 
+#> ℹ Design variables preserved but hidden: weight.
+#> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# Only recode Democrats; everything else becomes "Non-Democrat"
+# explicit from/to mapping — recode numeric codes to character labels
+new <- ns_wave1_svy |>
+  mutate(
+    party = recode_values(
+      pid3,
+      from = c(1, 2, 3, 4),
+      to = c("Democrat", "Republican", "Independent", "Other")
+    )
+  ) |>
+  select(pid3, party)
+
+new
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_nonprob> (non-probability) [experimental]
+#> Sample size: 6422
+#> 
+#> # A tibble: 6,422 × 2
+#>     pid3 party      
+#>    <dbl> <chr>      
+#>  1     1 Democrat   
+#>  2     1 Democrat   
+#>  3     1 Democrat   
+#>  4     3 Independent
+#>  5     2 Republican 
+#>  6     1 Democrat   
+#>  7     4 Other      
+#>  8     2 Republican 
+#>  9     2 Republican 
+#> 10     1 Democrat   
+#> # ℹ 6,412 more rows
+#> 
+#> ℹ Design variables preserved but hidden: weight.
+#> ℹ Use `print(x, full = TRUE)` to show all variables.
+
+# use default to catch unmatched values
 new <- ns_wave1_svy |>
   mutate(
     dem = recode_values(
@@ -197,7 +277,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -218,53 +298,36 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---------------------------------------------------------------------
-# .use_labels — build the map from existing value labels --------------
-# ---------------------------------------------------------------------
-
-# pid3 carries value labels (1=Democrat, 2=Republican, 3=Independent,
-# 4=Something else). .use_labels = TRUE converts codes to label strings.
+# .use_labels = TRUE builds the from/to map from existing value labels
 new <- ns_wave1_svy |>
   mutate(party = recode_values(pid3, .use_labels = TRUE)) |>
   select(pid3, party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `party = recode_values(pid3, .use_labels = TRUE)`.
-#> Caused by error in `recode_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic argument:
-#> • .use_labels = TRUE
 
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
-#>     pid3 dem         
-#>    <dbl> <chr>       
-#>  1     1 Democrat    
-#>  2     1 Democrat    
-#>  3     1 Democrat    
-#>  4     3 Non-Democrat
-#>  5     2 Non-Democrat
-#>  6     1 Democrat    
-#>  7     4 Non-Democrat
-#>  8     2 Non-Democrat
-#>  9     2 Non-Democrat
-#> 10     1 Democrat    
+#>     pid3 party         
+#>    <dbl> <chr>         
+#>  1     1 Democrat      
+#>  2     1 Democrat      
+#>  3     1 Democrat      
+#>  4     3 Independent   
+#>  5     2 Republican    
+#>  6     1 Democrat      
+#>  7     4 Something else
+#>  8     2 Republican    
+#>  9     2 Republican    
+#> 10     1 Democrat      
 #> # ℹ 6,412 more rows
 #> 
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
+# attach a variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -275,11 +338,6 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `party = recode_values(...)`.
-#> Caused by error in `recode_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic argument:
-#> • .label = "Party identification"
 
 new@metadata@variable_labels
 #> $pid3
@@ -288,11 +346,11 @@ new@metadata@variable_labels
 #> $weight
 #> [1] "Survey weight, continuous value from 0-5"
 #> 
+#> $party
+#> [1] "Party identification"
+#> 
 
-
-# ---- Value labels ----
-
-# Collapse 4 categories to 3 and add updated value labels
+# collapse 4 categories to 3 and document via .value_labels
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -308,23 +366,18 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `party = recode_values(...)`.
-#> Caused by error in `recode_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party ID (3 categories)"
-#> • .value_labels = c(Democrat = 1, Republican = 2, `Independent/Other` = 3)
 
 new@metadata@value_labels
 #> $pid3
 #>       Democrat     Republican    Independent Something else 
 #>              1              2              3              4 
 #> 
+#> $party
+#>          Democrat        Republican Independent/Other 
+#>                 1                 2                 3 
+#> 
 
-
-# ---- Make output a factor ----
-
-# Levels are ordered by the to vector
+# return a factor with levels in `to` order
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -335,39 +388,32 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `party = recode_values(...)`.
-#> Caused by error in `recode_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic argument:
-#> • .factor = TRUE
 
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
-#>     pid3 dem         
-#>    <dbl> <chr>       
-#>  1     1 Democrat    
-#>  2     1 Democrat    
-#>  3     1 Democrat    
-#>  4     3 Non-Democrat
-#>  5     2 Non-Democrat
-#>  6     1 Democrat    
-#>  7     4 Non-Democrat
-#>  8     2 Non-Democrat
-#>  9     2 Non-Democrat
-#> 10     1 Democrat    
+#>     pid3 party      
+#>    <dbl> <fct>      
+#>  1     1 Democrat   
+#>  2     1 Democrat   
+#>  3     1 Democrat   
+#>  4     3 Independent
+#>  5     2 Republican 
+#>  6     1 Democrat   
+#>  7     4 Other      
+#>  8     2 Republican 
+#>  9     2 Republican 
+#> 10     1 Democrat   
 #> # ℹ 6,412 more rows
 #> 
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     party = recode_values(
@@ -375,20 +421,33 @@ new <- ns_wave1_svy |>
       from = c(1, 2, 3, 4),
       to = c("Democrat", "Republican", "Independent", "Other"),
       .label = "Party identification",
-      .description = "pid3 recoded: 1->Democrat, 2->Republican, 3->Independent, 4->Other."
+      .description = paste(
+        "pid3 recoded: 1->Democrat, 2->Republican,",
+        "3->Independent, 4->Other."
+      )
     )
   ) |>
   select(pid3, party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `party = recode_values(...)`.
-#> Caused by error in `recode_values()`:
-#> ! Arguments in `...` must be passed by position, not name.
-#> ✖ Problematic arguments:
-#> • .label = "Party identification"
-#> • .description = "pid3 recoded: 1->Democrat, 2->Republican, 3->Independent,
-#>   4->Other."
 
 new@metadata@transformations
-#> $dem
-#> [1] "recode_values(pid3, from = c(1), to = c(\"Democrat\"), default = \"Non-Democrat\")"
+#> $party
+#> $party$fn
+#> [1] "recode_values"
+#> 
+#> $party$source_cols
+#> [1] "pid3"
+#> 
+#> $party$expr
+#> [1] "recode_values(pid3, from = c(1, 2, 3, 4), to = c(\"Democrat\", "                     
+#> [2] "    \"Republican\", \"Independent\", \"Other\"), .label = \"Party identification\", "
+#> [3] "    .description = paste(\"pid3 recoded: 1->Democrat, 2->Republican,\", "            
+#> [4] "        \"3->Independent, 4->Other.\"))"                                             
+#> 
+#> $party$output_type
+#> [1] "vector"
+#> 
+#> $party$description
+#> [1] "pid3 recoded: 1->Democrat, 2->Republican, 3->Independent, 4->Other."
+#> 
 #> 
 ```

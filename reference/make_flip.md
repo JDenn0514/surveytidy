@@ -51,14 +51,23 @@ Other transformation:
 [`make_binary()`](https://jdenn0514.github.io/surveytidy/reference/make_binary.md),
 [`make_dicho()`](https://jdenn0514.github.io/surveytidy/reference/make_dicho.md),
 [`make_factor()`](https://jdenn0514.github.io/surveytidy/reference/make_factor.md),
-[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md)
+[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md),
+[`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md),
+[`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
 
 ## Examples
 
 ``` r
+# build a labelled numeric vector with a 4-level Likert scale
 x <- c(1, 2, 3, 4)
-attr(x, "labels") <- c("Strongly agree" = 1, "Agree" = 2,
-                        "Disagree" = 3, "Strongly disagree" = 4)
+attr(x, "labels") <- c(
+  "Strongly agree" = 1,
+  "Agree" = 2,
+  "Disagree" = 3,
+  "Strongly disagree" = 4
+)
+
+# flip the semantic meaning while keeping numeric values unchanged
 make_flip(x, "I dislike the color blue")
 #> [1] 1 2 3 4
 #> attr(,"labels")

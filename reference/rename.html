@@ -25,7 +25,7 @@ change."><meta property="og:image" content="https://jdenn0514.github.io/surveyti
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ change."><meta property="og:image" content="https://jdenn0514.github.io/surveyti
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Rename columns of a survey design object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/rename.R" class="external-link"><code>R/rename.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/rename.R" class="external-link"><code>R/rename.R</code></a></small>
       <div class="d-none name"><code>rename.Rd</code></div>
     </div>
 
@@ -75,7 +75,19 @@ change.</p>
 <span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">.fn</span>, .cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_result'</span></span>
-<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">.fn</span>, .cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">.data</span>, <span class="va">.fn</span>, .cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu">rename</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .if_missing_var <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span></span>
+<span>  <span class="va">.data</span>,</span>
+<span>  <span class="va">.fn</span>,</span>
+<span>  .cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  .if_missing_var <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -102,6 +114,13 @@ duplicates and no conflicts with existing non-renamed column names.</p></dd>
 <dt id="arg--cols">.cols<a class="anchor" aria-label="anchor" href="#arg--cols"></a></dt>
 <dd><p>&lt;<code><a href="https://tidyselect.r-lib.org/reference/language.html" class="external-link">tidy-select</a></code>&gt; Columns whose names
 <code>.fn</code> will transform. Defaults to all columns.</p></dd>
+
+
+<dt id="arg--if-missing-var">.if_missing_var<a class="anchor" aria-label="anchor" href="#arg--if-missing-var"></a></dt>
+<dd><p>Per-call override of <code>collection@if_missing_var</code>.
+One of <code>"error"</code> or <code>"skip"</code>, or <code>NULL</code> (the default) to inherit the
+collection's stored value. See
+<code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -149,7 +168,7 @@ an error.</p>
 <li><p>A formula: <code>rename_with(d, ~ toupper(.))</code></p></li>
 <li><p>A lambda: <code>rename_with(d, \(x) paste0(x, "_v2"))</code></p></li>
 </ul><p>Extra arguments to <code>.fn</code> can be passed via <code>...</code>:</p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu">stringr</span><span class="fu">::</span><span class="va"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace</a></span>, .cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span>,</span>
+<p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu">stringr</span><span class="fu">::</span><span class="va"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace</a></span>, .cols <span class="op">=</span> <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span>,</span>
 <span>            pattern <span class="op">=</span> <span class="st">"y"</span>, replacement <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span></span></code></pre><p></p></div>
 <p><code>.cols</code> uses tidy-select syntax. The default <code><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">dplyr::everything()</a></code> applies
 <code>.fn</code> to all columns including design variables — which will trigger a
@@ -157,6 +176,38 @@ an error.</p>
 variable.</p>
 </div>
 
+    </div>
+    <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>rename()</code> is dispatched to each
+member independently. Each member's <code>rename.survey_base</code> updates <code>@data</code>,
+<code>@variables</code>, <code>@metadata</code>, and <code>@groups</code> atomically.</p>
+<p>Before dispatching, <code>rename.survey_collection</code> resolves the rename map
+against each member's <code>@data</code> and raises
+<code>surveytidy_error_collection_rename_group_partial</code> if any column in
+<code>coll@groups</code> would be renamed on some members but not others — that
+would leave the collection with an inconsistent <code>@groups</code> invariant
+(G1) that no <code>.if_missing_var</code> policy can recover. For plain <code>rename</code>
+the rename map is universal, so this branch normally fires only as a
+defense-in-depth catch for regressions in the surveycore G1b validator.</p>
+<p>Renaming a non-group design variable (weights, ids, strata, fpc) emits
+<code>surveytidy_warning_rename_design_var</code> once per member — N firings on
+an N-member collection. Capture with <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers()</a></code>.</p>
+
+<p>When applied to a <code>survey_collection</code>, <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with()</a></code> is dispatched to
+each member independently. Each member resolves <code>.cols</code> against its own
+<code>@data</code>, so a <code>.cols</code> like <code>where(is.factor)</code> may select different
+columns on different members.</p>
+<p>Before dispatching, <code>rename_with.survey_collection</code> resolves <code>.cols</code>
+per-member and raises
+<code>surveytidy_error_collection_rename_group_partial</code> if any column in
+<code>coll@groups</code> would be renamed on some members but not others. This
+is the genuine trigger for the partial-rename class — <code>.cols</code>
+resolving differently across a heterogeneous collection is the path
+the spec is designed to catch (see §IV.4 reachability note).</p>
+<p>Per-member design-variable warnings fire once per affected member.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -168,14 +219,15 @@ columns</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create a survey design from the pew_npors_2025 example dataset</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># rename() ----------------------------------------------------------------</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Rename an outcome column</span></span></span>
+<span class="r-in"><span><span class="co"># rename an outcome column</span></span></span>
 <span class="r-in"><span><span class="fu">rename</span><span class="op">(</span><span class="va">d</span>, financial_situation <span class="op">=</span> <span class="va">fin_sit</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -203,7 +255,7 @@ columns</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   bbhome &lt;dbl&gt;, smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_ig &lt;dbl&gt;, smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Rename multiple columns at once</span></span></span>
+<span class="r-in"><span><span class="co"># rename multiple columns at once</span></span></span>
 <span class="r-in"><span><span class="fu">rename</span><span class="op">(</span><span class="va">d</span>, region <span class="op">=</span> <span class="va">cregion</span>, education <span class="op">=</span> <span class="va">educcat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -231,7 +283,7 @@ columns</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Rename a design variable — warns and updates the design specification</span></span></span>
+<span class="r-in"><span><span class="co"># rename a design variable — warns and updates the design specification</span></span></span>
 <span class="r-in"><span><span class="fu">rename</span><span class="op">(</span><span class="va">d</span>, survey_weight <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Renamed design variable <span style="color: #00BB00;">weight</span>.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The survey design has been updated to track the new name.</span>
@@ -263,8 +315,8 @@ columns</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># rename_with() -----------------------------------------------------------</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Apply a function to all outcome columns</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">toupper</span>, .cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"econ"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># apply a function to all matching columns</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">toupper</span>, .cols <span class="op">=</span> <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"econ"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -291,8 +343,8 @@ columns</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Use a formula</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">.</span>, <span class="st">"_v2"</span><span class="op">)</span>, .cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"econ"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># use a formula</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">d</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">.</span>, <span class="st">"_v2"</span><span class="op">)</span>, .cols <span class="op">=</span> <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"econ"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,7 @@
 
       <dl><dt>
 
-          <code><a href="filter.html">filter_out(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="filter.html">filter()</a></code>
+          <code><a href="filter.html">filter_out(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="filter.html">filter_out(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="filter.html">filter()</a></code>
 
         </dt>
         <dd>Keep or drop rows using domain estimation</dd>
@@ -73,7 +73,7 @@
 
         <dt>
 
-          <code><a href="slice.html">slice()</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_result&gt;</i>)</a></code>
+          <code><a href="slice.html">slice()</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="slice.html">slice_head(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="slice.html">slice_tail(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="slice.html">slice_min(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="slice.html">slice_max(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="slice.html">slice_sample(<i>&lt;survey_collection&gt;</i>)</a></code>
 
         </dt>
         <dd>Physically select rows of a survey design object</dd>
@@ -110,7 +110,7 @@
 
         <dt>
 
-          <code><a href="rename.html">rename()</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_result&gt;</i>)</a></code>
+          <code><a href="rename.html">rename()</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_result&gt;</i>)</a></code> <code><a href="rename.html">rename_with(<i>&lt;survey_collection&gt;</i>)</a></code>
 
         </dt>
         <dd>Rename columns of a survey design object</dd>
@@ -147,7 +147,7 @@
 
       <dl><dt>
 
-          <code><a href="group_by.html">ungroup(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="group_by.html">group_by()</a></code>
+          <code><a href="group_by.html">ungroup(<i>&lt;survey_base&gt;</i>)</a></code> <code><a href="group_by.html">ungroup(<i>&lt;survey_collection&gt;</i>)</a></code> <code><a href="group_by.html">group_by()</a></code>
 
         </dt>
         <dd>Group and ungroup a survey design object</dd>
@@ -158,6 +158,57 @@
 
         </dt>
         <dd>Compute row-wise on a survey design object</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="joins">Joins<a class="anchor" aria-label="anchor" href="#joins"></a></h3>
+      <div class="section-desc"><p>Join a survey design object with a plain data frame. <code><a href="../reference/left_join.html">left_join()</a></code> adds lookup columns without changing row count. <code><a href="../reference/semi_join.html">semi_join()</a></code> and <code><a href="../reference/semi_join.html">anti_join()</a></code> are domain-aware: unmatched rows are marked out-of-domain rather than removed, preserving variance estimation validity. <code><a href="../reference/inner_join.html">inner_join()</a></code> defaults to domain-aware mode and supports an explicit <code>.domain_aware = FALSE</code> for physical row removal. <code><a href="../reference/right_join.html">right_join()</a></code>, <code><a href="../reference/right_join.html">full_join()</a></code>, and <code><a href="../reference/bind_rows.html">bind_rows()</a></code> always error — they would add rows with missing design variables.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="left_join.html">left_join()</a></code>
+
+        </dt>
+        <dd>Add columns from a data frame to a survey design</dd>
+
+        <dt>
+
+          <code><a href="semi_join.html">semi_join()</a></code> <code><a href="semi_join.html">anti_join()</a></code>
+
+        </dt>
+        <dd>Domain-aware semi- and anti-join for survey designs</dd>
+
+        <dt>
+
+          <code><a href="inner_join.html">inner_join()</a></code>
+
+        </dt>
+        <dd>Domain-aware inner join for survey designs</dd>
+
+        <dt>
+
+          <code><a href="bind_cols.html">bind_cols()</a></code>
+
+        </dt>
+        <dd>Append columns to a survey design by position</dd>
+
+        <dt>
+
+          <code><a href="right_join.html">right_join()</a></code> <code><a href="right_join.html">full_join()</a></code>
+
+        </dt>
+        <dd>Unsupported joins for survey designs</dd>
+
+        <dt>
+
+          <code><a href="bind_rows.html">bind_rows()</a></code>
+
+        </dt>
+        <dd>Stack surveys with bind_rows (errors unconditionally)</dd>
       </dl></div><div class="section level2">
 
       <h3 id="predicates">Predicates<a class="anchor" aria-label="anchor" href="#predicates"></a></h3>
@@ -276,6 +327,20 @@
 
         </dt>
         <dd>Flip the semantic valence of a variable</dd>
+
+        <dt>
+
+          <code><a href="row_means.html">row_means()</a></code>
+
+        </dt>
+        <dd>Compute row-wise means across selected columns</dd>
+
+        <dt>
+
+          <code><a href="row_sums.html">row_sums()</a></code>
+
+        </dt>
+        <dd>Compute row-wise sums across selected columns</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

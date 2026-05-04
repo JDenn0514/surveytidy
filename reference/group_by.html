@@ -17,7 +17,7 @@ verbs that support grouping."><meta property="og:image" content="https://jdenn05
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ verbs that support grouping."><meta property="og:image" content="https://jdenn05
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Group and ungroup a survey design object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/group-by.R" class="external-link"><code>R/group-by.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/group-by.R" class="external-link"><code>R/group-by.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
       <div class="d-none name"><code>group_by.Rd</code></div>
     </div>
 
@@ -56,6 +56,12 @@ verbs that support grouping.</p>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
 <span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu">group_by</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .add <span class="op">=</span> <span class="cn">FALSE</span>, .drop <span class="op">=</span> <span class="cn">TRUE</span>, .if_missing_var <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, .if_missing_var <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">group_by</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .add <span class="op">=</span> <span class="cn">FALSE</span>, .drop <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by_drop_default.html" class="external-link">group_by_drop_default</a></span><span class="op">(</span><span class="va">.data</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -89,6 +95,13 @@ effect on survey design objects.</p></dd>
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A <code><a href="https://jdenn0514.github.io/surveycore/reference/survey_base.html" class="external-link">survey_base</a></code> object (for
 <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">group_vars()</a></code>).</p></dd>
+
+
+<dt id="arg--if-missing-var">.if_missing_var<a class="anchor" aria-label="anchor" href="#arg--if-missing-var"></a></dt>
+<dd><p>Per-call override of <code>collection@if_missing_var</code>.
+One of <code>"error"</code> or <code>"skip"</code>, or <code>NULL</code> (the default) to inherit the
+collection's stored value. See
+<code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -140,6 +153,24 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 
     </div>
     <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>group_by()</code> is dispatched to each
+member independently. Every member's <code>@groups</code> is updated, and the
+rebuilt collection's <code>@groups</code> is synchronised from the members. If a
+grouping column is missing on some members, <code>.if_missing_var</code> controls
+whether those members are skipped or the call errors.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="survey-collections-ungroup-">Survey collections (ungroup)<a class="anchor" aria-label="anchor" href="#survey-collections-ungroup-"></a></h2>
+
+
+<p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> clears <code>@groups</code> on every member and on the collection. The
+dispatcher's step-5 sync lifts the cleared per-member <code>@groups</code> to the
+rebuilt collection. <code>@id</code> and <code>@if_missing_var</code> are preserved.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other grouping:
 <code><a href="is_grouped.html">is_grouped()</a></code>,
@@ -151,10 +182,10 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># create a survey design from the pew_npors_2025 example dataset</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Group by a column</span></span></span>
+<span class="r-in"><span><span class="co"># group by a single column</span></span></span>
 <span class="r-in"><span><span class="fu">group_by</span><span class="op">(</span><span class="va">d</span>, <span class="va">gender</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -183,7 +214,7 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Grouped mutate — within-group mean centring</span></span></span>
+<span class="r-in"><span><span class="co"># grouped mutate — within-group mean centring</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>econ_centred <span class="op">=</span> <span class="va">econ1mod</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">econ1mod</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -214,7 +245,7 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Add a second grouping variable with .add = TRUE</span></span></span>
+<span class="r-in"><span><span class="co"># add a second grouping variable with .add = TRUE</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">cregion</span>, .add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -245,8 +276,10 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Remove all groups</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># remove all groups</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -273,7 +306,7 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Partial ungroup — remove only gender, keep cregion</span></span></span>
+<span class="r-in"><span><span class="co"># partial ungroup — remove only gender, keep cregion</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span>, <span class="va">cregion</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="va">gender</span><span class="op">)</span></span></span>
@@ -304,8 +337,10 @@ grouping — rowwise mode is <strong>not</strong> affected.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get current grouping column names</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span>, <span class="va">cregion</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">group_vars</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># get current grouping column names</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">gender</span>, <span class="va">cregion</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">group_vars</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gender"  "cregion"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

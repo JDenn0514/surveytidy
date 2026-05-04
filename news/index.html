@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,9 +26,91 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.0" id="surveytidy-060">surveytidy 0.6.0<a class="anchor" aria-label="anchor" href="#surveytidy-060"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-6-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-6-0"></a></h3>
+<div class="section level4">
+<h4 id="survey_collection-support-0-6-0">survey_collection support<a class="anchor" aria-label="anchor" href="#survey_collection-support-0-6-0"></a></h4>
+<p>Collection-aware methods for all standard dplyr/tidyr verbs are now dispatched per-survey when called on a <code>survey_collection</code>. The result is a new <code>survey_collection</code> whose <code>@id</code>, <code>@if_missing_var</code>, and <code>@groups</code> properties are preserved.</p>
+<ul><li>Data-masking verbs: <code><a href="../reference/filter.html">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code>, <code><a href="../reference/mutate.html">mutate()</a></code>, <code><a href="../reference/arrange.html">arrange()</a></code>
+</li>
+<li>Tidyselect verbs: <code><a href="../reference/select.html">select()</a></code>, <code><a href="../reference/relocate.html">relocate()</a></code>, <code><a href="../reference/rename.html">rename()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with()</a></code>, <code><a href="../reference/drop_na.html">drop_na()</a></code>, <code><a href="../reference/distinct.html">distinct()</a></code>, <code><a href="../reference/rowwise.html">rowwise()</a></code>
+</li>
+<li>Grouping verbs: <code><a href="../reference/group_by.html">group_by()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/group_data.html" class="external-link">group_vars()</a></code>, <code><a href="../reference/is_rowwise.html">is_rowwise()</a></code>
+</li>
+<li>Slicing verbs: <code><a href="../reference/slice.html">slice()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_min()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample()</a></code>
+</li>
+<li>Collapsing verbs: <code><a href="../reference/pull.html">pull()</a></code> (returns a vector via <code><a href="https://vctrs.r-lib.org/reference/vec_c.html" class="external-link">vctrs::vec_c()</a></code>), <code><a href="../reference/glimpse.html">glimpse()</a></code> (default mode binds members; <code>.by_survey = TRUE</code> per-member)</li>
+</ul><p>The <code>.if_missing_var</code> argument on each verb (<code>"error"</code> (default) or <code>"skip"</code>) lets you override the collection’s stored missing-variable behaviour for a single call. Skipped surveys are reported via the typed message class <code>surveytidy_message_collection_skipped_surveys</code>.</p>
+<p>The 6 join verbs (<code><a href="../reference/left_join.html">left_join()</a></code>, <code><a href="../reference/right_join.html">right_join()</a></code>, <code><a href="../reference/inner_join.html">inner_join()</a></code>, <code><a href="../reference/right_join.html">full_join()</a></code>, <code><a href="../reference/semi_join.html">semi_join()</a></code>, <code><a href="../reference/semi_join.html">anti_join()</a></code>) error with <code>surveytidy_error_collection_verb_unsupported</code> when called on a <code>survey_collection</code>. Apply joins inside a per-survey pipeline before constructing the collection.</p>
+</div>
+<div class="section level4">
+<h4 id="surveycore-re-exports-0-6-0">surveycore re-exports<a class="anchor" aria-label="anchor" href="#surveycore-re-exports-0-6-0"></a></h4>
+<p><code><a href="https://jdenn0514.github.io/surveytidy/">library(surveytidy)</a></code> is now sufficient to use the collection construction and setter API. The following surveycore symbols are re-exported:</p>
+<ul><li><code><a href="https://jdenn0514.github.io/surveycore/reference/as_survey_collection.html" class="external-link">as_survey_collection()</a></code></li>
+<li><code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_id.html" class="external-link">set_collection_id()</a></code></li>
+<li><code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">set_collection_if_missing_var()</a></code></li>
+<li><code><a href="https://jdenn0514.github.io/surveycore/reference/add_survey.html" class="external-link">add_survey()</a></code></li>
+<li><code><a href="https://jdenn0514.github.io/surveycore/reference/remove_survey.html" class="external-link">remove_survey()</a></code></li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="bug-fixes-0-6-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-0"></a></h3>
+<ul><li>
+<code><a href="../reference/replace_when.html">replace_when()</a></code> and <code><a href="../reference/replace_values.html">replace_values()</a></code> no longer retain stale value labels for values absent from the recoded result. Previously, collapsing or replacing values left label entries (e.g. <code>"High" = 4</code>) attached to a vector that contained no such values. User-supplied <code>.value_labels</code> are always preserved.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-error--warning--message-classes-0-6-0">New error / warning / message classes<a class="anchor" aria-label="anchor" href="#new-error--warning--message-classes-0-6-0"></a></h3>
+<ul><li><code>surveytidy_error_collection_verb_emptied</code></li>
+<li><code>surveytidy_error_collection_verb_failed</code></li>
+<li><code>surveytidy_error_collection_by_unsupported</code></li>
+<li><code>surveytidy_error_collection_select_group_removed</code></li>
+<li><code>surveytidy_error_collection_rename_group_partial</code></li>
+<li><code>surveytidy_error_collection_slice_zero</code></li>
+<li><code>surveytidy_error_collection_pull_incompatible_types</code></li>
+<li><code>surveytidy_error_collection_glimpse_id_collision</code></li>
+<li><code>surveytidy_error_collection_verb_unsupported</code></li>
+<li><code>surveytidy_warning_collection_rowwise_mixed</code></li>
+<li><code>surveytidy_message_collection_skipped_surveys</code></li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependency-changes-0-6-0">Dependency changes<a class="anchor" aria-label="anchor" href="#dependency-changes-0-6-0"></a></h3>
+<ul><li>Adds <code>vctrs (&gt;= 0.6.0)</code> to <code>Imports</code> (used by <code>pull.survey_collection</code> and <code>glimpse.survey_collection</code>).</li>
+<li>Bumps <code>surveycore</code> minimum-version pin to <code>(&gt;= 0.8.2)</code>.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="surveytidy-050">surveytidy 0.5.0<a class="anchor" aria-label="anchor" href="#surveytidy-050"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-5-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="survey-aware-join-functions-0-5-0">Survey-aware join functions<a class="anchor" aria-label="anchor" href="#survey-aware-join-functions-0-5-0"></a></h4>
+<p>Eight join and binding functions are now available for combining survey design objects with plain data frames. All join functions protect design variable columns (weights, strata, PSU, etc.) from being overwritten by <code>y</code> and append a typed sentinel to <code>@variables$domain</code> for traceability by Phase 1 estimation functions.</p>
+<ul><li><p><code><a href="../reference/left_join.html">left_join()</a></code> — appends lookup columns from <code>y</code> without removing any rows. Errors if duplicate keys in <code>y</code> would expand rows.</p></li>
+<li><p><code><a href="../reference/inner_join.html">inner_join()</a></code> — two modes: domain-aware (<code>.domain_aware = TRUE</code>, default) marks unmatched rows out-of-domain without removing them; physical mode (<code>.domain_aware = FALSE</code>) removes rows and issues a warning. Physical mode is not supported for <code>survey_twophase</code> designs.</p></li>
+<li><p><code><a href="../reference/semi_join.html">semi_join()</a></code> — marks rows matching <code>y</code> as in-domain; unmatched rows are marked out-of-domain. No rows are physically removed.</p></li>
+<li><p><code><a href="../reference/semi_join.html">anti_join()</a></code> — inverse of <code><a href="../reference/semi_join.html">semi_join()</a></code>; marks rows that do NOT match <code>y</code> as in-domain.</p></li>
+<li><p><code><a href="../reference/right_join.html">right_join()</a></code> and <code><a href="../reference/right_join.html">full_join()</a></code> — always error when called on a survey object. Both would add rows with <code>NA</code> design variable values, which would invalidate variance estimation.</p></li>
+<li><p><code><a href="../reference/bind_cols.html">bind_cols()</a></code> — appends columns from <code>...</code> to a survey object. Validates that all inputs have the same row count. Passes through to <code><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">dplyr::bind_cols()</a></code> for non-survey inputs.</p></li>
+<li><p><code><a href="../reference/bind_rows.html">bind_rows()</a></code> — always errors when called with a survey object. Combining two survey designs has undefined variance structure. Passes through to <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">dplyr::bind_rows()</a></code> for non-survey inputs.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="row-statistic-helpers-0-5-0">Row statistic helpers<a class="anchor" aria-label="anchor" href="#row-statistic-helpers-0-5-0"></a></h4>
+<p>Two helper functions are now available for computing row-wise statistics inside <code><a href="../reference/mutate.html">mutate()</a></code>. Both propagate metadata automatically and accept <code>.label</code> and <code>.description</code> to document the new variable in a single step.</p>
+<ul><li><p><code><a href="../reference/row_means.html">row_means()</a></code> — computes the row mean across selected columns. Accepts <code>na.rm</code> to control <code>NA</code> handling. Issues a warning if any selected column is a design variable.</p></li>
+<li><p><code><a href="../reference/row_sums.html">row_sums()</a></code> — computes the row sum across selected columns. Accepts <code>na.rm</code> to control <code>NA</code> handling. Issues a warning if any selected column is a design variable.</p></li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="bug-fixes-0-5-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-5-0"></a></h3>
+<ul><li>
+<code><a href="../reference/mutate.html">mutate()</a></code> — transformation metadata is now correctly written back to the design object. Previously, <code>[[&lt;-</code> assignment on S7 properties silently failed; the fix uses <code>S7::prop&lt;-()</code> to sync all six metadata properties correctly (<a href="https://github.com/JDenn0514/surveytidy/issues/25" class="external-link">#25</a>).</li>
+</ul><hr></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="surveytidy-040">surveytidy 0.4.0<a class="anchor" aria-label="anchor" href="#surveytidy-040"></a></h2>
 <div class="section level3">

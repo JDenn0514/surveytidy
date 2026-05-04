@@ -13,6 +13,9 @@ relocate(.data, ..., .before = NULL, .after = NULL)
 
 # S3 method for class 'survey_base'
 relocate(.data, ..., .before = NULL, .after = NULL)
+
+# S3 method for class 'survey_collection'
+relocate(.data, ..., .before = NULL, .after = NULL, .if_missing_var = NULL)
 ```
 
 ## Arguments
@@ -33,6 +36,13 @@ relocate(.data, ..., .before = NULL, .after = NULL)
   \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
   A destination column. Columns in `...` are placed immediately before
   or after it. Specify at most one of `.before` and `.after`.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -62,6 +72,16 @@ has been called, `relocate()` reorders the visible columns (those shown
 when you print the object). This has no effect on the physical column
 order in the underlying data.
 
+## Survey collections
+
+When applied to a `survey_collection`, `relocate()` is dispatched to
+each member independently. Each member's `relocate.survey_base` reorders
+columns according to the user's tidyselect (and `.before`/`.after`),
+preserving design variables and `@groups`. Negative tidyselect like
+`relocate(coll, -group, .before = wt)` is permitted because `relocate`
+only reorders — it never removes columns. The `select` group-removal
+pre-flight does not apply.
+
 ## See also
 
 [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md)
@@ -70,8 +90,8 @@ to keep or drop columns,
 to rename them
 
 Other selecting:
-[`glimpse`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
-[`pull`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
+[`glimpse.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
+[`pull.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
 [`select`](https://jdenn0514.github.io/surveytidy/reference/select.md)
 
 ## Examples
@@ -79,9 +99,11 @@ Other selecting:
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Move agecat before gender
+# move agecat before gender
 relocate(d, agecat, .before = gender)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -109,8 +131,8 @@ relocate(d, agecat, .before = gender)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Move all social media columns to the front
-relocate(d, dplyr::starts_with("smuse_"))
+# move all social media columns to the front
+relocate(d, tidyselect::starts_with("smuse_"))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -137,7 +159,7 @@ relocate(d, dplyr::starts_with("smuse_"))
 #> #   crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>, fin_sit <dbl>,
 #> #   vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>, intfreq <dbl>, …
 
-# After select(), relocate reorders the visible columns
+# after select(), relocate reorders the visible columns
 d |>
   select(gender, agecat, partysum) |>
   relocate(partysum, .before = gender)

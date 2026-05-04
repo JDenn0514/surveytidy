@@ -19,7 +19,7 @@ When called inside mutate(), metadata is recorded in
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ When called inside mutate(), metadata is recorded in
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Convert a vector to a factor using value labels</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/transform.R" class="external-link"><code>R/transform.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/transform.R" class="external-link"><code>R/transform.R</code></a></small>
       <div class="d-none name"><code>make_factor.Rd</code></div>
     </div>
 
@@ -118,19 +118,14 @@ stored in <code>surveytidy_recode</code>.</p></dd>
 <code><a href="make_binary.html">make_binary()</a></code>,
 <code><a href="make_dicho.html">make_dicho()</a></code>,
 <code><a href="make_flip.html">make_flip()</a></code>,
-<code><a href="make_rev.html">make_rev()</a></code></p></div>
+<code><a href="make_rev.html">make_rev()</a></code>,
+<code><a href="row_means.html">row_means()</a></code>,
+<code><a href="row_sums.html">row_sums()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">surveycore</span><span class="fu">::</span><span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, wt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  weights <span class="op">=</span> <span class="va">wt</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> No `ids` or `strata` specified.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Creating a <span style="color: #0000BB;">&lt;survey_srs&gt;</span> design (equal-probability SRS).</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Use `as_survey_srs()` to create SRS designs without this warning.</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># attach value labels to a numeric vector and convert to a factor</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"labels"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Yes"</span> <span class="op">=</span> <span class="fl">1</span>, <span class="st">"No"</span> <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">make_factor</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>

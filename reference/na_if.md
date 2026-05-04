@@ -81,13 +81,11 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic na_if — replace a specific value with NA ----------------------
-# ---------------------------------------------------------------------
-
-# Replace "Something else" (pid3 == 4) with NA
+# basic na_if — replace "Something else" (pid3 == 4) with NA
 new <- ns_wave1_svy |>
   mutate(pid3_clean = na_if(pid3, 4)) |>
   select(pid3, pid3_clean)
@@ -95,7 +93,7 @@ new <- ns_wave1_svy |>
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -116,76 +114,56 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---- Replace multiple values at once ----
-
-# Replace both Independent (3) and "Something else" (4) with NA
+# replace multiple values at once — Independent (3) and "Something else" (4)
 new <- ns_wave1_svy |>
   mutate(pid3_2party = na_if(pid3, c(3, 4))) |>
   select(pid3, pid3_2party)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_2party = na_if(pid3, c(3, 4))`.
-#> Caused by error in `na_if()`:
-#> ! Can't recycle `y` (size 2) to size 6422.
 
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
-#>     pid3 pid3_clean
-#>    <dbl>      <dbl>
-#>  1     1          1
-#>  2     1          1
-#>  3     1          1
-#>  4     3          3
-#>  5     2          2
-#>  6     1          1
-#>  7     4         NA
-#>  8     2          2
-#>  9     2          2
-#> 10     1          1
+#>     pid3 pid3_2party
+#>    <dbl>       <dbl>
+#>  1     1           1
+#>  2     1           1
+#>  3     1           1
+#>  4     3          NA
+#>  5     2           2
+#>  6     1           1
+#>  7     4          NA
+#>  8     2           2
+#>  9     2           2
+#> 10     1           1
 #> # ℹ 6,412 more rows
 #> 
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---------------------------------------------------------------------
-# .update_labels — control which value labels are kept ----------------
-# ---------------------------------------------------------------------
-
-# .update_labels = TRUE (default): the label entry for the NA'd value
-# is removed from the output's value labels
+# .update_labels = TRUE (default) drops label entries for NA'd values
 new <- ns_wave1_svy |>
   mutate(pid3_clean = na_if(pid3, 4, .update_labels = TRUE)) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = na_if(pid3, 4, .update_labels = TRUE)`.
-#> Caused by error in `na_if()`:
-#> ! unused argument (.update_labels = TRUE)
 
 # "Something else" (4) is removed from pid3_clean's value labels
 new@metadata@value_labels$pid3_clean
-#> NULL
+#>    Democrat  Republican Independent 
+#>           1           2           3 
 
-
-# .update_labels = FALSE: the label entry for 4 is retained even though
-# those rows are now NA; useful when documenting what was set to missing
+# .update_labels = FALSE retains label entries even for NA'd values
 new <- ns_wave1_svy |>
   mutate(pid3_clean = na_if(pid3, 4, .update_labels = FALSE)) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = na_if(pid3, 4, .update_labels = FALSE)`.
-#> Caused by error in `na_if()`:
-#> ! unused argument (.update_labels = FALSE)
 
 # "Something else" (4) is still in pid3_clean's value labels
 new@metadata@value_labels$pid3_clean
-#> NULL
+#>       Democrat     Republican    Independent Something else 
+#>              1              2              3              4 
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     pid3_clean = na_if(
@@ -195,13 +173,23 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(pid3, pid3_clean)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `pid3_clean = na_if(pid3, 4, .description = "Set
-#>   'Something else' (pid3 == 4) to NA.")`.
-#> Caused by error in `na_if()`:
-#> ! unused argument (.description = "Set 'Something else' (pid3 == 4) to NA.")
 
 new@metadata@transformations
 #> $pid3_clean
-#> [1] "na_if(pid3, 4)"
+#> $pid3_clean$fn
+#> [1] "na_if"
+#> 
+#> $pid3_clean$source_cols
+#> [1] "pid3"
+#> 
+#> $pid3_clean$expr
+#> [1] "na_if(pid3, 4, .description = \"Set 'Something else' (pid3 == 4) to NA.\")"
+#> 
+#> $pid3_clean$output_type
+#> [1] "vector"
+#> 
+#> $pid3_clean$description
+#> [1] "Set 'Something else' (pid3 == 4) to NA."
+#> 
 #> 
 ```

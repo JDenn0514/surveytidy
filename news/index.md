@@ -1,5 +1,187 @@
 # Changelog
 
+## surveytidy 0.6.0
+
+### New features
+
+#### survey_collection support
+
+Collection-aware methods for all standard dplyr/tidyr verbs are now
+dispatched per-survey when called on a `survey_collection`. The result
+is a new `survey_collection` whose `@id`, `@if_missing_var`, and
+`@groups` properties are preserved.
+
+- Data-masking verbs:
+  [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md),
+  [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md),
+  [`arrange()`](https://jdenn0514.github.io/surveytidy/reference/arrange.md)
+- Tidyselect verbs:
+  [`select()`](https://jdenn0514.github.io/surveytidy/reference/select.md),
+  [`relocate()`](https://jdenn0514.github.io/surveytidy/reference/relocate.md),
+  [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md),
+  [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html),
+  [`drop_na()`](https://jdenn0514.github.io/surveytidy/reference/drop_na.md),
+  [`distinct()`](https://jdenn0514.github.io/surveytidy/reference/distinct.md),
+  [`rowwise()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.md)
+- Grouping verbs:
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md),
+  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  [`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html),
+  [`is_rowwise()`](https://jdenn0514.github.io/surveytidy/reference/is_rowwise.md)
+- Slicing verbs:
+  [`slice()`](https://jdenn0514.github.io/surveytidy/reference/slice.md),
+  [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html)
+- Collapsing verbs:
+  [`pull()`](https://jdenn0514.github.io/surveytidy/reference/pull.md)
+  (returns a vector via
+  [`vctrs::vec_c()`](https://vctrs.r-lib.org/reference/vec_c.html)),
+  [`glimpse()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md)
+  (default mode binds members; `.by_survey = TRUE` per-member)
+
+The `.if_missing_var` argument on each verb (`"error"` (default) or
+`"skip"`) lets you override the collection’s stored missing-variable
+behaviour for a single call. Skipped surveys are reported via the typed
+message class `surveytidy_message_collection_skipped_surveys`.
+
+The 6 join verbs
+([`left_join()`](https://jdenn0514.github.io/surveytidy/reference/left_join.md),
+[`right_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md),
+[`inner_join()`](https://jdenn0514.github.io/surveytidy/reference/inner_join.md),
+[`full_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md),
+[`semi_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md),
+[`anti_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md))
+error with `surveytidy_error_collection_verb_unsupported` when called on
+a `survey_collection`. Apply joins inside a per-survey pipeline before
+constructing the collection.
+
+#### surveycore re-exports
+
+[`library(surveytidy)`](https://jdenn0514.github.io/surveytidy/) is now
+sufficient to use the collection construction and setter API. The
+following surveycore symbols are re-exported:
+
+- [`as_survey_collection()`](https://jdenn0514.github.io/surveycore/reference/as_survey_collection.html)
+- [`set_collection_id()`](https://jdenn0514.github.io/surveycore/reference/set_collection_id.html)
+- [`set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html)
+- [`add_survey()`](https://jdenn0514.github.io/surveycore/reference/add_survey.html)
+- [`remove_survey()`](https://jdenn0514.github.io/surveycore/reference/remove_survey.html)
+
+### Bug fixes
+
+- [`replace_when()`](https://jdenn0514.github.io/surveytidy/reference/replace_when.md)
+  and
+  [`replace_values()`](https://jdenn0514.github.io/surveytidy/reference/replace_values.md)
+  no longer retain stale value labels for values absent from the recoded
+  result. Previously, collapsing or replacing values left label entries
+  (e.g. `"High" = 4`) attached to a vector that contained no such
+  values. User-supplied `.value_labels` are always preserved.
+
+### New error / warning / message classes
+
+- `surveytidy_error_collection_verb_emptied`
+- `surveytidy_error_collection_verb_failed`
+- `surveytidy_error_collection_by_unsupported`
+- `surveytidy_error_collection_select_group_removed`
+- `surveytidy_error_collection_rename_group_partial`
+- `surveytidy_error_collection_slice_zero`
+- `surveytidy_error_collection_pull_incompatible_types`
+- `surveytidy_error_collection_glimpse_id_collision`
+- `surveytidy_error_collection_verb_unsupported`
+- `surveytidy_warning_collection_rowwise_mixed`
+- `surveytidy_message_collection_skipped_surveys`
+
+### Dependency changes
+
+- Adds `vctrs (>= 0.6.0)` to `Imports` (used by `pull.survey_collection`
+  and `glimpse.survey_collection`).
+- Bumps `surveycore` minimum-version pin to `(>= 0.8.2)`.
+
+------------------------------------------------------------------------
+
+## surveytidy 0.5.0
+
+### New features
+
+#### Survey-aware join functions
+
+Eight join and binding functions are now available for combining survey
+design objects with plain data frames. All join functions protect design
+variable columns (weights, strata, PSU, etc.) from being overwritten by
+`y` and append a typed sentinel to `@variables$domain` for traceability
+by Phase 1 estimation functions.
+
+- [`left_join()`](https://jdenn0514.github.io/surveytidy/reference/left_join.md)
+  — appends lookup columns from `y` without removing any rows. Errors if
+  duplicate keys in `y` would expand rows.
+
+- [`inner_join()`](https://jdenn0514.github.io/surveytidy/reference/inner_join.md)
+  — two modes: domain-aware (`.domain_aware = TRUE`, default) marks
+  unmatched rows out-of-domain without removing them; physical mode
+  (`.domain_aware = FALSE`) removes rows and issues a warning. Physical
+  mode is not supported for `survey_twophase` designs.
+
+- [`semi_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+  — marks rows matching `y` as in-domain; unmatched rows are marked
+  out-of-domain. No rows are physically removed.
+
+- [`anti_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+  — inverse of
+  [`semi_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md);
+  marks rows that do NOT match `y` as in-domain.
+
+- [`right_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md)
+  and
+  [`full_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md)
+  — always error when called on a survey object. Both would add rows
+  with `NA` design variable values, which would invalidate variance
+  estimation.
+
+- [`bind_cols()`](https://jdenn0514.github.io/surveytidy/reference/bind_cols.md)
+  — appends columns from `...` to a survey object. Validates that all
+  inputs have the same row count. Passes through to
+  [`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+  for non-survey inputs.
+
+- [`bind_rows()`](https://jdenn0514.github.io/surveytidy/reference/bind_rows.md)
+  — always errors when called with a survey object. Combining two survey
+  designs has undefined variance structure. Passes through to
+  [`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+  for non-survey inputs.
+
+#### Row statistic helpers
+
+Two helper functions are now available for computing row-wise statistics
+inside
+[`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md).
+Both propagate metadata automatically and accept `.label` and
+`.description` to document the new variable in a single step.
+
+- [`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md)
+  — computes the row mean across selected columns. Accepts `na.rm` to
+  control `NA` handling. Issues a warning if any selected column is a
+  design variable.
+
+- [`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
+  — computes the row sum across selected columns. Accepts `na.rm` to
+  control `NA` handling. Issues a warning if any selected column is a
+  design variable.
+
+### Bug fixes
+
+- [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  — transformation metadata is now correctly written back to the design
+  object. Previously, `[[<-` assignment on S7 properties silently
+  failed; the fix uses `S7::prop<-()` to sync all six metadata
+  properties correctly
+  ([\#25](https://github.com/JDenn0514/surveytidy/issues/25)).
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.4.0
 
 ### New features

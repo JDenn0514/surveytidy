@@ -25,6 +25,17 @@ mutate(
 # S3 method for class 'survey_result'
 mutate(.data, ...)
 
+# S3 method for class 'survey_collection'
+mutate(
+  .data,
+  ...,
+  .by = NULL,
+  .keep = c("all", "used", "unused", "none"),
+  .before = NULL,
+  .after = NULL,
+  .if_missing_var = NULL
+)
+
 mutate(.data, ...)
 ```
 
@@ -61,6 +72,13 @@ mutate(.data, ...)
 
   \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
   Optionally position new columns before or after an existing one.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -127,6 +145,28 @@ directly.
   [`dplyr::na_if()`](https://dplyr.tidyverse.org/reference/na_if.html),
   [`dplyr::coalesce()`](https://dplyr.tidyverse.org/reference/coalesce.html)
 
+## Survey collections
+
+When applied to a `survey_collection`, `mutate()` is dispatched to each
+member independently. Per-member warnings (e.g.,
+`surveytidy_warning_mutate_weight_col` when modifying the weight column)
+fire once per member in which they apply — an N-member collection that
+all modify the weight column will surface N warnings.
+
+If members have non-uniform rowwise state (some are rowwise, some are
+not), `mutate()` emits `surveytidy_warning_collection_rowwise_mixed`
+once before dispatch as a soft-invariant diagnostic. Dispatch still
+proceeds; per-member rowwise/non-rowwise semantics apply for the call.
+To resolve, call
+[`rowwise()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.md)
+or [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) on
+the entire collection first.
+
+`.by` is rejected at the collection layer with
+`surveytidy_error_collection_by_unsupported`. Set grouping with
+[`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+on the collection instead.
+
 ## See also
 
 [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
@@ -142,9 +182,10 @@ Other modification:
 ``` r
 library(surveytidy)
 library(surveycore)
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Add a new column
+# add a new column
 mutate(d, college_grad = educcat == 1)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -172,8 +213,11 @@ mutate(d, college_grad = educcat == 1)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Conditional recoding
-mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
+# conditional recoding
+mutate(
+  d,
+  college = dplyr::if_else(educcat == 1, "college+", "non-college")
+)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -200,7 +244,7 @@ mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"))
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Grouped mutate — within-group mean centring
+# grouped mutate — within-group mean centring
 d |>
   group_by(gender) |>
   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
@@ -232,8 +276,11 @@ d |>
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
 # .keep = "none" keeps only new columns plus design vars (always preserved)
-mutate(d, college = dplyr::if_else(educcat == 1, "college+", "non-college"),
-  .keep = "none")
+mutate(
+  d,
+  college = dplyr::if_else(educcat == 1, "college+", "non-college"),
+  .keep = "none"
+)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)

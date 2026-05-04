@@ -16,6 +16,9 @@ arrange(.data, ..., .by_group = FALSE, .locale = NULL)
 # S3 method for class 'survey_result'
 arrange(.data, ..., .by_group = FALSE)
 
+# S3 method for class 'survey_collection'
+arrange(.data, ..., .by_group = FALSE, .locale = NULL, .if_missing_var = NULL)
+
 arrange(.data, ..., .by_group = FALSE)
 ```
 
@@ -47,6 +50,13 @@ arrange(.data, ..., .by_group = FALSE)
   [`stringi::locale()`](https://rdrr.io/pkg/stringi/man/about_locale.html)
   for available locales.
 
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
+
 ## Value
 
 An object of the same type as `.data` with the following properties:
@@ -72,6 +82,15 @@ are always sorted to the end, even when using
 The domain column moves with the rows — row reordering does not affect
 which rows are in or out of the survey domain.
 
+## Survey collections
+
+When applied to a `survey_collection`, `arrange()` is dispatched to each
+member independently. Each member's rows are sorted in place; per-member
+domain columns travel with the sorted rows. The output
+`survey_collection` preserves the input's `@id`, `@if_missing_var`, and
+`@groups`. Use `.if_missing_var` to override the collection's stored
+missing-variable behavior for this call.
+
 ## See also
 
 [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
@@ -84,9 +103,11 @@ for physical row selection
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Sort by age category ascending
+# sort by age category ascending
 arrange(d, agecat)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -114,7 +135,7 @@ arrange(d, agecat)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Sort by age category descending
+# sort by age category descending
 arrange(d, dplyr::desc(agecat))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -142,7 +163,7 @@ arrange(d, dplyr::desc(agecat))
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Sort by multiple variables
+# sort by multiple variables
 arrange(d, gender, dplyr::desc(agecat))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -170,7 +191,7 @@ arrange(d, gender, dplyr::desc(agecat))
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Sort by grouping variables first
+# sort by grouping variables first
 d_grouped <- group_by(d, gender)
 arrange(d_grouped, .by_group = TRUE, agecat)
 #> 

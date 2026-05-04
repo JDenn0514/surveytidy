@@ -6,6 +6,7 @@ package. It makes survey analysis feel natural to tidyverse users. Full
 documentation is at <https://jdenn0514.github.io/surveytidy/>.
 
 ``` r
+
 library(surveycore)
 library(dplyr)
 #> 
@@ -45,6 +46,7 @@ The most important statistical feature of surveytidy is that
 uses **domain estimation** rather than physical subsetting:
 
 ``` r
+
 # This keeps all 5,022 rows — variance estimation stays correct
 republicans <- d |> filter(partysum == 1)
 nrow(republicans@data) #> 5022
@@ -68,6 +70,14 @@ Simply put, this calculates the variance for subpopulations correctly.
 ## Installation
 
 ``` r
+
+install.packages("surveytidy")
+```
+
+Or install the development version from GitHub:
+
+``` r
+
 # install.packages("pak")
 # install surveycore first, to create surveycore style survey objects
 pak::pak("JDenn0514/surveycore")
@@ -80,6 +90,7 @@ pak::pak("JDenn0514/surveytidy")
 ### Filtering (domain estimation)
 
 ``` r
+
 # Single condition
 republicans <- d |> filter(partysum == 1)
 
@@ -95,6 +106,7 @@ rep_women2 <- d |> filter(partysum == 1, gender == 2)
 ### Selecting columns
 
 ``` r
+
 # Design variables (weights, strata) are always kept in @data
 # even when not selected — they are required for variance estimation
 d2 <- select(d, party, gender, agecat, cregion)
@@ -128,6 +140,7 @@ print(d2)
 ### Mutating
 
 ``` r
+
 # Add new columns
 d |>
   mutate(
@@ -228,6 +241,7 @@ d |>
 ### Renaming
 
 ``` r
+
 # @variables and @metadata stay in sync automatically
 d |>
   rename(
@@ -264,6 +278,7 @@ d |>
 ### Sorting
 
 ``` r
+
 # Rows sort; domain column moves with them
 d |>
   filter(partysum == 1) |>
@@ -329,6 +344,7 @@ d |>
 ### Grouping
 
 ``` r
+
 d2 <- group_by(d, partysum) # set groups
 d3 <- group_by(d2, gender, .add = TRUE) # add to groups
 d4 <- ungroup(d3) # remove all groups
@@ -337,6 +353,7 @@ d4 <- ungroup(d3) # remove all groups
 ### Physical row operations (use sparingly)
 
 ``` r
+
 # These physically remove rows and always issue a warning.
 # Use filter() instead for subpopulation analyses.
 slice_head(d, n = 100) # first 100 rows

@@ -55,6 +55,54 @@ slice_max(.data, ...)
 
 # S3 method for class 'survey_result'
 slice_sample(.data, ...)
+
+# S3 method for class 'survey_collection'
+slice(.data, ...)
+
+# S3 method for class 'survey_collection'
+slice_head(.data, ..., n = NULL, prop = NULL)
+
+# S3 method for class 'survey_collection'
+slice_tail(.data, ..., n = NULL, prop = NULL)
+
+# S3 method for class 'survey_collection'
+slice_min(
+  .data,
+  order_by,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  with_ties = TRUE,
+  na_rm = FALSE,
+  .if_missing_var = NULL
+)
+
+# S3 method for class 'survey_collection'
+slice_max(
+  .data,
+  order_by,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  with_ties = TRUE,
+  na_rm = FALSE,
+  .if_missing_var = NULL
+)
+
+# S3 method for class 'survey_collection'
+slice_sample(
+  .data,
+  ...,
+  n = NULL,
+  prop = NULL,
+  by = NULL,
+  weight_by = NULL,
+  replace = FALSE,
+  seed = NULL,
+  .if_missing_var = NULL
+)
 ```
 
 ## Arguments
@@ -63,12 +111,14 @@ slice_sample(.data, ...)
 
   A
   [`survey_base`](https://jdenn0514.github.io/surveycore/reference/survey_base.html)
-  object, or a `survey_result` object returned by a surveycore
-  estimation function.
+  object, a `survey_result` object returned by a surveycore estimation
+  function, or a
+  [`survey_collection`](https://jdenn0514.github.io/surveycore/reference/survey_collection.html).
 
 - ...:
 
-  Passed to the corresponding `dplyr::slice_*()` function.
+  Passed to the corresponding `dplyr::slice_*()` function. For `slice()`
+  only, the `...` accepts a vector of row indices.
 
 - .by:
 
@@ -77,6 +127,80 @@ slice_sample(.data, ...)
 - .preserve:
 
   Accepted for interface compatibility; not used by survey methods.
+
+- n:
+
+  Number of rows to keep. See
+  [`dplyr::slice_head()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- prop:
+
+  Fraction of rows to keep (between 0 and 1). See
+  [`dplyr::slice_head()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- order_by:
+
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  Variable to order by, used by
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html) and
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html). See
+  [`dplyr::slice_min()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- by:
+
+  Per-call grouping override accepted by
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html), and
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html).
+  Not supported on `survey_collection` — passing a non-NULL value raises
+  `surveytidy_error_collection_by_unsupported`. Use
+  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+  on the collection (or set `coll@groups`) instead.
+
+- with_ties:
+
+  Should ties be kept together? Used by
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html) and
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html). See
+  [`dplyr::slice_min()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- na_rm:
+
+  Should missing values in `order_by` be removed before slicing? Used by
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html) and
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html). See
+  [`dplyr::slice_min()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
+
+- weight_by:
+
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  Sampling weights for
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html).
+  See
+  [`dplyr::slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html).
+  Independent of the survey design weights — issues
+  `surveytidy_warning_slice_sample_weight_by` as a reminder.
+
+- replace:
+
+  Should sampling be performed with replacement? Used by
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html).
+  See
+  [`dplyr::slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html).
+
+- seed:
+
+  Used by `slice_sample.survey_collection` only. `NULL` (the default)
+  leaves the ambient RNG state alone; an integer seed makes per-survey
+  samples deterministic and order-independent (see "Survey collections"
+  below).
 
 ## Value
 
@@ -106,6 +230,54 @@ values, independently of the survey design weights. A
 reminder. If you intend probability-proportional sampling, use the
 design weights directly.
 
+## Survey collections
+
+Slice variants are dispatched to each member independently. Each
+member's `slice_*.survey_base` call emits
+`surveycore_warning_physical_subset` — an N-member collection therefore
+surfaces N warnings.
+
+Before dispatching, a verb-specific pre-flight raises
+`surveytidy_error_collection_slice_zero` when the supplied arguments
+would produce a 0-row result on every member (e.g., `n = 0`, literal
+`slice(integer(0))`). This stops dispatch before any member is touched,
+so users see a slice-specific message instead of a misleading per-member
+validator failure.
+
+`slice`, `slice_head`, `slice_tail`, and `slice_sample` (when
+`weight_by = NULL`) reference no user columns — their signatures omit
+`.if_missing_var`. `slice_min`, `slice_max`, and `slice_sample` with a
+non-NULL `weight_by` do reference user columns; their signatures include
+`.if_missing_var`.
+
+`slice_min`, `slice_max`, and `slice_sample` reject the per-call `by`
+argument with `surveytidy_error_collection_by_unsupported`; use
+[`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+on the collection (or `coll@groups`) instead.
+
+## `slice_sample.survey_collection` reproducibility
+
+`slice_sample.survey_collection` adds a `seed = NULL` argument absent
+from `slice_sample.survey_base`.
+
+- `seed = NULL` (default): no seed manipulation. Per-survey
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html)
+  calls draw from the ambient RNG state in iteration order.
+  Reproducibility requires a single upstream
+  [`set.seed()`](https://rdrr.io/r/base/Random.html) AND a stable
+  collection size and member order — adding or removing a survey changes
+  the samples drawn from every subsequent survey.
+
+- `seed = <integer>`: each per-survey call is wrapped with a
+  deterministic per-survey seed derived as
+  `strtoi(substr(rlang::hash(paste0(survey_name, "::", seed)), 1, 7), 16L)`.
+  Per-survey samples are stable regardless of collection order,
+  additions, or removals. The ambient `.Random.seed` is restored on
+  exit.
+
+For any analysis intended to be reproducible, pass an explicit integer
+`seed`.
+
 ## See also
 
 [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
@@ -120,11 +292,14 @@ Other row operations:
 ## Examples
 
 ``` r
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-# First 10 rows (issues a physical subset warning)
+# first 10 rows (issues a physical subset warning)
 slice_head(d, n = 10)
 #> Warning: ! `slice_head()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct
@@ -156,7 +331,7 @@ slice_head(d, n = 10)
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>,
 #> #   smuse_bsk <dbl>, smuse_th <dbl>, smuse_ts <dbl>, radio <dbl>, …
 
-# Rows with the 5 lowest survey weights
+# rows with the 5 lowest survey weights
 slice_min(d, order_by = weight, n = 5)
 #> Warning: ! `slice_min()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct
@@ -188,7 +363,7 @@ slice_min(d, order_by = weight, n = 5)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Random sample of 50 rows
+# random sample of 50 rows
 slice_sample(d, n = 50)
 #> Warning: ! `slice_sample()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct

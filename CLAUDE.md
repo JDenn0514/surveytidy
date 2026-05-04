@@ -9,23 +9,27 @@ to other packages.**
 
 ## Project Overview
 
-surveytidy provides dplyr/tidyr verbs for survey design objects from
-surveycore. It extends tidyverse workflows to work seamlessly with
-complex survey designs, allowing users to filter, select, mutate, and
-group survey objects while maintaining proper variance estimation and
-metadata handling.
+surveytidy provides dplyr/tidyr verbs and survey-aware data wrangling
+for survey design objects from surveycore. It extends tidyverse
+workflows to work seamlessly with complex survey designs, allowing users
+to filter, select, mutate, group, recode, and compute row-wise
+statistics on survey objects while maintaining proper variance
+estimation and metadata handling.
 
 ## Package Information
 
 - **Name:** surveytidy
-- **Purpose:** dplyr/tidyr verbs for survey objects (filter, select,
-  mutate, rename, arrange, group_by, etc.)
+- **Purpose:** dplyr/tidyr verbs (filter, select, mutate, rename,
+  arrange, group_by, slice\_\*, drop_na, distinct, joins), survey-aware
+  recoding (recode, recode_values, replace_values, replace_when, na_if,
+  case_when, if_else), and row-wise computations (rowstats, rowwise) for
+  survey objects
 - **Target Audience:** Survey researchers using tidyverse; users
   transitioning from srvyr
-- **Current Status:** Phase 0.5 (planning complete; implementation
-  starting)
 - **License:** GPL-3 (inherits from surveycore)
 - **Dependencies:** surveycore (imports core S7 classes)
+- **Status:** v0.5.0; CRAN submission in prep (see `cran-comments.md`
+  and the `/cran` skill)
 
 ## Vision & Goals
 
@@ -41,7 +45,7 @@ surveytidy makes survey analysis feel natural to tidyverse users by:
     update labels automatically
 3.  **Group-by support** —
     [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
-    sets up stratification for Phase 1 estimation functions
+    sets up stratification for downstream estimation functions
 4.  **Familiar API** — Users never write formula syntax; everything uses
     bare names (tidy-select)
 
@@ -63,6 +67,7 @@ surveytidy makes survey analysis feel natural to tidyverse users by:
 S7 namespaced class names break S3 dispatch. To make dplyr verbs work:
 
 ``` r
+
 # In .onLoad():
 registerS3method(
   "filter", "surveycore::survey_base",
@@ -79,31 +84,36 @@ See `R/zzz.R` for full setup.
 
 ### File Organization (R/)
 
-    R/
-    ├── arrange.R              # arrange.survey_base (row sorting)
-    ├── filter.R               # filter.survey_base + subset.survey_base
-    ├── group-by.R             # group_by.survey_base + ungroup.survey_base
-    ├── joins.R                # *_join() (stretch goals)
-    ├── mutate.R               # mutate.survey_base (warns on weight column modification)
-    ├── rename.R               # rename.survey_base (auto-updates @variables + @metadata keys)
-    ├── select.R               # select + relocate + pull + glimpse
-    ├── slice.R                # all slice_*.survey_base via factory
-    ├── surveytidy-package.R   # Package-level documentation
-    ├── drop-na.R              # drop_na.survey_base
-    ├── utils.R                # shared helpers (.protected_cols, dplyr_reconstruct, etc.)
-    └── zzz.R                  # .onLoad(): S3 method registration + S7::methods_register()
+Files are grouped by family. Each verb file contains both the
+`survey_base` and `survey_result` methods (no separate
+`verbs-survey-result.R`).
+
+**dplyr/tidyr verbs:** - `arrange.R`, `distinct.R`, `drop-na.R`,
+`filter.R`, `group-by.R`, `joins.R`, `mutate.R`, `rename.R`, `select.R`,
+`slice.R`, `transform.R`
+
+**Survey-aware recoding:** - `recode.R`, `recode-values.R`,
+`replace-values.R`, `replace-when.R`, `na-if.R`, `case-when.R`,
+`if-else.R`
+
+**Row-wise computations:** - `rowstats.R`, `rowwise.R`
+
+**Dispatch and infrastructure:** - `collection-dispatch.R` — routes
+user-facing function calls across the survey collection (data frames,
+surveys, lists of surveys) - `reexports.R` — re-exports for dplyr/tidyr
+verbs - `utils.R` — shared helpers (`.protected_cols`,
+`dplyr_reconstruct`, `.sc_update_design_var_names()`,
+`.sc_rename_metadata_keys()`, `.restore_survey_result()`, etc.) -
+`zzz.R` — `.onLoad()`: S3 method registration +
+[`S7::methods_register()`](https://rconsortium.github.io/S7/reference/methods_register.html) -
+`surveytidy-package.R` — package-level documentation
 
 ### Test Organization (tests/testthat/)
 
-    tests/testthat/
-    ├── helper-test-data.R      # Shared test data generators (copied from surveycore)
-    ├── test-filter.R           # filter() and related domain operations
-    ├── test-select.R           # select(), pull(), glimpse()
-    ├── test-mutate.R           # mutate() behavior + weight column warnings
-    ├── test-rename.R           # rename() + automatic metadata updates
-    ├── test-arrange.R          # arrange(), slice_*()
-    ├── test-group-by.R         # group_by(), ungroup()
-    └── test-tidyr.R            # tidyr functions (drop_na, separate, unite)
+Each source file has a corresponding `test-*.R`. Cross-cutting tests
+live in `test-pipeline.R` (multi-verb pipelines), `test-wiring.R` (S3
+dispatch + `.onLoad()`), and `test-verbs-survey-result.R` (survey_result
+method contracts). Shared generators in `helper-test-data.R`.
 
 ### Key Concepts
 
@@ -132,13 +142,11 @@ See `R/zzz.R` for full setup.
 
 #### @groups
 
-- Reserved for Phase 0.5 (now used by
-  [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md))
 - Populated by
   [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md),
   cleared by
   [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
-- Will be used by Phase 1 estimation functions
+- Used by downstream estimation functions
 
 #### dplyr_reconstruct()
 
@@ -165,12 +173,28 @@ design type loops, domain preservation, verb error patterns 6.
 `.claude/rules/engineering-preferences.md` — DRY, well-tested,
 engineered enough, explicit over clever
 
-**Skills (invoke on-demand):** - `.claude/skills/spec-workflow/SKILL.md`
-— planning arc: draft → review → implementation plan → decisions log -
-`.claude/skills/r-implement/SKILL.md` — implementation loop: read plan →
-write code → verify → mark done -
-`.claude/skills/commit-and-pr/SKILL.md` — PR cycle: changelog →
-pre-flight → commit → PR → CI
+**Skills (invoke on-demand):**
+
+*Planning:* - `spec-workflow` — draft → methodology review → resolve →
+spec review → resolve + log - `implementation-workflow` — draft plan →
+adversarial review → resolve + decisions log - `spec-reviewer` —
+adversarial spec review (also wired into spec-workflow Stage 2)
+
+*Implementation:* - `r-implement` — read plan → write code → verify →
+mark done - `auto-ship` — drives a plan end-to-end: TDD → review →
+changelog → commit → PR → CI → squash-merge - `testing-r-packages` —
+testthat 3 patterns - `cli` — cli_abort/cli_warn/cli_inform conventions
+
+*Review:* - `critical-code-reviewer` — adversarial code review -
+`describe-design` — architectural documentation
+
+*Release:* - `commit-and-pr` — changelog → pre-flight → commit → PR →
+CI - `merge-main` — develop → main release: NEWS → version bump → tag →
+post-release `.9000` - `cran` — CRAN submission workflow (R CMD check
+–as-cran, cran-comments.md, reviewer feedback) - `lifecycle` —
+deprecation, superseding, experimental tags - `release-post` —
+Tidyverse/Shiny blog release announcements - `create-release-checklist`
+— release issue/checklist scaffolding
 
 **GitHub strategy (read when creating PRs):** -
 `.claude/rules/github-strategy.md` — branching model, commit format, PR
@@ -180,23 +204,6 @@ workflow, CI/CD setup
 (survey class structure, @data/@variables/@metadata) -
 `plans/error-messages.md` — surveytidy error/warning classes (update
 before adding any new class)
-
-## Phase 0.5 Build Order
-
-1.  `feature/filter` — `R/01-filter.R` + `tests/testthat/test-filter.R`
-2.  `feature/select` — `R/02-select.R` + `tests/testthat/test-select.R`
-3.  `feature/mutate` — `R/03-mutate.R` + `tests/testthat/test-mutate.R`
-4.  `feature/rename` — `R/04-rename.R` + `tests/testthat/test-rename.R`
-5.  `feature/arrange` — `R/05-arrange.R` +
-    `tests/testthat/test-arrange.R`
-6.  `feature/group-by` — `R/06-group-by.R` +
-    `tests/testthat/test-group-by.R`
-7.  `feature/tidyr` — `R/07-tidyr.R` + `tests/testthat/test-tidyr.R`
-    (stretch)
-8.  `feature/joins` — `R/08-joins.R` + `tests/testthat/test-joins.R`
-    (stretch)
-
-------------------------------------------------------------------------
 
 ## Key Implementation Details
 
@@ -226,12 +233,27 @@ before adding any new class)
 
 ### rename() Specifics
 
-- Uses `surveycore:::.update_design_var_names()` to update @variables
-  keys
-- Uses `surveycore:::.rename_metadata_keys()` to update @metadata keys
+- Uses `.sc_update_design_var_names()` (wrapper in `R/utils.R`) to
+  update @variables keys; the wrapper resolves
+  `surveycore:::.update_design_var_names` via
+  `get(..., envir = asNamespace("surveycore"))` to avoid the
+  `:::`-induced R CMD check NOTE
+- Uses `.sc_rename_metadata_keys()` (wrapper in `R/utils.R`) for
+  @metadata keys
 - **Warns** (does not error) if user renames a design variable; updates
   `@variables` to track the new column name
   (`surveytidy_warning_rename_design_var`)
+- Bypasses S7 validation during the @data + @variables update
+  (per-assignment validation rejects the intermediate state); calls
+  [`S7::validate()`](https://rconsortium.github.io/S7/reference/validate.html)
+  once at the end on the consistent state
+
+### `:::` policy (project rule)
+
+Never call `surveycore:::*` directly — it raises a “Unexported object”
+NOTE under R CMD check. Instead, add a thin wrapper in `R/utils.R` that
+uses `get("name", envir = asNamespace("surveycore"))`. Existing
+wrappers: `.sc_update_design_var_names()`, `.sc_rename_metadata_keys()`.
 
 ### dplyr_reconstruct()
 
@@ -259,6 +281,7 @@ block that calls a dplyr or tidyr verb must begin with an explicit
 [`library()`](https://rdrr.io/r/base/library.html) call:
 
 ``` r
+
 #' @examples
 #' library(dplyr)        # required — dplyr verbs not re-exported by surveytidy
 #' df <- data.frame(...)
@@ -283,17 +306,25 @@ and other tidyr verbs.
 5.  **Provide complete code blocks** — ready to copy and use
 6.  **Include tests** — always provide corresponding tests for new verbs
 
+## Common commands
+
+``` r
+
+devtools::document()  # rebuild NAMESPACE + man/ from roxygen
+devtools::test()      # run testthat suite
+devtools::check()     # full R CMD check (use --as-cran near submission)
+covr::package_coverage()  # line coverage
+```
+
 ## Reference Documents
 
-All planning documents are in `plans/`: - (Currently minimal; will grow
-as Phase 0.5 proceeds)
+All planning documents are in `plans/`.
 
-All finalized decisions are in `../survey-standards/.claude/rules/`: -
-`code-style.md` — R style, S7 patterns, error conventions, function
-design, roxygen/package check - `testing-standards.md` — test structure,
-coverage, assertion patterns, test data
+Local rules in `.claude/rules/` are authoritative for surveytidy. The
+ecosystem-wide copies under `../survey-standards/.claude/rules/` are a
+historical mirror; the local versions override on any divergence.
 
-PR workflow: `.claude/skills/github-strategy.md`
+PR workflow: `.claude/rules/github-strategy.md`
 
 ------------------------------------------------------------------------
 

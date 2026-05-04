@@ -23,7 +23,7 @@ retain them (useful when you want to document what was set to missing)."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ retain them (useful when you want to document what was set to missing)."><meta p
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Convert values to <code>NA</code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/na-if.R" class="external-link"><code>R/na-if.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/na-if.R" class="external-link"><code>R/na-if.R</code></a></small>
       <div class="d-none name"><code>na_if.Rd</code></div>
     </div>
 
@@ -114,16 +114,13 @@ than <code>NA</code>.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create the survey design</span></span></span>
 <span class="r-in"><span><span class="va">ns_wave1_svy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey_nonprob.html" class="external-link">as_survey_nonprob</a></span><span class="op">(</span><span class="va">ns_wave1</span>, weights <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Basic na_if — replace a specific value with NA ----------------------</span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Replace "Something else" (pid3 == 4) with NA</span></span></span>
+<span class="r-in"><span><span class="co"># basic na_if — replace "Something else" (pid3 == 4) with NA</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>pid3_clean <span class="op">=</span> <span class="fu">na_if</span><span class="op">(</span><span class="va">pid3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
@@ -131,7 +128,7 @@ than <code>NA</code>.</p></li>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 2</span></span>
@@ -152,76 +149,56 @@ than <code>NA</code>.</p></li>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Replace multiple values at once ----</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Replace both Independent (3) and "Something else" (4) with NA</span></span></span>
+<span class="r-in"><span><span class="co"># replace multiple values at once — Independent (3) and "Something else" (4)</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>pid3_2party <span class="op">=</span> <span class="fu">na_if</span><span class="op">(</span><span class="va">pid3</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_2party</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_2party = na_if(pid3, c(3, 4))`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `na_if()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Can't recycle `y` (size 2) to size 6422.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     pid3 pid3_clean</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     1          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     1          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     3          3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     2          2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     1          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     4         <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     2          2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     2          2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>     1          1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     pid3 pid3_2party</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     1           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     1           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     3          <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     2           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     1           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     4          <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     2           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     2           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>     1           1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6,412 more rows</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># .update_labels — control which value labels are kept ----------------</span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># .update_labels = TRUE (default): the label entry for the NA'd value</span></span></span>
-<span class="r-in"><span><span class="co"># is removed from the output's value labels</span></span></span>
+<span class="r-in"><span><span class="co"># .update_labels = TRUE (default) drops label entries for NA'd values</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>pid3_clean <span class="op">=</span> <span class="fu">na_if</span><span class="op">(</span><span class="va">pid3</span>, <span class="fl">4</span>, .update_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = na_if(pid3, 4, .update_labels = TRUE)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `na_if()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> unused argument (.update_labels = TRUE)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># "Something else" (4) is removed from pid3_clean's value labels</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">value_labels</span><span class="op">$</span><span class="va">pid3_clean</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Democrat  Republican Independent </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># .update_labels = FALSE: the label entry for 4 is retained even though</span></span></span>
-<span class="r-in"><span><span class="co"># those rows are now NA; useful when documenting what was set to missing</span></span></span>
+<span class="r-in"><span><span class="co"># .update_labels = FALSE retains label entries even for NA'd values</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>pid3_clean <span class="op">=</span> <span class="fu">na_if</span><span class="op">(</span><span class="va">pid3</span>, <span class="fl">4</span>, .update_labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = na_if(pid3, 4, .update_labels = FALSE)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `na_if()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> unused argument (.update_labels = FALSE)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># "Something else" (4) is still in pid3_clean's value labels</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">value_labels</span><span class="op">$</span><span class="va">pid3_clean</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Democrat     Republican    Independent Something else </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              1              2              3              4 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Transformation ----</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># attach a plain-language description of the transformation</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    pid3_clean <span class="op">=</span> <span class="fu">na_if</span><span class="op">(</span></span></span>
@@ -231,14 +208,24 @@ than <code>NA</code>.</p></li>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = na_if(pid3, 4, .description = "Set</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   'Something else' (pid3 == 4) to NA.")`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `na_if()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> unused argument (.description = "Set 'Something else' (pid3 == 4) to NA.")</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">transformations</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "na_if(pid3, 4)"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$fn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "na_if"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$source_cols</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pid3"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$expr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "na_if(pid3, 4, .description = \"Set 'Something else' (pid3 == 4) to NA.\")"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$output_type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "vector"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$description</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Set 'Something else' (pid3 == 4) to NA."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

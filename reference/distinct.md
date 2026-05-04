@@ -18,6 +18,9 @@ valid variance estimation.
 # S3 method for class 'survey_base'
 distinct(.data, ..., .keep_all = FALSE)
 
+# S3 method for class 'survey_collection'
+distinct(.data, ..., .keep_all = FALSE, .if_missing_var = NULL)
+
 distinct(.data, ..., .keep_all = FALSE)
 ```
 
@@ -40,6 +43,13 @@ distinct(.data, ..., .keep_all = FALSE)
 
   Accepted for interface compatibility; **has no effect**. The survey
   implementation always retains all columns in `@data`.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -82,6 +92,22 @@ If `...` includes a design variable,
 The operation still proceeds after the warning — the user is assumed to
 know what they are doing.
 
+## Survey collections
+
+When applied to a `survey_collection`, `distinct()` is dispatched to
+each member independently — there is no cross-survey deduplication. Two
+members that share a literally identical row will both retain that row
+in their post-`distinct()` results. This is the V9 contract from the
+survey-collection spec; collections deliberately avoid the
+[`bind_rows()`](https://jdenn0514.github.io/surveytidy/reference/bind_rows.md)
+analogy here because cross-survey deduplication has no coherent variance
+interpretation across designs.
+
+Each member's `distinct.survey_base` issues
+`surveycore_warning_physical_subset` independently — N firings on an
+N-member collection. Capture with
+[`withCallingHandlers()`](https://rdrr.io/r/base/conditions.html).
+
 ## See also
 
 [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
@@ -95,23 +121,12 @@ Other row operations:
 
 ``` r
 library(surveytidy)
-library(dplyr)
-#> 
-#> Attaching package: ‘dplyr’
-#> The following objects are masked from ‘package:surveytidy’:
-#> 
-#>     case_when, if_else, na_if, recode_values, replace_values,
-#>     replace_when
-#> The following objects are masked from ‘package:stats’:
-#> 
-#>     filter, lag
-#> The following objects are masked from ‘package:base’:
-#> 
-#>     intersect, setdiff, setequal, union
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Deduplicate on all non-design columns (issues physical-subset warning)
+# deduplicate on all non-design columns (issues physical-subset warning)
 distinct(d)
 #> Warning: ! `distinct()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct
@@ -143,7 +158,7 @@ distinct(d)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Deduplicate by one column (all other columns still retained)
+# deduplicate by one column (all other columns still retained)
 distinct(d, cregion)
 #> Warning: ! `distinct()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct

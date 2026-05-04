@@ -31,6 +31,18 @@ rename_with(.data, .fn, .cols = dplyr::everything(), ...)
 
 # S3 method for class 'survey_result'
 rename_with(.data, .fn, .cols = dplyr::everything(), ...)
+
+# S3 method for class 'survey_collection'
+rename(.data, ..., .if_missing_var = NULL)
+
+# S3 method for class 'survey_collection'
+rename_with(
+  .data,
+  .fn,
+  .cols = dplyr::everything(),
+  ...,
+  .if_missing_var = NULL
+)
 ```
 
 ## Arguments
@@ -58,6 +70,13 @@ rename_with(.data, .fn, .cols = dplyr::everything(), ...)
 
   \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
   Columns whose names `.fn` will transform. Defaults to all columns.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -113,7 +132,7 @@ indicate an error.
 
 Extra arguments to `.fn` can be passed via `...`:
 
-    rename_with(d, stringr::str_replace, .cols = starts_with("y"),
+    rename_with(d, stringr::str_replace, .cols = tidyselect::starts_with("y"),
                 pattern = "y", replacement = "outcome")
 
 `.cols` uses tidy-select syntax. The default
@@ -121,6 +140,41 @@ Extra arguments to `.fn` can be passed via `...`:
 applies `.fn` to all columns including design variables — which will
 trigger a `surveytidy_warning_rename_design_var` warning for each
 renamed design variable.
+
+## Survey collections
+
+When applied to a `survey_collection`, `rename()` is dispatched to each
+member independently. Each member's `rename.survey_base` updates
+`@data`, `@variables`, `@metadata`, and `@groups` atomically.
+
+Before dispatching, `rename.survey_collection` resolves the rename map
+against each member's `@data` and raises
+`surveytidy_error_collection_rename_group_partial` if any column in
+`coll@groups` would be renamed on some members but not others — that
+would leave the collection with an inconsistent `@groups` invariant (G1)
+that no `.if_missing_var` policy can recover. For plain `rename` the
+rename map is universal, so this branch normally fires only as a
+defense-in-depth catch for regressions in the surveycore G1b validator.
+
+Renaming a non-group design variable (weights, ids, strata, fpc) emits
+`surveytidy_warning_rename_design_var` once per member — N firings on an
+N-member collection. Capture with
+[`withCallingHandlers()`](https://rdrr.io/r/base/conditions.html).
+
+When applied to a `survey_collection`,
+[`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html) is
+dispatched to each member independently. Each member resolves `.cols`
+against its own `@data`, so a `.cols` like `where(is.factor)` may select
+different columns on different members.
+
+Before dispatching, `rename_with.survey_collection` resolves `.cols`
+per-member and raises `surveytidy_error_collection_rename_group_partial`
+if any column in `coll@groups` would be renamed on some members but not
+others. This is the genuine trigger for the partial-rename class —
+`.cols` resolving differently across a heterogeneous collection is the
+path the spec is designed to catch (see §IV.4 reachability note).
+
+Per-member design-variable warnings fire once per affected member.
 
 ## See also
 
@@ -135,14 +189,15 @@ Other modification:
 ## Examples
 
 ``` r
-library(dplyr)
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
 # rename() ----------------------------------------------------------------
 
-# Rename an outcome column
+# rename an outcome column
 rename(d, financial_situation = fin_sit)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -170,7 +225,7 @@ rename(d, financial_situation = fin_sit)
 #> #   bbhome <dbl>, smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>,
 #> #   smuse_ig <dbl>, smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, …
 
-# Rename multiple columns at once
+# rename multiple columns at once
 rename(d, region = cregion, education = educcat)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -198,7 +253,7 @@ rename(d, region = cregion, education = educcat)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Rename a design variable — warns and updates the design specification
+# rename a design variable — warns and updates the design specification
 rename(d, survey_weight = weight)
 #> Warning: ! Renamed design variable weight.
 #> ℹ The survey design has been updated to track the new name.
@@ -230,8 +285,8 @@ rename(d, survey_weight = weight)
 
 # rename_with() -----------------------------------------------------------
 
-# Apply a function to all outcome columns
-rename_with(d, toupper, .cols = starts_with("econ"))
+# apply a function to all matching columns
+rename_with(d, toupper, .cols = tidyselect::starts_with("econ"))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -258,8 +313,8 @@ rename_with(d, toupper, .cols = starts_with("econ"))
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Use a formula
-rename_with(d, ~ paste0(., "_v2"), .cols = starts_with("econ"))
+# use a formula
+rename_with(d, ~ paste0(., "_v2"), .cols = tidyselect::starts_with("econ"))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)

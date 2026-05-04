@@ -33,12 +33,16 @@ Other grouping:
 ## Examples
 
 ``` r
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-is_rowwise(d)           # FALSE
+# FALSE for a freshly-built design; TRUE after rowwise()
+is_rowwise(d)
 #> [1] FALSE
-is_rowwise(rowwise(d))  # TRUE
+is_rowwise(rowwise(d))
 #> [1] TRUE
 ```

@@ -27,7 +27,7 @@ dplyr::case_when()."><meta property="og:image" content="https://jdenn0514.github
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ dplyr::case_when()."><meta property="og:image" content="https://jdenn0514.github
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>A generalised vectorised if-else</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/case-when.R" class="external-link"><code>R/case-when.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/case-when.R" class="external-link"><code>R/case-when.R</code></a></small>
       <div class="d-none name"><code>case_when.Rd</code></div>
     </div>
 
@@ -159,9 +159,7 @@ existing value labels from the input automatically.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># load the libraries</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create the survey design</span></span></span>
@@ -170,13 +168,9 @@ existing value labels from the input automatically.</p></li>
 <span class="r-in"><span>  weights <span class="op">=</span> <span class="va">weight</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Basic case_when — identical to dplyr::case_when() -------------------</span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># basic case_when — identical to dplyr::case_when()</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># make a new variable for young partisans</span></span></span>
 <span class="r-in"><span>    age_pid <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="st">"18-29 Democrats"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="st">"18-29 Republicans"</span>,</span></span>
@@ -184,14 +178,13 @@ existing value labels from the input automatically.</p></li>
 <span class="r-in"><span>      .default <span class="op">=</span> <span class="st">"Everyone else"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="co"># keep only only the relevant columns</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">pid3</span>, <span class="va">age_pid</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># show the new column</span></span></span>
+<span class="r-in"><span><span class="co"># by default, no metadata is attached</span></span></span>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 3</span></span>
@@ -211,8 +204,6 @@ existing value labels from the input automatically.</p></li>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># By default, no metadata is attached</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;surveycore::survey_metadata&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ variable_labels  :List of 3</span>
@@ -226,32 +217,24 @@ existing value labels from the input automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ notes            : list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ universe         : list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ missing_codes    : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  @ sata             : list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ transformations  :List of 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .. $ age_pid: chr "case_when(age &lt; 30 &amp; pid3 == 1 ~ \"18-29 Democrats\", age &lt; 30 &amp; \n    pid3 == 2 ~ \"18-29 Republicans\", age &lt;"| __truncated__</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  @ weighting_history: list()</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># --------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Set metadata -------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># --------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Variable label ----</span></span></span>
+<span class="r-in"><span><span class="co"># attach a variable label via .label</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># make a new variable for young partisans</span></span></span>
 <span class="r-in"><span>    age_pid <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="st">"18-29 Democrats"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="st">"18-29 Republicans"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">~</span> <span class="st">"18-29 Independents"</span>,</span></span>
 <span class="r-in"><span>      .default <span class="op">=</span> <span class="st">"Everyone else"</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># set variable label</span></span></span>
 <span class="r-in"><span>      .label <span class="op">=</span> <span class="st">"Age and Partisanship"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="co"># show the output of the new column relative to original columsn</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">pid3</span>, <span class="va">age_pid</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Show variable labels, we can see that age_pid is blank</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">variable_labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "3-category party ID"</span>
@@ -266,30 +249,24 @@ existing value labels from the input automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Age and Partisanship"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Transformation ----</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># set the plain word description of how the variable was created</span></span></span>
+<span class="r-in"><span><span class="co"># attach a plain-language description of the transformation</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># make a new variable for young partisans</span></span></span>
 <span class="r-in"><span>    age_pid <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="st">"18-29 Democrats"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="st">"18-29 Republicans"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">~</span> <span class="st">"18-29 Independents"</span>,</span></span>
 <span class="r-in"><span>      .default <span class="op">=</span> <span class="st">"Everyone else"</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># set variable label</span></span></span>
 <span class="r-in"><span>      .label <span class="op">=</span> <span class="st">"Age and Partisanship"</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># set the description of the transformation</span></span></span>
-<span class="r-in"><span>      .description <span class="op">=</span> <span class="st">"Those with age &lt; 30 AND pid3 = 1 were set to '18-29 Democrats',\n</span></span></span>
-<span class="r-in"><span><span class="st">         those with age &lt; 30 AND pid3 = 2 were set to '18-29 Republicans', \n</span></span></span>
-<span class="r-in"><span><span class="st">         those with age &lt; 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \n</span></span></span>
-<span class="r-in"><span><span class="st">         everyone else was set to 'Everyone else'"</span></span></span>
+<span class="r-in"><span>      .description <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"Young (&lt; 30) Democrats, Republicans, and Independents"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"were grouped by partisanship; everyone else was set to"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"'Everyone else'."</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="co"># show the output of the new column relative to original columsn</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">pid3</span>, <span class="va">age_pid</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Show variable labels, we can see that age_pid is blank</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">transformations</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_pid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_pid$fn</span>
@@ -299,33 +276,30 @@ existing value labels from the input automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "age"  "pid3"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_pid$expr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "case_when(age &lt; 30 &amp; pid3 == 1 ~ \"18-29 Democrats\", age &lt; 30 &amp; "                                                                                                                                                                                                                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "    pid3 == 2 ~ \"18-29 Republicans\", age &lt; 30 &amp; pid3 %in% c(3:4) ~ "                                                                                                                                                                                                                                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "    \"18-29 Independents\", .default = \"Everyone else\", .label = \"Age and Partisanship\", "                                                                                                                                                                                                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "    .description = \"Those with age &lt; 30 AND pid3 = 1 were set to '18-29 Democrats',\\n\\n         those with age &lt; 30 AND pid3 = 2 were set to '18-29 Republicans', \\n\\n         those with age &lt; 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \\n\\n         everyone else was set to 'Everyone else'\")"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "case_when(age &lt; 30 &amp; pid3 == 1 ~ \"18-29 Democrats\", age &lt; 30 &amp; "                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "    pid3 == 2 ~ \"18-29 Republicans\", age &lt; 30 &amp; pid3 %in% c(3:4) ~ "                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "    \"18-29 Independents\", .default = \"Everyone else\", .label = \"Age and Partisanship\", "</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "    .description = paste(\"Young (&lt; 30) Democrats, Republicans, and Independents\", "         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "        \"were grouped by partisanship; everyone else was set to\", "                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "        \"'Everyone else'.\"))"                                                               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_pid$output_type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "vector"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_pid$description</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Those with age &lt; 30 AND pid3 = 1 were set to '18-29 Democrats',\n\n         those with age &lt; 30 AND pid3 = 2 were set to '18-29 Republicans', \n\n         those with age &lt; 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \n\n         everyone else was set to 'Everyone else'"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Young (&lt; 30) Democrats, Republicans, and Independents were grouped by partisanship; everyone else was set to 'Everyone else'."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Value labels ----</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Add value labels</span></span></span>
+<span class="r-in"><span><span class="co"># attach value labels alongside numeric codes</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    age_pid <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span></span>
-<span class="r-in"><span>      <span class="co"># set party for 18-29</span></span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">~</span> <span class="fl">3</span>,</span></span>
 <span class="r-in"><span>      .default <span class="op">=</span> <span class="fl">4</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># add variable label</span></span></span>
 <span class="r-in"><span>      .label <span class="op">=</span> <span class="st">"Age and Partisanship"</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># add value labels</span></span></span>
 <span class="r-in"><span>      .value_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        <span class="st">"18-29 Democrats"</span> <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>        <span class="st">"18-29 Republicans"</span> <span class="op">=</span> <span class="fl">2</span>,</span></span>
@@ -350,29 +324,23 @@ existing value labels from the input automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  1                  2                  3                  4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># --------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Make output a factor -----------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># --------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># return a factor with levels in formula order</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># make a new variable for young partisans</span></span></span>
 <span class="r-in"><span>    age_pid <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="st">"18-29 Democrats"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="st">"18-29 Republicans"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">age</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">pid3</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">~</span> <span class="st">"18-29 Independents"</span>,</span></span>
 <span class="r-in"><span>      .default <span class="op">=</span> <span class="st">"Everyone else"</span>,</span></span>
-<span class="r-in"><span>      <span class="co"># make output a factor based on it's appearance</span></span></span>
 <span class="r-in"><span>      .factor <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="co"># show the output of the new column relative to original columsn</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">pid3</span>, <span class="va">age_pid</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 3</span></span>

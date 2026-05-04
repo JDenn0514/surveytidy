@@ -31,7 +31,7 @@ as x."><meta property="og:image" content="https://jdenn0514.github.io/surveytidy
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@ as x."><meta property="og:image" content="https://jdenn0514.github.io/surveytidy
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Partially update values using an explicit mapping</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/replace-values.R" class="external-link"><code>R/replace-values.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/replace-values.R" class="external-link"><code>R/replace-values.R</code></a></small>
       <div class="d-none name"><code>replace_values.Rd</code></div>
     </div>
 
@@ -148,17 +148,13 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create the survey design</span></span></span>
 <span class="r-in"><span><span class="va">ns_wave1_svy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey_nonprob.html" class="external-link">as_survey_nonprob</a></span><span class="op">(</span><span class="va">ns_wave1</span>, weights <span class="op">=</span> <span class="va">weight</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Basic replace_values — replace specific values ----------------------</span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Replace "Something else" (4) with 3 (Independent) in pid3.</span></span></span>
-<span class="r-in"><span><span class="co"># Only matching rows change; all others keep their original value.</span></span></span>
+<span class="r-in"><span><span class="co"># basic replace_values — replace pid3 == 4 ("Something else") with 3</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span>pid3_clean <span class="op">=</span> <span class="fu">replace_values</span><span class="op">(</span><span class="va">pid3</span>, from <span class="op">=</span> <span class="fl">4</span>, to <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
@@ -166,7 +162,7 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-in"><span><span class="va">new</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (calibrated / non-probability) [experimental]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_nonprob&gt;</span> (non-probability) [experimental]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sample size: <span style="color: #0000BB;">6422</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6,422 × 2</span></span>
@@ -187,21 +183,18 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Value labels from pid3 carry over to pid3_clean automatically</span></span></span>
+<span class="r-in"><span><span class="co"># value labels from pid3 carry over to pid3_clean automatically</span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">value_labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Democrat     Republican    Independent Something else </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              1              2              3              4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Democrat  Republican Independent </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Set metadata --------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># ---------------------------------------------------------------------</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Variable label ----</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Override the variable label inherited from pid3</span></span></span>
+<span class="r-in"><span><span class="co"># override the inherited variable label via .label</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    pid3_clean <span class="op">=</span> <span class="fu">replace_values</span><span class="op">(</span></span></span>
@@ -212,12 +205,6 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = replace_values(pid3, from = 4, to = 3,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   .label = "Party ID (3 categories)")`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `replace_values()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Arguments in `...` must be passed by position, not name.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Problematic argument:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> .label = "Party ID (3 categories)"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">variable_labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3</span>
@@ -226,11 +213,11 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $weight</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Survey weight, continuous value from 0-5"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Party ID (3 categories)"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Value labels ----</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Provide updated value labels that reflect the recoded categories</span></span></span>
+<span class="r-in"><span><span class="co"># provide updated value labels that reflect the recoded categories</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    pid3_clean <span class="op">=</span> <span class="fu">replace_values</span><span class="op">(</span></span></span>
@@ -246,22 +233,18 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = replace_values(...)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `replace_values()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Arguments in `...` must be passed by position, not name.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Problematic arguments:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> .label = "Party ID (3 categories)"</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> .value_labels = c(Democrat = 1, Republican = 2, `Independent/Other` = 3)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">value_labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Democrat     Republican    Independent Something else </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              1              2              3              4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Democrat        Republican Independent/Other </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1                 2                 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ---- Transformation ----</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># attach a plain-language description of the transformation</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="va">ns_wave1_svy</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mutate.html">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    pid3_clean <span class="op">=</span> <span class="fu">replace_values</span><span class="op">(</span></span></span>
@@ -269,21 +252,33 @@ vectors; does not inherit labels from <code>x</code> automatically.</p></li>
 <span class="r-in"><span>      from <span class="op">=</span> <span class="fl">4</span>,</span></span>
 <span class="r-in"><span>      to <span class="op">=</span> <span class="fl">3</span>,</span></span>
 <span class="r-in"><span>      .label <span class="op">=</span> <span class="st">"Party ID (3 categories)"</span>,</span></span>
-<span class="r-in"><span>      .description <span class="op">=</span> <span class="st">"'Something else' (pid3 == 4) replaced with value 3 (Independent)."</span></span></span>
+<span class="r-in"><span>      .description <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"'Something else' (pid3 == 4) replaced with"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"value 3 (Independent)."</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">pid3</span>, <span class="va">pid3_clean</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(base_data, ..., .keep = .keep):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `pid3_clean = replace_values(...)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `replace_values()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Arguments in `...` must be passed by position, not name.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Problematic arguments:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> .label = "Party ID (3 categories)"</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> .description = "'Something else' (pid3 == 4) replaced with value 3</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   (Independent)."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">new</span><span class="op">@</span><span class="va">metadata</span><span class="op">@</span><span class="va">transformations</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "replace_values(pid3, from = 4, to = 3)"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$fn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "replace_values"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$source_cols</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pid3"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$expr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "replace_values(pid3, from = 4, to = 3, .label = \"Party ID (3 categories)\", "</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "    .description = paste(\"'Something else' (pid3 == 4) replaced with\", "    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "        \"value 3 (Independent).\"))"                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$output_type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "vector"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pid3_clean$description</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "'Something else' (pid3 == 4) replaced with value 3 (Independent)."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

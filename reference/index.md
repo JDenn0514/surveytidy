@@ -14,6 +14,7 @@ Physical row removal ([`subset()`](https://rdrr.io/r/base/subset.html),
 rows can bias variance estimates.
 
 - [`filter_out(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+  [`filter_out(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
   [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
   : Keep or drop rows using domain estimation
 - [`distinct()`](https://jdenn0514.github.io/surveytidy/reference/distinct.md)
@@ -33,6 +34,11 @@ rows can bias variance estimates.
   [`slice_min(`*`<survey_result>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
   [`slice_max(`*`<survey_result>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
   [`slice_sample(`*`<survey_result>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
+  [`slice_head(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
+  [`slice_tail(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
+  [`slice_min(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
+  [`slice_max(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
+  [`slice_sample(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/slice.md)
   : Physically select rows of a survey design object
 - [`subset(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/subset.survey_base.md)
   : Physically remove rows from a survey design object
@@ -53,6 +59,7 @@ metadata to match the new name.
 - [`rename()`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
   [`rename_with(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
   [`rename_with(`*`<survey_result>`*`)`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
+  [`rename_with(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/rename.md)
   : Rename columns of a survey design object
 - [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
   : Create, modify, and delete columns of a survey design object
@@ -73,10 +80,45 @@ modified — groups are stored on the survey object and applied when
 needed.
 
 - [`ungroup(`*`<survey_base>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
+  [`ungroup(`*`<survey_collection>`*`)`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
   [`group_by()`](https://jdenn0514.github.io/surveytidy/reference/group_by.md)
   : Group and ungroup a survey design object
 - [`rowwise()`](https://jdenn0514.github.io/surveytidy/reference/rowwise.md)
   : Compute row-wise on a survey design object
+
+### Joins
+
+Join a survey design object with a plain data frame.
+[`left_join()`](https://jdenn0514.github.io/surveytidy/reference/left_join.md)
+adds lookup columns without changing row count.
+[`semi_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+and
+[`anti_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+are domain-aware: unmatched rows are marked out-of-domain rather than
+removed, preserving variance estimation validity.
+[`inner_join()`](https://jdenn0514.github.io/surveytidy/reference/inner_join.md)
+defaults to domain-aware mode and supports an explicit
+`.domain_aware = FALSE` for physical row removal.
+[`right_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md),
+[`full_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md),
+and
+[`bind_rows()`](https://jdenn0514.github.io/surveytidy/reference/bind_rows.md)
+always error — they would add rows with missing design variables.
+
+- [`left_join()`](https://jdenn0514.github.io/surveytidy/reference/left_join.md)
+  : Add columns from a data frame to a survey design
+- [`semi_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+  [`anti_join()`](https://jdenn0514.github.io/surveytidy/reference/semi_join.md)
+  : Domain-aware semi- and anti-join for survey designs
+- [`inner_join()`](https://jdenn0514.github.io/surveytidy/reference/inner_join.md)
+  : Domain-aware inner join for survey designs
+- [`bind_cols()`](https://jdenn0514.github.io/surveytidy/reference/bind_cols.md)
+  : Append columns to a survey design by position
+- [`right_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md)
+  [`full_join()`](https://jdenn0514.github.io/surveytidy/reference/right_join.md)
+  : Unsupported joins for survey designs
+- [`bind_rows()`](https://jdenn0514.github.io/surveytidy/reference/bind_rows.md)
+  : Stack surveys with bind_rows (errors unconditionally)
 
 ### Predicates
 
@@ -138,3 +180,7 @@ transformation metadata in `@metadata@transformations`.
   : Reverse the numeric values of a scale variable
 - [`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md)
   : Flip the semantic valence of a variable
+- [`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md)
+  : Compute row-wise means across selected columns
+- [`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
+  : Compute row-wise sums across selected columns

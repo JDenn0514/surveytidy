@@ -9,6 +9,8 @@
 <url><loc>https://jdenn0514.github.io/surveytidy/index.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/news/index.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/arrange.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/bind_cols.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/bind_rows.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/case_when.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/distinct.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/drop_na.html</loc></url>
@@ -17,8 +19,10 @@
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/group_by.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/if_else.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/index.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/inner_join.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/is_grouped.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/is_rowwise.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/left_join.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/make_binary.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/make_dicho.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/make_factor.html</loc></url>
@@ -33,10 +37,15 @@
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/rename.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/replace_values.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/replace_when.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/right_join.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/row_means.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/row_sums.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/rowwise.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/select.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/semi_join.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/slice.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/subset.survey_base.html</loc></url>
+<url><loc>https://jdenn0514.github.io/surveytidy/reference/survey_collection_args.html</loc></url>
 <url><loc>https://jdenn0514.github.io/surveytidy/reference/surveytidy-package.html</loc></url>
 </urlset>
 

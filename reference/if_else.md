@@ -109,20 +109,20 @@ Other recoding:
 ``` r
 library(surveycore)
 library(surveytidy)
+
+# create the survey design
 ns_wave1_svy <- as_survey_nonprob(ns_wave1, weights = weight)
 
-# ---------------------------------------------------------------------
-# Basic if_else — identical to dplyr::if_else() -----------------------
-# ---------------------------------------------------------------------
-
+# basic if_else — identical to dplyr::if_else()
 new <- ns_wave1_svy |>
   mutate(senior = if_else(age >= 65, "Senior (65+)", "Non-senior")) |>
   select(age, senior)
 
+# by default, no metadata is attached
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -142,8 +142,6 @@ new
 #> 
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
-
-# By default, no metadata is attached
 new@metadata
 #> <surveycore::survey_metadata>
 #>  @ variable_labels  :List of 2
@@ -154,24 +152,27 @@ new@metadata
 #>  @ notes            : list()
 #>  @ universe         : list()
 #>  @ missing_codes    : list()
+#>  @ sata             : list()
 #>  @ transformations  :List of 1
 #>  .. $ senior: chr "if_else(age >= 65, \"Senior (65+)\", \"Non-senior\")"
 #>  @ weighting_history: list()
 
-
-# ---- Handle missing values ----
-
-# Use missing = to specify the output value when condition is NA
+# use missing = to specify the output value when condition is NA
 new <- ns_wave1_svy |>
   mutate(
-    dem = if_else(pid3 == 1, "Democrat", "Non-Democrat", missing = "Unknown")
+    dem = if_else(
+      pid3 == 1,
+      "Democrat",
+      "Non-Democrat",
+      missing = "Unknown"
+    )
   ) |>
   select(pid3, dem)
 
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -192,13 +193,7 @@ new
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-
-# ---------------------------------------------------------------------
-# Set metadata --------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---- Variable label ----
-
+# attach a variable label via .label
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -209,25 +204,19 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(age, senior)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `senior = if_else(age >= 65, "Senior (65+)",
-#>   "Non-senior", .label = "Senior citizen (age 65+)")`.
-#> Caused by error in `if_else()`:
-#> ! `...` must be empty.
-#> ✖ Problematic argument:
-#> • .label = "Senior citizen (age 65+)"
 
 new@metadata@variable_labels
-#> $pid3
-#> [1] "3-category party ID"
+#> $age
+#> [1] "What is your age? Provided by LUCID. Response is an integer value 18 or ..."
 #> 
 #> $weight
 #> [1] "Survey weight, continuous value from 0-5"
 #> 
+#> $senior
+#> [1] "Senior citizen (age 65+)"
+#> 
 
-
-# ---- Value labels ----
-
-# Use integer codes for the output and add value labels to document them
+# use integer codes and document them with value labels
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -239,22 +228,14 @@ new <- ns_wave1_svy |>
     )
   ) |>
   select(age, senior)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `senior = if_else(...)`.
-#> Caused by error in `if_else()`:
-#> ! `...` must be empty.
-#> ✖ Problematic arguments:
-#> • .label = "Senior citizen (age 65+)"
-#> • .value_labels = c(`Senior (65+)` = 1, `Non-senior` = 0)
 
 new@metadata@value_labels
-#> $pid3
-#>       Democrat     Republican    Independent Something else 
-#>              1              2              3              4 
+#> $senior
+#> Senior (65+)   Non-senior 
+#>            1            0 
 #> 
 
-
-# ---- Transformation ----
-
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
     senior = if_else(
@@ -262,20 +243,32 @@ new <- ns_wave1_svy |>
       "Senior (65+)",
       "Non-senior",
       .label = "Senior citizen (age 65+)",
-      .description = "age >= 65 coded as 'Senior (65+)'; everyone else as 'Non-senior'."
+      .description = paste(
+        "age >= 65 coded as 'Senior (65+)';",
+        "everyone else as 'Non-senior'."
+      )
     )
   ) |>
   select(age, senior)
-#> Error in dplyr::mutate(base_data, ..., .keep = .keep): ℹ In argument: `senior = if_else(...)`.
-#> Caused by error in `if_else()`:
-#> ! `...` must be empty.
-#> ✖ Problematic arguments:
-#> • .label = "Senior citizen (age 65+)"
-#> • .description = "age >= 65 coded as 'Senior (65+)'; everyone else as
-#>   'Non-senior'."
 
 new@metadata@transformations
-#> $dem
-#> [1] "if_else(pid3 == 1, \"Democrat\", \"Non-Democrat\", missing = \"Unknown\")"
+#> $senior
+#> $senior$fn
+#> [1] "if_else"
+#> 
+#> $senior$source_cols
+#> [1] "age"
+#> 
+#> $senior$expr
+#> [1] "if_else(age >= 65, \"Senior (65+)\", \"Non-senior\", .label = \"Senior citizen (age 65+)\", "
+#> [2] "    .description = paste(\"age >= 65 coded as 'Senior (65+)';\", "                           
+#> [3] "        \"everyone else as 'Non-senior'.\"))"                                                
+#> 
+#> $senior$output_type
+#> [1] "vector"
+#> 
+#> $senior$description
+#> [1] "age >= 65 coded as 'Senior (65+)'; everyone else as 'Non-senior'."
+#> 
 #> 
 ```

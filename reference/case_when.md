@@ -125,7 +125,6 @@ Other recoding:
 ## Examples
 
 ``` r
-# load the libraries
 library(surveycore)
 library(surveytidy)
 
@@ -135,13 +134,9 @@ ns_wave1_svy <- as_survey_nonprob(
   weights = weight
 )
 
-# ---------------------------------------------------------------------
-# Basic case_when — identical to dplyr::case_when() -------------------
-# ---------------------------------------------------------------------
-
+# basic case_when — identical to dplyr::case_when()
 new <- ns_wave1_svy |>
   mutate(
-    # make a new variable for young partisans
     age_pid = case_when(
       age < 30 & pid3 == 1 ~ "18-29 Democrats",
       age < 30 & pid3 == 2 ~ "18-29 Republicans",
@@ -149,14 +144,13 @@ new <- ns_wave1_svy |>
       .default = "Everyone else"
     )
   ) |>
-  # keep only only the relevant columns
   select(age, pid3, age_pid)
 
-# show the new column
+# by default, no metadata is attached
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3
@@ -176,8 +170,6 @@ new
 #> 
 #> ℹ Design variables preserved but hidden: weight.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
-
-# By default, no metadata is attached
 new@metadata
 #> <surveycore::survey_metadata>
 #>  @ variable_labels  :List of 3
@@ -191,32 +183,24 @@ new@metadata
 #>  @ notes            : list()
 #>  @ universe         : list()
 #>  @ missing_codes    : list()
+#>  @ sata             : list()
 #>  @ transformations  :List of 1
 #>  .. $ age_pid: chr "case_when(age < 30 & pid3 == 1 ~ \"18-29 Democrats\", age < 30 & \n    pid3 == 2 ~ \"18-29 Republicans\", age <"| __truncated__
 #>  @ weighting_history: list()
 
-
-# --------------------------------------------------------------------
-# Set metadata -------------------------------------------------------
-# --------------------------------------------------------------------
-
-# ---- Variable label ----
+# attach a variable label via .label
 new <- ns_wave1_svy |>
   mutate(
-    # make a new variable for young partisans
     age_pid = case_when(
       age < 30 & pid3 == 1 ~ "18-29 Democrats",
       age < 30 & pid3 == 2 ~ "18-29 Republicans",
       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
       .default = "Everyone else",
-      # set variable label
       .label = "Age and Partisanship"
     )
   ) |>
-  # show the output of the new column relative to original columsn
   select(age, pid3, age_pid)
 
-# Show variable labels, we can see that age_pid is blank
 new@metadata@variable_labels
 #> $pid3
 #> [1] "3-category party ID"
@@ -231,30 +215,24 @@ new@metadata@variable_labels
 #> [1] "Age and Partisanship"
 #> 
 
-# ---- Transformation ----
-
-# set the plain word description of how the variable was created
+# attach a plain-language description of the transformation
 new <- ns_wave1_svy |>
   mutate(
-    # make a new variable for young partisans
     age_pid = case_when(
       age < 30 & pid3 == 1 ~ "18-29 Democrats",
       age < 30 & pid3 == 2 ~ "18-29 Republicans",
       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
       .default = "Everyone else",
-      # set variable label
       .label = "Age and Partisanship",
-      # set the description of the transformation
-      .description = "Those with age < 30 AND pid3 = 1 were set to '18-29 Democrats',\n
-         those with age < 30 AND pid3 = 2 were set to '18-29 Republicans', \n
-         those with age < 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \n
-         everyone else was set to 'Everyone else'"
+      .description = paste(
+        "Young (< 30) Democrats, Republicans, and Independents",
+        "were grouped by partisanship; everyone else was set to",
+        "'Everyone else'."
+      )
     )
   ) |>
-  # show the output of the new column relative to original columsn
   select(age, pid3, age_pid)
 
-# Show variable labels, we can see that age_pid is blank
 new@metadata@transformations
 #> $age_pid
 #> $age_pid$fn
@@ -264,33 +242,30 @@ new@metadata@transformations
 #> [1] "age"  "pid3"
 #> 
 #> $age_pid$expr
-#> [1] "case_when(age < 30 & pid3 == 1 ~ \"18-29 Democrats\", age < 30 & "                                                                                                                                                                                                                                                     
-#> [2] "    pid3 == 2 ~ \"18-29 Republicans\", age < 30 & pid3 %in% c(3:4) ~ "                                                                                                                                                                                                                                                 
-#> [3] "    \"18-29 Independents\", .default = \"Everyone else\", .label = \"Age and Partisanship\", "                                                                                                                                                                                                                         
-#> [4] "    .description = \"Those with age < 30 AND pid3 = 1 were set to '18-29 Democrats',\\n\\n         those with age < 30 AND pid3 = 2 were set to '18-29 Republicans', \\n\\n         those with age < 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \\n\\n         everyone else was set to 'Everyone else'\")"
+#> [1] "case_when(age < 30 & pid3 == 1 ~ \"18-29 Democrats\", age < 30 & "                            
+#> [2] "    pid3 == 2 ~ \"18-29 Republicans\", age < 30 & pid3 %in% c(3:4) ~ "                        
+#> [3] "    \"18-29 Independents\", .default = \"Everyone else\", .label = \"Age and Partisanship\", "
+#> [4] "    .description = paste(\"Young (< 30) Democrats, Republicans, and Independents\", "         
+#> [5] "        \"were grouped by partisanship; everyone else was set to\", "                         
+#> [6] "        \"'Everyone else'.\"))"                                                               
 #> 
 #> $age_pid$output_type
 #> [1] "vector"
 #> 
 #> $age_pid$description
-#> [1] "Those with age < 30 AND pid3 = 1 were set to '18-29 Democrats',\n\n         those with age < 30 AND pid3 = 2 were set to '18-29 Republicans', \n\n         those with age < 30 AND pid3 = 3 or 4 were set to '18-29 Independents', \n\n         everyone else was set to 'Everyone else'"
+#> [1] "Young (< 30) Democrats, Republicans, and Independents were grouped by partisanship; everyone else was set to 'Everyone else'."
 #> 
 #> 
 
-# ---- Value labels ----
-
-# Add value labels
+# attach value labels alongside numeric codes
 new <- ns_wave1_svy |>
   mutate(
     age_pid = case_when(
-      # set party for 18-29
       age < 30 & pid3 == 1 ~ 1,
       age < 30 & pid3 == 2 ~ 2,
       age < 30 & pid3 %in% c(3:4) ~ 3,
       .default = 4,
-      # add variable label
       .label = "Age and Partisanship",
-      # add value labels
       .value_labels = c(
         "18-29 Democrats" = 1,
         "18-29 Republicans" = 2,
@@ -315,29 +290,23 @@ new@metadata@value_labels
 #>                  1                  2                  3                  4 
 #> 
 
-# --------------------------------------------------------------------
-# Make output a factor -----------------------------------------------
-# --------------------------------------------------------------------
-
+# return a factor with levels in formula order
 new <- ns_wave1_svy |>
   mutate(
-    # make a new variable for young partisans
     age_pid = case_when(
       age < 30 & pid3 == 1 ~ "18-29 Democrats",
       age < 30 & pid3 == 2 ~ "18-29 Republicans",
       age < 30 & pid3 %in% c(3:4) ~ "18-29 Independents",
       .default = "Everyone else",
-      # make output a factor based on it's appearance
       .factor = TRUE
     )
   ) |>
-  # show the output of the new column relative to original columsn
   select(age, pid3, age_pid)
 
 new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
-#> <survey_nonprob> (calibrated / non-probability) [experimental]
+#> <survey_nonprob> (non-probability) [experimental]
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3

@@ -23,7 +23,7 @@ the survey object and cannot be recovered within the same pipeline."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ the survey object and cannot be recovered within the same pipeline."><meta prope
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Keep or drop columns using their names and types</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/select.R" class="external-link"><code>R/select.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/select.R" class="external-link"><code>R/select.R</code></a></small>
       <div class="d-none name"><code>select.Rd</code></div>
     </div>
 
@@ -66,7 +66,10 @@ the survey object and cannot be recovered within the same pipeline.</p>
 <span><span class="fu">select</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_result'</span></span>
-<span><span class="fu">select</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">select</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu">select</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .if_missing_var <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,6 +84,13 @@ the survey object and cannot be recovered within the same pipeline.</p>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>&lt;<code><a href="https://tidyselect.r-lib.org/reference/language.html" class="external-link">tidy-select</a></code>&gt; One or more unquoted
 column names or tidy-select expressions.</p></dd>
+
+
+<dt id="arg--if-missing-var">.if_missing_var<a class="anchor" aria-label="anchor" href="#arg--if-missing-var"></a></dt>
+<dd><p>Per-call override of <code>collection@if_missing_var</code>.
+One of <code>"error"</code> or <code>"skip"</code>, or <code>NULL</code> (the default) to inherit the
+collection's stored value. See
+<code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -113,12 +123,30 @@ are removed. Metadata for retained columns is preserved.</p>
 
     </div>
     <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>select()</code> is dispatched to each
+member independently. Each member resolves its own tidyselect expression
+against its own <code>@data</code>, so members may end up with different visible
+columns when the selection is partial (e.g., <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">any_of()</a></code> against a
+heterogeneous collection). Per-member design variables are always retained.</p>
+<p>Before dispatching, <code>select.survey_collection</code> resolves the selection
+against the first member's <code>@data</code> and raises
+<code>surveytidy_error_collection_select_group_removed</code> if any column in
+<code>coll@groups</code> would be removed. Group columns must remain in every member;
+silently dropping them would violate the surveycore class validator (G1b).
+Use <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> first if you intend to remove a group column.</p>
+<p><code>relocate.survey_collection</code> is <strong>not</strong> subject to this pre-flight —
+<code><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">dplyr::relocate</a></code> only reorders columns and never drops them.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="relocate.html">relocate()</a></code> to reorder columns, <code><a href="rename.html">rename()</a></code> to rename them,
 <code><a href="mutate.html">mutate()</a></code> to add new ones</p>
 <p>Other selecting:
-<code><a href="glimpse.html">glimpse</a></code>,
-<code><a href="pull.html">pull</a></code>,
+<code><a href="glimpse.html">glimpse.survey_collection()</a></code>,
+<code><a href="pull.html">pull.survey_collection()</a></code>,
 <code><a href="relocate.html">relocate</a></code></p></div>
     </div>
 
@@ -126,9 +154,11 @@ are removed. Metadata for retained columns is preserved.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create a survey design from the pew_npors_2025 example dataset</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Select by name</span></span></span>
+<span class="r-in"><span><span class="co"># select by name</span></span></span>
 <span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="va">gender</span>, <span class="va">agecat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -153,8 +183,8 @@ are removed. Metadata for retained columns is preserved.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span> and <span style="color: #00BB00;">stratum</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Select by name pattern</span></span></span>
-<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># select by name pattern</span></span></span>
+<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -179,8 +209,8 @@ are removed. Metadata for retained columns is preserved.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Design variables preserved but hidden: <span style="color: #00BB00;">weight</span> and <span style="color: #00BB00;">stratum</span>.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `print(x, full = TRUE)` to show all variables.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Select by type</span></span></span>
-<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># select by type</span></span></span>
+<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -207,8 +237,8 @@ are removed. Metadata for retained columns is preserved.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;, smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, smuse_bsk &lt;dbl&gt;, smuse_th &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Drop columns with !</span></span></span>
-<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="op">!</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># drop columns with !</span></span></span>
+<span class="r-in"><span><span class="fu">select</span><span class="op">(</span><span class="va">d</span>, <span class="op">!</span><span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>

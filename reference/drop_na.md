@@ -19,6 +19,9 @@ drop_na(data, ...)
 # S3 method for class 'survey_result'
 drop_na(data, ...)
 
+# S3 method for class 'survey_collection'
+drop_na(data, ...)
+
 drop_na(data, ...)
 ```
 
@@ -58,6 +61,22 @@ calls too. These are equivalent:
     drop_na(d, bpxsy1) |> filter(ridageyr >= 18)
     filter(d, !is.na(bpxsy1), ridageyr >= 18)
 
+## Survey collections
+
+When applied to a `survey_collection`, `drop_na()` is dispatched to each
+member independently with the same `...`. Per-member empty-domain
+warnings fire as usual. The collection's stored `@if_missing_var`
+controls behavior when a tidyselect-named column is absent from one or
+more members; detection mode is class-catch (the tidyselect error is
+caught at dispatch time).
+
+Unlike other collection verbs, `drop_na()` does not accept a per-call
+`.if_missing_var` argument: tidyr's `drop_na()` generic calls
+[`rlang::check_dots_unnamed()`](https://rlang.r-lib.org/reference/check_dots_unnamed.html)
+before S3 dispatch, which rejects any named `...` argument. Use
+[`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html)
+to change the collection's stored behavior instead.
+
 ## See also
 
 [`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
@@ -70,11 +89,16 @@ Other row operations:
 ## Examples
 
 ``` r
-library(surveytidy)
-library(surveycore)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+library(tidyr)
 
-# Mark rows with NA in votegen_post as out-of-domain
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
+
+# mark rows with NA in votegen_post as out-of-domain
 drop_na(d, votegen_post)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -103,7 +127,7 @@ drop_na(d, votegen_post)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Mark rows with NA in either social media column
+# mark rows with NA in either social media column
 drop_na(d, smuse_fb, smuse_yt)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -132,7 +156,7 @@ drop_na(d, smuse_fb, smuse_yt)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# No columns specified — any NA in any column marks the row out-of-domain
+# no columns specified — any NA in any column marks the row out-of-domain
 drop_na(d)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────

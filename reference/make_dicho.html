@@ -19,7 +19,7 @@ When called inside mutate(), metadata is recorded in
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ When called inside mutate(), metadata is recorded in
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Collapse a multi-level factor to two levels</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/transform.R" class="external-link"><code>R/transform.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/transform.R" class="external-link"><code>R/transform.R</code></a></small>
       <div class="d-none name"><code>make_dicho.Rd</code></div>
     </div>
 
@@ -100,17 +100,30 @@ to <code>attr(x, "label")</code> then the column name.</p></dd>
 <code><a href="make_binary.html">make_binary()</a></code>,
 <code><a href="make_factor.html">make_factor()</a></code>,
 <code><a href="make_flip.html">make_flip()</a></code>,
-<code><a href="make_rev.html">make_rev()</a></code></p></div>
+<code><a href="make_rev.html">make_rev()</a></code>,
+<code><a href="row_means.html">row_means()</a></code>,
+<code><a href="row_sums.html">row_sums()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># build a 4-level Likert factor</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Always agree"</span>, <span class="st">"Sometimes agree"</span>, <span class="st">"Sometimes disagree"</span>, <span class="st">"Always disagree"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Always agree"</span>, <span class="st">"Sometimes agree"</span>, <span class="st">"Sometimes disagree"</span>,</span></span>
-<span class="r-in"><span>             <span class="st">"Always disagree"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"Always agree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Sometimes agree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Sometimes disagree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Always disagree"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"Always agree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Sometimes agree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Sometimes disagree"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"Always disagree"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># collapse to 2 levels by stripping the qualifier word</span></span></span>
 <span class="r-in"><span><span class="fu">make_dicho</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Always agree    Sometimes agree Sometimes disagree    Always disagree </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Agree              Agree           Disagree           Disagree </span>

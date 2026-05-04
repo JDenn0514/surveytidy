@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="logo.png" class="logo" alt=""><h1>surveytidy Package Development</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/CLAUDE.md" class="external-link"><code>CLAUDE.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/CLAUDE.md" class="external-link"><code>CLAUDE.md</code></a></small>
     </div>
 
 <div id="surveytidy-package-development" class="section level1">
@@ -34,22 +34,22 @@
 <p><strong>Part of the <a href="../survey-standards/ECOSYSTEM.html">surveyverse ecosystem</a> — see there for ecosystem vision, architecture, and how surveytidy relates to other packages.</strong></p>
 <hr><div class="section level2">
 <h2 id="project-overview">Project Overview<a class="anchor" aria-label="anchor" href="#project-overview"></a></h2>
-<p>surveytidy provides dplyr/tidyr verbs for survey design objects from surveycore. It extends tidyverse workflows to work seamlessly with complex survey designs, allowing users to filter, select, mutate, and group survey objects while maintaining proper variance estimation and metadata handling.</p>
+<p>surveytidy provides dplyr/tidyr verbs and survey-aware data wrangling for survey design objects from surveycore. It extends tidyverse workflows to work seamlessly with complex survey designs, allowing users to filter, select, mutate, group, recode, and compute row-wise statistics on survey objects while maintaining proper variance estimation and metadata handling.</p>
 </div>
 <div class="section level2">
 <h2 id="package-information">Package Information<a class="anchor" aria-label="anchor" href="#package-information"></a></h2>
 <ul><li>
 <strong>Name:</strong> surveytidy</li>
 <li>
-<strong>Purpose:</strong> dplyr/tidyr verbs for survey objects (filter, select, mutate, rename, arrange, group_by, etc.)</li>
+<strong>Purpose:</strong> dplyr/tidyr verbs (filter, select, mutate, rename, arrange, group_by, slice_*, drop_na, distinct, joins), survey-aware recoding (recode, recode_values, replace_values, replace_when, na_if, case_when, if_else), and row-wise computations (rowstats, rowwise) for survey objects</li>
 <li>
 <strong>Target Audience:</strong> Survey researchers using tidyverse; users transitioning from srvyr</li>
-<li>
-<strong>Current Status:</strong> Phase 0.5 (planning complete; implementation starting)</li>
 <li>
 <strong>License:</strong> GPL-3 (inherits from surveycore)</li>
 <li>
 <strong>Dependencies:</strong> surveycore (imports core S7 classes)</li>
+<li>
+<strong>Status:</strong> v0.5.0; CRAN submission in prep (see <code>cran-comments.md</code> and the <code>/cran</code> skill)</li>
 </ul></div>
 <div class="section level2">
 <h2 id="vision--goals">Vision &amp; Goals<a class="anchor" aria-label="anchor" href="#vision--goals"></a></h2>
@@ -59,7 +59,7 @@
 <li>
 <strong>Intelligent metadata handling</strong> — <code><a href="reference/select.html">select()</a></code> and <code><a href="reference/rename.html">rename()</a></code> update labels automatically</li>
 <li>
-<strong>Group-by support</strong> — <code><a href="reference/group_by.html">group_by()</a></code> sets up stratification for Phase 1 estimation functions</li>
+<strong>Group-by support</strong> — <code><a href="reference/group_by.html">group_by()</a></code> sets up stratification for downstream estimation functions</li>
 <li>
 <strong>Familiar API</strong> — Users never write formula syntax; everything uses bare names (tidy-select)</li>
 </ol></div>
@@ -94,31 +94,15 @@
 <h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a></h2>
 <div class="section level3">
 <h3 id="file-organization-r">File Organization (R/)<a class="anchor" aria-label="anchor" href="#file-organization-r"></a></h3>
-<pre><code>R/
-├── arrange.R              # arrange.survey_base (row sorting)
-├── filter.R               # filter.survey_base + subset.survey_base
-├── group-by.R             # group_by.survey_base + ungroup.survey_base
-├── joins.R                # *_join() (stretch goals)
-├── mutate.R               # mutate.survey_base (warns on weight column modification)
-├── rename.R               # rename.survey_base (auto-updates @variables + @metadata keys)
-├── select.R               # select + relocate + pull + glimpse
-├── slice.R                # all slice_*.survey_base via factory
-├── surveytidy-package.R   # Package-level documentation
-├── drop-na.R              # drop_na.survey_base
-├── utils.R                # shared helpers (.protected_cols, dplyr_reconstruct, etc.)
-└── zzz.R                  # .onLoad(): S3 method registration + S7::methods_register()</code></pre>
+<p>Files are grouped by family. Each verb file contains both the <code>survey_base</code> and <code>survey_result</code> methods (no separate <code>verbs-survey-result.R</code>).</p>
+<p><strong>dplyr/tidyr verbs:</strong> - <code>arrange.R</code>, <code>distinct.R</code>, <code>drop-na.R</code>, <code>filter.R</code>, <code>group-by.R</code>, <code>joins.R</code>, <code>mutate.R</code>, <code>rename.R</code>, <code>select.R</code>, <code>slice.R</code>, <code>transform.R</code></p>
+<p><strong>Survey-aware recoding:</strong> - <code>recode.R</code>, <code>recode-values.R</code>, <code>replace-values.R</code>, <code>replace-when.R</code>, <code>na-if.R</code>, <code>case-when.R</code>, <code>if-else.R</code></p>
+<p><strong>Row-wise computations:</strong> - <code>rowstats.R</code>, <code>rowwise.R</code></p>
+<p><strong>Dispatch and infrastructure:</strong> - <code>collection-dispatch.R</code> — routes user-facing function calls across the survey collection (data frames, surveys, lists of surveys) - <code>reexports.R</code> — re-exports for dplyr/tidyr verbs - <code>utils.R</code> — shared helpers (<code>.protected_cols</code>, <code>dplyr_reconstruct</code>, <code>.sc_update_design_var_names()</code>, <code>.sc_rename_metadata_keys()</code>, <code>.restore_survey_result()</code>, etc.) - <code>zzz.R</code> — <code>.onLoad()</code>: S3 method registration + <code><a href="https://rconsortium.github.io/S7/reference/methods_register.html" class="external-link">S7::methods_register()</a></code> - <code>surveytidy-package.R</code> — package-level documentation</p>
 </div>
 <div class="section level3">
 <h3 id="test-organization-teststestthat">Test Organization (tests/testthat/)<a class="anchor" aria-label="anchor" href="#test-organization-teststestthat"></a></h3>
-<pre><code>tests/testthat/
-├── helper-test-data.R      # Shared test data generators (copied from surveycore)
-├── test-filter.R           # filter() and related domain operations
-├── test-select.R           # select(), pull(), glimpse()
-├── test-mutate.R           # mutate() behavior + weight column warnings
-├── test-rename.R           # rename() + automatic metadata updates
-├── test-arrange.R          # arrange(), slice_*()
-├── test-group-by.R         # group_by(), ungroup()
-└── test-tidyr.R            # tidyr functions (drop_na, separate, unite)</code></pre>
+<p>Each source file has a corresponding <code>test-*.R</code>. Cross-cutting tests live in <code>test-pipeline.R</code> (multi-verb pipelines), <code>test-wiring.R</code> (S3 dispatch + <code>.onLoad()</code>), and <code>test-verbs-survey-result.R</code> (survey_result method contracts). Shared generators in <code>helper-test-data.R</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="key-concepts">Key Concepts<a class="anchor" aria-label="anchor" href="#key-concepts"></a></h3>
@@ -142,10 +126,9 @@
 </ul></div>
 <div class="section level4">
 <h4 id="groups">@groups<a class="anchor" aria-label="anchor" href="#groups"></a></h4>
-<ul><li>Reserved for Phase 0.5 (now used by <code><a href="reference/group_by.html">group_by()</a></code>)</li>
-<li>Populated by <code><a href="reference/group_by.html">group_by()</a></code>, cleared by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>
+<ul><li>Populated by <code><a href="reference/group_by.html">group_by()</a></code>, cleared by <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>
 </li>
-<li>Will be used by Phase 1 estimation functions</li>
+<li>Used by downstream estimation functions</li>
 </ul></div>
 <div class="section level4">
 <h4 id="dplyr_reconstruct">dplyr_reconstruct()<a class="anchor" aria-label="anchor" href="#dplyr_reconstruct"></a></h4>
@@ -159,35 +142,14 @@
 <h2 id="before-starting-any-implementation">Before Starting Any Implementation<a class="anchor" aria-label="anchor" href="#before-starting-any-implementation"></a></h2>
 <p><strong>Start here:</strong> - <code>.claude/WORKFLOW.md</code> — how the planning, implementation, and PR cycles fit together</p>
 <p><strong>Rules (always apply — loaded at session start):</strong> 1. <code>.claude/rules/code-style.md</code> — indentation, pipe operator, air formatter, S7 patterns, cli error structure, argument order, helper placement 2. <code>.claude/rules/r-package-conventions.md</code> — <code>::</code> usage, NAMESPACE, roxygen2, <code>@return</code>, <code>@examples</code>, export policy 3. <code>.claude/rules/surveytidy-conventions.md</code> — S3 dispatch, verb method names, special columns (domain, visible_vars, @groups), return visibility 4. <code>.claude/rules/testing-standards.md</code> — test structure, coverage requirements, assertion patterns, data generators 5. <code>.claude/rules/testing-surveytidy.md</code> — <code>test_invariants()</code>, three design type loops, domain preservation, verb error patterns 6. <code>.claude/rules/engineering-preferences.md</code> — DRY, well-tested, engineered enough, explicit over clever</p>
-<p><strong>Skills (invoke on-demand):</strong> - <code>.claude/skills/spec-workflow/SKILL.md</code> — planning arc: draft → review → implementation plan → decisions log - <code>.claude/skills/r-implement/SKILL.md</code> — implementation loop: read plan → write code → verify → mark done - <code>.claude/skills/commit-and-pr/SKILL.md</code> — PR cycle: changelog → pre-flight → commit → PR → CI</p>
+<p><strong>Skills (invoke on-demand):</strong></p>
+<p><em>Planning:</em> - <code>spec-workflow</code> — draft → methodology review → resolve → spec review → resolve + log - <code>implementation-workflow</code> — draft plan → adversarial review → resolve + decisions log - <code>spec-reviewer</code> — adversarial spec review (also wired into spec-workflow Stage 2)</p>
+<p><em>Implementation:</em> - <code>r-implement</code> — read plan → write code → verify → mark done - <code>auto-ship</code> — drives a plan end-to-end: TDD → review → changelog → commit → PR → CI → squash-merge - <code>testing-r-packages</code> — testthat 3 patterns - <code>cli</code> — cli_abort/cli_warn/cli_inform conventions</p>
+<p><em>Review:</em> - <code>critical-code-reviewer</code> — adversarial code review - <code>describe-design</code> — architectural documentation</p>
+<p><em>Release:</em> - <code>commit-and-pr</code> — changelog → pre-flight → commit → PR → CI - <code>merge-main</code> — develop → main release: NEWS → version bump → tag → post-release <code>.9000</code> - <code>cran</code> — CRAN submission workflow (R CMD check –as-cran, cran-comments.md, reviewer feedback) - <code>lifecycle</code> — deprecation, superseding, experimental tags - <code>release-post</code> — Tidyverse/Shiny blog release announcements - <code>create-release-checklist</code> — release issue/checklist scaffolding</p>
 <p><strong>GitHub strategy (read when creating PRs):</strong> - <code>.claude/rules/github-strategy.md</code> — branching model, commit format, PR workflow, CI/CD setup</p>
 <p><strong>Reference:</strong> - <code>../surveycore/CLAUDE.md</code> — surveycore architecture (survey class structure, @data/@variables/@metadata) - <code>plans/error-messages.md</code> — surveytidy error/warning classes (update before adding any new class)</p>
 </div>
-<div class="section level2">
-<h2 id="phase-05-build-order">Phase 0.5 Build Order<a class="anchor" aria-label="anchor" href="#phase-05-build-order"></a></h2>
-<ol style="list-style-type: decimal"><li>
-<code>feature/filter</code> — <code>R/01-filter.R</code> + <code>tests/testthat/test-filter.R</code>
-</li>
-<li>
-<code>feature/select</code> — <code>R/02-select.R</code> + <code>tests/testthat/test-select.R</code>
-</li>
-<li>
-<code>feature/mutate</code> — <code>R/03-mutate.R</code> + <code>tests/testthat/test-mutate.R</code>
-</li>
-<li>
-<code>feature/rename</code> — <code>R/04-rename.R</code> + <code>tests/testthat/test-rename.R</code>
-</li>
-<li>
-<code>feature/arrange</code> — <code>R/05-arrange.R</code> + <code>tests/testthat/test-arrange.R</code>
-</li>
-<li>
-<code>feature/group-by</code> — <code>R/06-group-by.R</code> + <code>tests/testthat/test-group-by.R</code>
-</li>
-<li>
-<code>feature/tidyr</code> — <code>R/07-tidyr.R</code> + <code>tests/testthat/test-tidyr.R</code> (stretch)</li>
-<li>
-<code>feature/joins</code> — <code>R/08-joins.R</code> + <code>tests/testthat/test-joins.R</code> (stretch)</li>
-</ol><hr></div>
 <div class="section level2">
 <h2 id="key-implementation-details">Key Implementation Details<a class="anchor" aria-label="anchor" href="#key-implementation-details"></a></h2>
 <div class="section level3">
@@ -216,11 +178,17 @@
 </ul></div>
 <div class="section level3">
 <h3 id="rename-specifics">rename() Specifics<a class="anchor" aria-label="anchor" href="#rename-specifics"></a></h3>
-<ul><li>Uses <code>surveycore:::.update_design_var_names()</code> to update @variables keys</li>
-<li>Uses <code>surveycore:::.rename_metadata_keys()</code> to update @metadata keys</li>
+<ul><li>Uses <code>.sc_update_design_var_names()</code> (wrapper in <code>R/utils.R</code>) to update @variables keys; the wrapper resolves <code>surveycore:::.update_design_var_names</code> via <code>get(..., envir = asNamespace("surveycore"))</code> to avoid the <code>:::</code>-induced R CMD check NOTE</li>
+<li>Uses <code>.sc_rename_metadata_keys()</code> (wrapper in <code>R/utils.R</code>) for @metadata keys</li>
 <li>
 <strong>Warns</strong> (does not error) if user renames a design variable; updates <code>@variables</code> to track the new column name (<code>surveytidy_warning_rename_design_var</code>)</li>
+<li>Bypasses S7 validation during the @data + @variables update (per-assignment validation rejects the intermediate state); calls <code><a href="https://rconsortium.github.io/S7/reference/validate.html" class="external-link">S7::validate()</a></code> once at the end on the consistent state</li>
 </ul></div>
+<div class="section level3">
+<h3 id="id_-policy-project-rule">
+<code>:::</code> policy (project rule)<a class="anchor" aria-label="anchor" href="#id_-policy-project-rule"></a></h3>
+<p>Never call <code>surveycore:::*</code> directly — it raises a “Unexported object” NOTE under R CMD check. Instead, add a thin wrapper in <code>R/utils.R</code> that uses <code>get("name", envir = asNamespace("surveycore"))</code>. Existing wrappers: <code>.sc_update_design_var_names()</code>, <code>.sc_rename_metadata_keys()</code>.</p>
+</div>
 <div class="section level3">
 <h3 id="dplyr_reconstruct-1">dplyr_reconstruct()<a class="anchor" aria-label="anchor" href="#dplyr_reconstruct-1"></a></h3>
 <ul><li>Called by dplyr for complex operations (joins, across(), slice, etc.)</li>
@@ -241,7 +209,7 @@
 <div class="section level3">
 <h3 id="examples-must-load-dplyrtidyr-explicitly">Examples must load dplyr/tidyr explicitly<a class="anchor" aria-label="anchor" href="#examples-must-load-dplyrtidyr-explicitly"></a></h3>
 <p>dplyr verbs (<code>filter</code>, <code>select</code>, <code>arrange</code>, etc.) are in <strong>Imports</strong> but are <strong>not re-exported</strong>. R CMD check runs examples in a fresh session with only <code><a href="https://jdenn0514.github.io/surveytidy/">library(surveytidy)</a></code> loaded — the dplyr functions are not on the search path. Every <code>@examples</code> block that calls a dplyr or tidyr verb must begin with an explicit <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> call:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#' @examples</span></span>
 <span><span class="co">#' library(dplyr)        # required — dplyr verbs not re-exported by surveytidy</span></span>
 <span><span class="co">#' df &lt;- data.frame(...)</span></span>
@@ -266,10 +234,18 @@
 <strong>Include tests</strong> — always provide corresponding tests for new verbs</li>
 </ol></div>
 <div class="section level2">
+<h2 id="common-commands">Common commands<a class="anchor" aria-label="anchor" href="#common-commands"></a></h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span>  <span class="co"># rebuild NAMESPACE + man/ from roxygen</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span>      <span class="co"># run testthat suite</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span>     <span class="co"># full R CMD check (use --as-cran near submission)</span></span>
+<span><span class="fu">covr</span><span class="fu">::</span><span class="fu"><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">package_coverage</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># line coverage</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="reference-documents">Reference Documents<a class="anchor" aria-label="anchor" href="#reference-documents"></a></h2>
-<p>All planning documents are in <code>plans/</code>: - (Currently minimal; will grow as Phase 0.5 proceeds)</p>
-<p>All finalized decisions are in <code>../survey-standards/.claude/rules/</code>: - <code>code-style.md</code> — R style, S7 patterns, error conventions, function design, roxygen/package check - <code>testing-standards.md</code> — test structure, coverage, assertion patterns, test data</p>
-<p>PR workflow: <code>.claude/skills/github-strategy.md</code></p>
+<p>All planning documents are in <code>plans/</code>.</p>
+<p>Local rules in <code>.claude/rules/</code> are authoritative for surveytidy. The ecosystem-wide copies under <code>../survey-standards/.claude/rules/</code> are a historical mirror; the local versions override on any divergence.</p>
+<p>PR workflow: <code>.claude/rules/github-strategy.md</code></p>
 <hr><p><strong>Always defer to surveycore’s CLAUDE.md for survey class internals. surveytidy is an add-on layer.</strong></p>
 </div>
 </div>

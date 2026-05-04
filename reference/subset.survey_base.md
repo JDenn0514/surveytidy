@@ -58,9 +58,11 @@ for domain-aware row marking (preferred for subpopulation analyses)
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Physical row removal — always issues a warning
+# physical row removal — always issues a warning
 subset(d, agecat >= 3)
 #> Warning: ! `subset()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct

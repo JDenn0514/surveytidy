@@ -3,8 +3,8 @@
 `rowwise()` enables row-by-row computation in
 [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md).
 Each row is treated as an independent group, so expressions like
-`mutate(d, row_max = max(c_across(starts_with("y"))))` compute the
-maximum across columns for each row independently.
+`mutate(d, row_max = max(dplyr::c_across(tidyselect::starts_with("y"))))`
+compute the maximum across columns for each row independently.
 
 Use [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
 or
@@ -18,6 +18,9 @@ rowwise(data, ...)
 
 # S3 method for class 'survey_base'
 rowwise(data, ...)
+
+# S3 method for class 'survey_collection'
+rowwise(data, ..., .if_missing_var = NULL)
 ```
 
 ## Arguments
@@ -34,6 +37,13 @@ rowwise(data, ...)
   Optional id columns that identify each row (used with
   [`dplyr::c_across()`](https://dplyr.tidyverse.org/reference/c_across.html)).
   Commonly omitted.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -66,6 +76,20 @@ detects rowwise mode and routes internally through
 The `rowwise_df` class is stripped from `@data` after mutation so
 subsequent operations are not accidentally rowwise.
 
+## Survey collections
+
+When applied to a `survey_collection`, `rowwise()` is dispatched to each
+member independently — every member receives `@variables$rowwise = TRUE`
+and the same `@variables$rowwise_id_cols`. The collection has no rowwise
+marker; rowwise state lives entirely per-member. `@groups`, `@id`, and
+`@if_missing_var` on the collection are unchanged.
+
+Construction-time uniformity is by-construction: every member is rowwise
+after the call. Mixed rowwise state across members is detected later by
+[`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+(see §IV.5 of the survey-collection spec) and warned about rather than
+blocked.
+
 ## See also
 
 Other grouping:
@@ -76,15 +100,19 @@ Other grouping:
 ## Examples
 
 ``` r
-library(surveytidy)
-library(surveycore)
-library(dplyr)
-d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
+# create a survey object from the bundled NPORS dataset
+d <- surveycore::as_survey(
+  surveycore::pew_npors_2025,
+  weights = weight,
+  strata = stratum
+)
 
-# Row-wise max across several columns
+# row-wise max across several columns
 d |>
   rowwise() |>
-  mutate(row_max = max(c_across(starts_with("econ")), na.rm = TRUE))
+  mutate(
+    row_max = max(dplyr::c_across(tidyselect::starts_with("econ")), na.rm = TRUE)
+  )
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -111,8 +139,10 @@ d |>
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Exit rowwise mode
-d |> rowwise() |> ungroup()
+# exit rowwise mode
+d |>
+  rowwise() |>
+  ungroup()
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)

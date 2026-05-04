@@ -75,19 +75,14 @@ Other transformation:
 [`make_binary()`](https://jdenn0514.github.io/surveytidy/reference/make_binary.md),
 [`make_dicho()`](https://jdenn0514.github.io/surveytidy/reference/make_dicho.md),
 [`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md),
-[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md)
+[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md),
+[`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md),
+[`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
 
 ## Examples
 
 ``` r
-library(dplyr)
-d <- surveycore::as_survey(
-  data.frame(x = c(1, 2, 1, 2), wt = c(1, 1, 1, 1)),
-  weights = wt
-)
-#> Warning: ! No `ids` or `strata` specified.
-#> ℹ Creating a <survey_srs> design (equal-probability SRS).
-#> ✔ Use `as_survey_srs()` to create SRS designs without this warning.
+# attach value labels to a numeric vector and convert to a factor
 x <- c(1, 2, 1, 2)
 attr(x, "labels") <- c("Yes" = 1, "No" = 2)
 make_factor(x)

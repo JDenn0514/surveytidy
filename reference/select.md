@@ -23,6 +23,9 @@ select(.data, ...)
 
 # S3 method for class 'survey_result'
 select(.data, ...)
+
+# S3 method for class 'survey_collection'
+select(.data, ..., .if_missing_var = NULL)
 ```
 
 ## Arguments
@@ -38,6 +41,13 @@ select(.data, ...)
 
   \<[`tidy-select`](https://tidyselect.r-lib.org/reference/language.html)\>
   One or more unquoted column names or tidy-select expressions.
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -67,6 +77,29 @@ output but remain available for variance estimation.
 Variable labels, value labels, and other metadata for dropped columns
 are removed. Metadata for retained columns is preserved.
 
+## Survey collections
+
+When applied to a `survey_collection`, `select()` is dispatched to each
+member independently. Each member resolves its own tidyselect expression
+against its own `@data`, so members may end up with different visible
+columns when the selection is partial (e.g.,
+[`any_of()`](https://tidyselect.r-lib.org/reference/all_of.html) against
+a heterogeneous collection). Per-member design variables are always
+retained.
+
+Before dispatching, `select.survey_collection` resolves the selection
+against the first member's `@data` and raises
+`surveytidy_error_collection_select_group_removed` if any column in
+`coll@groups` would be removed. Group columns must remain in every
+member; silently dropping them would violate the surveycore class
+validator (G1b). Use
+[`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) first
+if you intend to remove a group column.
+
+`relocate.survey_collection` is **not** subject to this pre-flight —
+[`dplyr::relocate`](https://dplyr.tidyverse.org/reference/relocate.html)
+only reorders columns and never drops them.
+
 ## See also
 
 [`relocate()`](https://jdenn0514.github.io/surveytidy/reference/relocate.md)
@@ -77,8 +110,8 @@ to rename them,
 to add new ones
 
 Other selecting:
-[`glimpse`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
-[`pull`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
+[`glimpse.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
+[`pull.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/pull.md),
 [`relocate`](https://jdenn0514.github.io/surveytidy/reference/relocate.md)
 
 ## Examples
@@ -86,9 +119,11 @@ Other selecting:
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Select by name
+# select by name
 select(d, gender, agecat)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -113,8 +148,8 @@ select(d, gender, agecat)
 #> ℹ Design variables preserved but hidden: weight and stratum.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# Select by name pattern
-select(d, dplyr::starts_with("smuse_"))
+# select by name pattern
+select(d, tidyselect::starts_with("smuse_"))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -139,8 +174,8 @@ select(d, dplyr::starts_with("smuse_"))
 #> ℹ Design variables preserved but hidden: weight and stratum.
 #> ℹ Use `print(x, full = TRUE)` to show all variables.
 
-# Select by type
-select(d, dplyr::where(is.numeric))
+# select by type
+select(d, tidyselect::where(is.numeric))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -167,8 +202,8 @@ select(d, dplyr::where(is.numeric))
 #> #   smuse_x <dbl>, smuse_ig <dbl>, smuse_sc <dbl>, smuse_wa <dbl>,
 #> #   smuse_tt <dbl>, smuse_rd <dbl>, smuse_bsk <dbl>, smuse_th <dbl>, …
 
-# Drop columns with !
-select(d, !dplyr::starts_with("smuse_"))
+# drop columns with !
+select(d, !tidyselect::starts_with("smuse_"))
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)

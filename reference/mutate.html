@@ -15,7 +15,7 @@ strata, PSUs) cannot be deleted this way — they are always preserved."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@ strata, PSUs) cannot be deleted this way — they are always preserved."><meta p
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Create, modify, and delete columns of a survey design object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/mutate.R" class="external-link"><code>R/mutate.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/mutate.R" class="external-link"><code>R/mutate.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
       <div class="d-none name"><code>mutate.Rd</code></div>
     </div>
 
@@ -60,6 +60,17 @@ strata, PSUs) cannot be deleted this way — they are always preserved.</p>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_result'</span></span>
 <span><span class="fu">mutate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu">mutate</span><span class="op">(</span></span>
+<span>  <span class="va">.data</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  .by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .keep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"used"</span>, <span class="st">"unused"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  .before <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .after <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .if_missing_var <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mutate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,6 +106,13 @@ regardless of this argument.</p></dd>
 <dt id="arg--before-after">.before, .after<a class="anchor" aria-label="anchor" href="#arg--before-after"></a></dt>
 <dd><p>&lt;<code><a href="https://tidyselect.r-lib.org/reference/language.html" class="external-link">tidy-select</a></code>&gt; Optionally
 position new columns before or after an existing one.</p></dd>
+
+
+<dt id="arg--if-missing-var">.if_missing_var<a class="anchor" aria-label="anchor" href="#arg--if-missing-var"></a></dt>
+<dd><p>Per-call override of <code>collection@if_missing_var</code>.
+One of <code>"error"</code> or <code>"skip"</code>, or <code>NULL</code> (the default) to inherit the
+collection's stored value. See
+<code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -147,6 +165,24 @@ The <code>.by</code> argument is not used directly.</p>
 
     </div>
     <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>mutate()</code> is dispatched to each
+member independently. Per-member warnings (e.g.,
+<code>surveytidy_warning_mutate_weight_col</code> when modifying the weight column)
+fire once per member in which they apply — an N-member collection that
+all modify the weight column will surface N warnings.</p>
+<p>If members have non-uniform rowwise state (some are rowwise, some are not),
+<code>mutate()</code> emits <code>surveytidy_warning_collection_rowwise_mixed</code> once before
+dispatch as a soft-invariant diagnostic. Dispatch still proceeds; per-member
+rowwise/non-rowwise semantics apply for the call. To resolve, call
+<code><a href="rowwise.html">rowwise()</a></code> or <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code> on the entire collection first.</p>
+<p><code>.by</code> is rejected at the collection layer with
+<code>surveytidy_error_collection_by_unsupported</code>. Set grouping with
+<code><a href="group_by.html">group_by()</a></code> on the collection instead.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="rename.html">rename()</a></code> to rename columns, <code><a href="select.html">select()</a></code> to drop columns</p>
 <p>Other modification:
@@ -157,9 +193,10 @@ The <code>.by</code> argument is not used directly.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># create a survey design from the pew_npors_2025 example dataset</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Add a new column</span></span></span>
+<span class="r-in"><span><span class="co"># add a new column</span></span></span>
 <span class="r-in"><span><span class="fu">mutate</span><span class="op">(</span><span class="va">d</span>, college_grad <span class="op">=</span> <span class="va">educcat</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -187,8 +224,11 @@ The <code>.by</code> argument is not used directly.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Conditional recoding</span></span></span>
-<span class="r-in"><span><span class="fu">mutate</span><span class="op">(</span><span class="va">d</span>, college <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">educcat</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"college+"</span>, <span class="st">"non-college"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># conditional recoding</span></span></span>
+<span class="r-in"><span><span class="fu">mutate</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">d</span>,</span></span>
+<span class="r-in"><span>  college <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">educcat</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"college+"</span>, <span class="st">"non-college"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -215,7 +255,7 @@ The <code>.by</code> argument is not used directly.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Grouped mutate — within-group mean centring</span></span></span>
+<span class="r-in"><span><span class="co"># grouped mutate — within-group mean centring</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="group_by.html">group_by</a></span><span class="op">(</span><span class="va">gender</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">mutate</span><span class="op">(</span>econ_centred <span class="op">=</span> <span class="va">econ1mod</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">econ1mod</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -247,8 +287,11 @@ The <code>.by</code> argument is not used directly.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># .keep = "none" keeps only new columns plus design vars (always preserved)</span></span></span>
-<span class="r-in"><span><span class="fu">mutate</span><span class="op">(</span><span class="va">d</span>, college <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">educcat</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"college+"</span>, <span class="st">"non-college"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  .keep <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">mutate</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">d</span>,</span></span>
+<span class="r-in"><span>  college <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">educcat</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"college+"</span>, <span class="st">"non-college"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  .keep <span class="op">=</span> <span class="st">"none"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>

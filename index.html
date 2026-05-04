@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,6 +115,9 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"surveytidy"</span><span class="op">)</span></span></code></pre></div>
+<p>Or install the development version from GitHub:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="co"># install surveycore first, to create surveycore style survey objects</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"JDenn0514/surveycore"</span><span class="op">)</span></span>
@@ -127,7 +130,7 @@
 <div class="section level3">
 <h3 id="filtering-domain-estimation">Filtering (domain estimation)<a class="anchor" aria-label="anchor" href="#filtering-domain-estimation"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Single condition</span></span>
 <span><span class="va">republicans</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -142,7 +145,7 @@
 <div class="section level3">
 <h3 id="selecting-columns">Selecting columns<a class="anchor" aria-label="anchor" href="#selecting-columns"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Design variables (weights, strata) are always kept in @data</span></span>
 <span><span class="co"># even when not selected — they are required for variance estimation</span></span>
 <span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/select.html">select</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">party</span>, <span class="va">gender</span>, <span class="va">agecat</span>, <span class="va">cregion</span><span class="op">)</span></span>
@@ -175,7 +178,7 @@
 <div class="section level3">
 <h3 id="mutating">Mutating<a class="anchor" aria-label="anchor" href="#mutating"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add new columns</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span></span>
@@ -275,7 +278,7 @@
 <div class="section level3">
 <h3 id="renaming">Renaming<a class="anchor" aria-label="anchor" href="#renaming"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># @variables and @metadata stay in sync automatically</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/rename.html">rename</a></span><span class="op">(</span></span>
@@ -311,7 +314,7 @@
 <div class="section level3">
 <h3 id="sorting">Sorting<a class="anchor" aria-label="anchor" href="#sorting"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Rows sort; domain column moves with them</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter.html">filter</a></span><span class="op">(</span><span class="va">partysum</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -376,7 +379,7 @@
 <div class="section level3">
 <h3 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">partysum</span><span class="op">)</span> <span class="co"># set groups</span></span>
 <span><span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d2</span>, <span class="va">gender</span>, .add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># add to groups</span></span>
 <span><span class="va">d4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="va">d3</span><span class="op">)</span> <span class="co"># remove all groups</span></span></code></pre></div>
@@ -384,7 +387,7 @@
 <div class="section level3">
 <h3 id="physical-row-operations-use-sparingly">Physical row operations (use sparingly)<a class="anchor" aria-label="anchor" href="#physical-row-operations-use-sparingly"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># These physically remove rows and always issue a warning.</span></span>
 <span><span class="co"># Use filter() instead for subpopulation analyses.</span></span>
 <span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="co"># first 100 rows</span></span>
@@ -508,7 +511,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://codecov.io/gh/JDenn0514/surveytidy" class="external-link"><img src="https://codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://app.codecov.io/gh/JDenn0514/surveytidy" class="external-link"><img src="https://app.codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://jdenn0514.github.io/surveytidy/"><img src="https://github.com/JDenn0514/surveytidy/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 </ul>
 </div>

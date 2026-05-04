@@ -17,7 +17,7 @@ preserving all rows for correct variance estimation."><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ preserving all rows for correct variance estimation."><meta property="og:image" 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Mark rows with missing values as out-of-domain</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/drop-na.R" class="external-link"><code>R/drop-na.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/drop-na.R" class="external-link"><code>R/drop-na.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a></small>
       <div class="d-none name"><code>drop_na.Rd</code></div>
     </div>
 
@@ -55,6 +55,9 @@ preserving all rows for correct variance estimation.</p>
 <span><span class="fu">drop_na</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_result'</span></span>
+<span><span class="fu">drop_na</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
 <span><span class="fu">drop_na</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">drop_na</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -95,6 +98,22 @@ accumulate with <code><a href="filter.html">filter()</a></code> calls too. These
 
     </div>
     <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>drop_na()</code> is dispatched to each
+member independently with the same <code>...</code>. Per-member empty-domain warnings
+fire as usual. The collection's stored <code>@if_missing_var</code> controls behavior
+when a tidyselect-named column is absent from one or more members;
+detection mode is class-catch (the tidyselect error is caught at dispatch
+time).</p>
+<p>Unlike other collection verbs, <code>drop_na()</code> does not accept a per-call
+<code>.if_missing_var</code> argument: tidyr's <code>drop_na()</code> generic calls
+<code><a href="https://rlang.r-lib.org/reference/check_dots_unnamed.html" class="external-link">rlang::check_dots_unnamed()</a></code> before S3 dispatch, which rejects any named
+<code>...</code> argument. Use <code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code> to change
+the collection's stored behavior instead.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="filter.html">filter()</a></code> for domain-aware row marking</p>
 <p>Other row operations:
@@ -104,11 +123,16 @@ accumulate with <code><a href="filter.html">filter()</a></code> calls too. These
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Mark rows with NA in votegen_post as out-of-domain</span></span></span>
+<span class="r-in"><span><span class="co"># create a survey object from the bundled NPORS dataset</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">surveycore</span><span class="fu">::</span><span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">surveycore</span><span class="fu">::</span><span class="va"><a href="https://jdenn0514.github.io/surveycore/reference/pew_npors_2025.html" class="external-link">pew_npors_2025</a></span>,</span></span>
+<span class="r-in"><span>  weights <span class="op">=</span> <span class="va">weight</span>,</span></span>
+<span class="r-in"><span>  strata <span class="op">=</span> <span class="va">stratum</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># mark rows with NA in votegen_post as out-of-domain</span></span></span>
 <span class="r-in"><span><span class="fu">drop_na</span><span class="op">(</span><span class="va">d</span>, <span class="va">votegen_post</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -137,7 +161,7 @@ accumulate with <code><a href="filter.html">filter()</a></code> calls too. These
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Mark rows with NA in either social media column</span></span></span>
+<span class="r-in"><span><span class="co"># mark rows with NA in either social media column</span></span></span>
 <span class="r-in"><span><span class="fu">drop_na</span><span class="op">(</span><span class="va">d</span>, <span class="va">smuse_fb</span>, <span class="va">smuse_yt</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -166,7 +190,7 @@ accumulate with <code><a href="filter.html">filter()</a></code> calls too. These
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># No columns specified — any NA in any column marks the row out-of-domain</span></span></span>
+<span class="r-in"><span><span class="co"># no columns specified — any NA in any column marks the row out-of-domain</span></span></span>
 <span class="r-in"><span><span class="fu">drop_na</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>

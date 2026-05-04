@@ -13,7 +13,7 @@ change position."><meta property="og:image" content="https://jdenn0514.github.io
 
     <a class="navbar-brand me-2" href="../index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@ change position."><meta property="og:image" content="https://jdenn0514.github.io
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Change column order in a survey design object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/v0.4.0/R/select.R" class="external-link"><code>R/select.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/reexports.R" class="external-link"><code>R/reexports.R</code></a>, <a href="https://github.com/JDenn0514/surveytidy/blob/main/R/select.R" class="external-link"><code>R/select.R</code></a></small>
       <div class="d-none name"><code>relocate.Rd</code></div>
     </div>
 
@@ -48,7 +48,10 @@ change position.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">relocate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .before <span class="op">=</span> <span class="cn">NULL</span>, .after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'survey_base'</span></span>
-<span><span class="fu">relocate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .before <span class="op">=</span> <span class="cn">NULL</span>, .after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">relocate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .before <span class="op">=</span> <span class="cn">NULL</span>, .after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'survey_collection'</span></span>
+<span><span class="fu">relocate</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .before <span class="op">=</span> <span class="cn">NULL</span>, .after <span class="op">=</span> <span class="cn">NULL</span>, .if_missing_var <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,6 +70,13 @@ change position.</p>
 <dd><p>&lt;<code><a href="https://tidyselect.r-lib.org/reference/language.html" class="external-link">tidy-select</a></code>&gt; A destination
 column. Columns in <code>...</code> are placed immediately before or after it.
 Specify at most one of <code>.before</code> and <code>.after</code>.</p></dd>
+
+
+<dt id="arg--if-missing-var">.if_missing_var<a class="anchor" aria-label="anchor" href="#arg--if-missing-var"></a></dt>
+<dd><p>Per-call override of <code>collection@if_missing_var</code>.
+One of <code>"error"</code> or <code>"skip"</code>, or <code>NULL</code> (the default) to inherit the
+collection's stored value. See
+<code><a href="https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html" class="external-link">surveycore::set_collection_if_missing_var()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -99,11 +109,23 @@ column order in the underlying data.</p>
 
     </div>
     <div class="section level2">
+    <h2 id="survey-collections">Survey collections<a class="anchor" aria-label="anchor" href="#survey-collections"></a></h2>
+
+
+<p>When applied to a <code>survey_collection</code>, <code>relocate()</code> is dispatched to each
+member independently. Each member's <code>relocate.survey_base</code> reorders
+columns according to the user's tidyselect (and <code>.before</code>/<code>.after</code>),
+preserving design variables and <code>@groups</code>. Negative tidyselect like
+<code>relocate(coll, -group, .before = wt)</code> is permitted because <code>relocate</code>
+only reorders — it never removes columns. The <code>select</code> group-removal
+pre-flight does not apply.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="select.html">select()</a></code> to keep or drop columns, <code><a href="rename.html">rename()</a></code> to rename them</p>
 <p>Other selecting:
-<code><a href="glimpse.html">glimpse</a></code>,
-<code><a href="pull.html">pull</a></code>,
+<code><a href="glimpse.html">glimpse.survey_collection()</a></code>,
+<code><a href="pull.html">pull.survey_collection()</a></code>,
 <code><a href="select.html">select</a></code></p></div>
     </div>
 
@@ -111,9 +133,11 @@ column order in the underlying data.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/JDenn0514/surveycore" class="external-link">surveycore</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create a survey design from the pew_npors_2025 example dataset</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jdenn0514.github.io/surveycore/reference/as_survey.html" class="external-link">as_survey</a></span><span class="op">(</span><span class="va">pew_npors_2025</span>, weights <span class="op">=</span> <span class="va">weight</span>, strata <span class="op">=</span> <span class="va">stratum</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Move agecat before gender</span></span></span>
+<span class="r-in"><span><span class="co"># move agecat before gender</span></span></span>
 <span class="r-in"><span><span class="fu">relocate</span><span class="op">(</span><span class="va">d</span>, <span class="va">agecat</span>, .before <span class="op">=</span> <span class="va">gender</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
@@ -141,8 +165,8 @@ column order in the underlying data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_fb &lt;dbl&gt;, smuse_yt &lt;dbl&gt;, smuse_x &lt;dbl&gt;, smuse_ig &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   smuse_sc &lt;dbl&gt;, smuse_wa &lt;dbl&gt;, smuse_tt &lt;dbl&gt;, smuse_rd &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Move all social media columns to the front</span></span></span>
-<span class="r-in"><span><span class="fu">relocate</span><span class="op">(</span><span class="va">d</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># move all social media columns to the front</span></span></span>
+<span class="r-in"><span><span class="fu">relocate</span><span class="op">(</span><span class="va">d</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"smuse_"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Design</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;survey_taylor&gt;</span> (Taylor series linearization)</span>
@@ -169,7 +193,7 @@ column order in the underlying data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   crimesafe &lt;dbl&gt;, govprotct &lt;dbl&gt;, moregunimpact &lt;dbl&gt;, fin_sit &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   vet1 &lt;dbl&gt;, vol12_cps &lt;dbl&gt;, eminuse &lt;dbl&gt;, intmob &lt;dbl&gt;, intfreq &lt;dbl&gt;, …</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># After select(), relocate reorders the visible columns</span></span></span>
+<span class="r-in"><span><span class="co"># after select(), relocate reorders the visible columns</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="select.html">select</a></span><span class="op">(</span><span class="va">gender</span>, <span class="va">agecat</span>, <span class="va">partysum</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">relocate</span><span class="op">(</span><span class="va">partysum</span>, .before <span class="op">=</span> <span class="va">gender</span><span class="op">)</span></span></span>

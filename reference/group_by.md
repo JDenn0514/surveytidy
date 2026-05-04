@@ -21,6 +21,12 @@ group_by(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
 # S3 method for class 'survey_base'
 ungroup(x, ...)
 
+# S3 method for class 'survey_collection'
+group_by(.data, ..., .add = FALSE, .drop = TRUE, .if_missing_var = NULL)
+
+# S3 method for class 'survey_collection'
+ungroup(x, ..., .if_missing_var = NULL)
+
 group_by(.data, ..., .add = FALSE, .drop = group_by_drop_default(.data))
 ```
 
@@ -58,6 +64,13 @@ group_by(.data, ..., .add = FALSE, .drop = group_by_drop_default(.data))
   object (for
   [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html) and
   [`group_vars()`](https://dplyr.tidyverse.org/reference/group_data.html)).
+
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
 
 ## Value
 
@@ -106,6 +119,21 @@ no arguments removes all groups and exits rowwise mode. With column
 arguments, it removes only the specified columns from the grouping —
 rowwise mode is **not** affected.
 
+## Survey collections
+
+When applied to a `survey_collection`, `group_by()` is dispatched to
+each member independently. Every member's `@groups` is updated, and the
+rebuilt collection's `@groups` is synchronised from the members. If a
+grouping column is missing on some members, `.if_missing_var` controls
+whether those members are skipped or the call errors.
+
+## Survey collections (ungroup)
+
+[`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+clears `@groups` on every member and on the collection. The dispatcher's
+step-5 sync lifts the cleared per-member `@groups` to the rebuilt
+collection. `@id` and `@if_missing_var` are preserved.
+
 ## See also
 
 Other grouping:
@@ -118,10 +146,10 @@ Other grouping:
 ``` r
 library(surveytidy)
 library(surveycore)
-library(dplyr)
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Group by a column
+# group by a single column
 group_by(d, gender)
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
@@ -150,7 +178,7 @@ group_by(d, gender)
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Grouped mutate — within-group mean centring
+# grouped mutate — within-group mean centring
 d |>
   group_by(gender) |>
   mutate(econ_centred = econ1mod - mean(econ1mod, na.rm = TRUE))
@@ -181,7 +209,7 @@ d |>
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Add a second grouping variable with .add = TRUE
+# add a second grouping variable with .add = TRUE
 d |>
   group_by(gender) |>
   group_by(cregion, .add = TRUE)
@@ -212,8 +240,10 @@ d |>
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Remove all groups
-d |> group_by(gender) |> ungroup()
+# remove all groups
+d |>
+  group_by(gender) |>
+  ungroup()
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -240,7 +270,7 @@ d |> group_by(gender) |> ungroup()
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Partial ungroup — remove only gender, keep cregion
+# partial ungroup — remove only gender, keep cregion
 d |>
   group_by(gender, cregion) |>
   ungroup(gender)
@@ -271,7 +301,9 @@ d |>
 #> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
 #> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>, …
 
-# Get current grouping column names
-d |> group_by(gender, cregion) |> group_vars()
+# get current grouping column names
+d |>
+  group_by(gender, cregion) |>
+  group_vars()
 #> [1] "gender"  "cregion"
 ```

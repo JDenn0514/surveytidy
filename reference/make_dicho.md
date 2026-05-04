@@ -58,17 +58,30 @@ Other transformation:
 [`make_binary()`](https://jdenn0514.github.io/surveytidy/reference/make_binary.md),
 [`make_factor()`](https://jdenn0514.github.io/surveytidy/reference/make_factor.md),
 [`make_flip()`](https://jdenn0514.github.io/surveytidy/reference/make_flip.md),
-[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md)
+[`make_rev()`](https://jdenn0514.github.io/surveytidy/reference/make_rev.md),
+[`row_means()`](https://jdenn0514.github.io/surveytidy/reference/row_means.md),
+[`row_sums()`](https://jdenn0514.github.io/surveytidy/reference/row_sums.md)
 
 ## Examples
 
 ``` r
-library(dplyr)
+# build a 4-level Likert factor
 x <- factor(
-  c("Always agree", "Sometimes agree", "Sometimes disagree", "Always disagree"),
-  levels = c("Always agree", "Sometimes agree", "Sometimes disagree",
-             "Always disagree")
+  c(
+    "Always agree",
+    "Sometimes agree",
+    "Sometimes disagree",
+    "Always disagree"
+  ),
+  levels = c(
+    "Always agree",
+    "Sometimes agree",
+    "Sometimes disagree",
+    "Always disagree"
+  )
 )
+
+# collapse to 2 levels by stripping the qualifier word
 make_dicho(x)
 #>       Always agree    Sometimes agree Sometimes disagree    Always disagree 
 #>              Agree              Agree           Disagree           Disagree 

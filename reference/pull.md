@@ -7,6 +7,9 @@ cannot be piped back into survey verbs.
 ## Usage
 
 ``` r
+# S3 method for class 'survey_collection'
+pull(.data, var = -1, name = NULL, ..., .if_missing_var = NULL)
+
 pull(.data, var = -1, name = NULL, ...)
 
 # S3 method for class 'survey_base'
@@ -39,9 +42,66 @@ pull(.data, var = -1, name = NULL, ...)
   Passed to
   [`dplyr::pull()`](https://dplyr.tidyverse.org/reference/pull.html).
 
+- .if_missing_var:
+
+  Per-call override of `collection@if_missing_var`. One of `"error"` or
+  `"skip"`, or `NULL` (the default) to inherit the collection's stored
+  value. See
+  [`surveycore::set_collection_if_missing_var()`](https://jdenn0514.github.io/surveycore/reference/set_collection_if_missing_var.html).
+
 ## Value
 
 A vector the same length as the number of rows in `.data`.
+
+## Survey collections
+
+When applied to a `survey_collection`, `pull()` extracts the column from
+each member and combines the per-member vectors via
+[`vctrs::vec_c()`](https://vctrs.r-lib.org/reference/vec_c.html).
+Detection of missing columns uses class-catch only — both `var` and
+`name` flow through a single `tryCatch` handler that re-raises
+`vctrs_error_subscript_oob` / `rlang_error_data_pronoun_not_found` as
+`surveytidy_error_collection_verb_failed`.
+
+Naming options:
+
+- `name = NULL` (default) — unnamed combined vector.
+
+- `name = coll@id` — by-survey naming sentinel: each combined element is
+  named by its source survey. The sentinel string is whatever `coll@id`
+  resolves to (default `.survey`; user-set values like `"wave"` work
+  identically).
+
+- `name = "<other_column>"` — passes through to
+  [`dplyr::pull`](https://dplyr.tidyverse.org/reference/pull.html)'s
+  `name` arg unchanged (per-row names from another column inside each
+  member), then combined across surveys via the same
+  [`vctrs::vec_c()`](https://vctrs.r-lib.org/reference/vec_c.html) path
+  as the values.
+
+If [`vctrs::vec_c()`](https://vctrs.r-lib.org/reference/vec_c.html)
+raises `vctrs_error_incompatible_type` (e.g., one member has the column
+as numeric and another as character), the error is re-raised as
+`surveytidy_error_collection_pull_incompatible_types` with
+`parent = cnd` and the column name and conflicting surveys. No
+auto-coercion — `pull` returns a single vector and silent coercion would
+mask the kind of data-type bug users almost certainly want surfaced.
+(`glimpse.survey_collection` auto-coerces with a footer; the divergence
+is intentional — `glimpse` is diagnostic, `pull` is computational.)
+
+## Domain inclusion
+
+Inherits the contract of `pull()` for `survey_base`: the returned vector
+includes both in-domain and out-of-domain values. `pull.survey_base`
+calls `dplyr::pull(@data, ...)` directly without filtering on the domain
+column, so the combined vector mixes both kinds of rows. The user has no
+per-element marker for domain membership — this is a known limitation of
+`pull` at the per-survey verb level (not the collection layer). Use a
+per-member
+[`filter()`](https://jdenn0514.github.io/surveytidy/reference/filter.md)
+or
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+before pulling if domain filtering is required.
 
 ## See also
 
@@ -49,7 +109,7 @@ A vector the same length as the number of rows in `.data`.
 to keep columns in the survey object
 
 Other selecting:
-[`glimpse`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
+[`glimpse.survey_collection()`](https://jdenn0514.github.io/surveytidy/reference/glimpse.md),
 [`relocate`](https://jdenn0514.github.io/surveytidy/reference/relocate.md),
 [`select`](https://jdenn0514.github.io/surveytidy/reference/select.md)
 
@@ -58,9 +118,11 @@ Other selecting:
 ``` r
 library(surveytidy)
 library(surveycore)
+
+# create a survey design from the pew_npors_2025 example dataset
 d <- as_survey(pew_npors_2025, weights = weight, strata = stratum)
 
-# Extract a column by name
+# extract a column by name
 pull(d, agecat)
 #>    [1]  4  4  4  2  4  4  3  4  3  2  3  4  3  3  4  2  1  4  2  2  4  3  4  2
 #>   [25]  3  4  2  3  2  1  4  3  4  2  4  4  2  4  4  4  1  4  2  4  2  3  3  1
@@ -278,7 +340,7 @@ pull(d, agecat)
 #>   18-29   30-49   50-64     65+ Refused 
 #>       1       2       3       4      99 
 
-# Named vector — values of agecat named by respid
+# named vector — values of agecat named by respid
 pull(d, agecat, name = respid)
 #>  1470  2374  1177 15459  9849  8178  3682  6999  9945  1901 18470 18634 16757 
 #>     4     4     4     2     4     4     3     4     3     2     3     4     3 
