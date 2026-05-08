@@ -1,6 +1,6 @@
 ## Test environments
 
-* local macOS 14 (Sonoma), R 4.5.2
+* local macOS 15 (Sequoia), R 4.5.2
 * GitHub Actions (ubuntu-latest, macos-latest, windows-latest)
 * win-builder (R-devel)
 
@@ -21,10 +21,7 @@ None. This is a new package with no dependents.
 ## Comments
 
 * First CRAN submission of surveytidy.
-* This package depends on 'surveycore', which is being submitted to CRAN
-  separately. The 'Remotes:' field in DESCRIPTION is present only to
-  support pre-CRAN local installation; it will be removed before the
-  final submission once 'surveycore' is on CRAN.
+* This package depends on 'surveycore', which is available on CRAN.
 * There are no published references describing the methods in this
   package. The domain estimation approach implemented in filter() follows
   standard survey statistics practice as described in Lumley (2010),

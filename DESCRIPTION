@@ -1,6 +1,6 @@
 Package: surveytidy
 Title: Tidy 'dplyr'/'tidyr' Verbs for Survey Design Objects
-Version: 0.6.0.9000
+Version: 0.6.0
 Authors@R:
     person(
         "Jacob", "Dennen",
@@ -39,7 +39,5 @@ Suggests:
     pkgdown,
     testthat (>= 3.0.0),
     tibble
-Remotes:
-    JDenn0514/surveycore
 Config/Needs/website: rmarkdown
 Config/Needs/coverage: covr
