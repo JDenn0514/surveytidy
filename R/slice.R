@@ -612,24 +612,6 @@ slice_sample.survey_collection <- function(
   id_from_stored,
   detect
 ) {
-  # Save and restore ambient .Random.seed.
-  if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-    saved_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-    on.exit(
-      assign(".Random.seed", saved_seed, envir = .GlobalEnv),
-      add = TRUE
-    )
-  } else {
-    on.exit(
-      {
-        if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-          rm(".Random.seed", envir = .GlobalEnv)
-        }
-      },
-      add = TRUE
-    )
-  }
-
   dots <- rlang::enquos(...)
   dots <- .unwrap_scalar_dots(dots)
 
@@ -669,13 +651,15 @@ slice_sample.survey_collection <- function(
     } else {
       list()
     }
-    set.seed(.derive_member_seed(nm, seed))
-    r <- rlang::inject(dplyr::slice_sample(
-      survey,
-      !!!dots,
-      !!!weight_by_args,
-      !!!scalar_args
-    ))
+    r <- withr::with_seed(
+      .derive_member_seed(nm, seed),
+      rlang::inject(dplyr::slice_sample(
+        survey,
+        !!!dots,
+        !!!weight_by_args,
+        !!!scalar_args
+      ))
+    )
     results[[nm]] <- r
   }
 

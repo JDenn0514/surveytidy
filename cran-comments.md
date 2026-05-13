@@ -1,3 +1,14 @@
+## Resubmission
+
+This is a resubmission addressing reviewer feedback:
+
+* Removed single quotes around `survey_collection` in the Description
+  field (single quotes are reserved for package/software names).
+* Replaced manual `.Random.seed` save/restore and `set.seed()` in
+  `slice_sample.survey_collection` with `withr::with_seed()`, which
+  eliminates both the `.GlobalEnv` write and the in-function seed setting.
+  `withr` has been added to Imports accordingly.
+
 ## Test environments
 
 * local macOS 15 (Sequoia), R 4.5.2
