@@ -1,6 +1,17 @@
+## Resubmission
+
+This is a resubmission addressing reviewer feedback:
+
+* Removed single quotes around `survey_collection` in the Description
+  field (single quotes are reserved for package/software names).
+* Replaced manual `.Random.seed` save/restore and `set.seed()` in
+  `slice_sample.survey_collection` with `withr::with_seed()`, which
+  eliminates both the `.GlobalEnv` write and the in-function seed setting.
+  `withr` has been added to Imports accordingly.
+
 ## Test environments
 
-* local macOS 14 (Sonoma), R 4.5.2
+* local macOS 15 (Sequoia), R 4.5.2
 * GitHub Actions (ubuntu-latest, macos-latest, windows-latest)
 * win-builder (R-devel)
 
@@ -21,10 +32,7 @@ None. This is a new package with no dependents.
 ## Comments
 
 * First CRAN submission of surveytidy.
-* This package depends on 'surveycore', which is being submitted to CRAN
-  separately. The 'Remotes:' field in DESCRIPTION is present only to
-  support pre-CRAN local installation; it will be removed before the
-  final submission once 'surveycore' is on CRAN.
+* This package depends on 'surveycore', which is available on CRAN.
 * There are no published references describing the methods in this
   package. The domain estimation approach implemented in filter() follows
   standard survey statistics practice as described in Lumley (2010),
