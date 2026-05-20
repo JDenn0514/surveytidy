@@ -2,6 +2,8 @@
 
 ## surveytidy 0.6.0
 
+CRAN release: 2026-05-19
+
 ### New features
 
 #### survey_collection support
