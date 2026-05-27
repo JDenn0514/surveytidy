@@ -225,21 +225,35 @@ mutate.survey_base <- function(
     new_data <- dplyr::ungroup(new_data)
   }
 
+  # Step 3b: Expand effective_mutated_names to include columns produced by
+  # across() that received a surveytidy_recode attr. dplyr resolves these
+  # column names at runtime, so they are absent from mutated_names (which
+  # only captures explicit LHS names). The attr is always stripped in Step 5b,
+  # so only columns recoded in THIS call can have it.
+  across_recode_cols <- Filter(
+    function(col) !is.null(attr(new_data[[col]], "surveytidy_recode")),
+    names(new_data)
+  )
+  effective_mutated_names <- union(
+    mutated_names[nzchar(mutated_names)],
+    across_recode_cols
+  )
+
   # Step 4: Post-detect labelled outputs and update @metadata.
   updated_metadata <- .extract_metadata_attrs(
     new_data,
     .data@metadata,
-    mutated_names
+    effective_mutated_names
   )
 
   # Step 5a: Capture surveytidy_recode attrs for transformation log before
   # the strip step removes them. Capture the full attr (not just description)
   # so we can distinguish recode calls (attr set) from non-recode calls
   # (attr NULL), even when .description was not supplied (description = NULL).
-  recode_attrs <- lapply(mutated_names, function(col) {
+  recode_attrs <- lapply(effective_mutated_names, function(col) {
     attr(new_data[[col]], "surveytidy_recode")
   })
-  names(recode_attrs) <- mutated_names
+  names(recode_attrs) <- effective_mutated_names
 
   # Step 5b: Strip haven attrs and surveytidy_recode attr from @data.
   new_data <- .strip_metadata_attrs(new_data)
@@ -266,10 +280,20 @@ mutate.survey_base <- function(
   # When surveytidy_recode$fn and surveytidy_recode$var are set, those values
   # are used directly (immune to aliasing; var correct inside across()).
   # Non-recode new columns get plain text (Phase 0.5 behavior).
-  for (col in mutated_names) {
+  # across() columns: q is NULL (no explicit LHS quosure) but recode_attr is
+  # non-NULL — recode attr fields are used directly for the structured record.
+  for (col in effective_mutated_names) {
     q <- mutations[[col]]
     recode_attr <- recode_attrs[[col]]
-    if (!is.null(q) && !is.null(recode_attr)) {
+    if (is.null(q) && !is.null(recode_attr)) {
+      updated_metadata@transformations[[col]] <- list(
+        fn = recode_attr$fn %||% "unknown",
+        source_cols = recode_attr$var %||% character(0),
+        expr = col,
+        output_type = if (is.factor(new_data[[col]])) "factor" else "vector",
+        description = recode_attr$description
+      )
+    } else if (!is.null(q) && !is.null(recode_attr)) {
       # Use fn and var from the recode attr when available; fall back to quosure.
       recode_fn <- recode_attr$fn
       recode_var <- recode_attr$var

@@ -149,13 +149,39 @@ test_that("mutate() records transformation expression in @metadata for new colum
   expect_equal(result@metadata@transformations[["z"]], "y1 * 2")
 })
 
-test_that("mutate() does not record transformation for columns created by across()", {
+test_that("mutate() does not record transformation for plain across() (no recode attr)", {
   d <- make_all_designs()$taylor
   result <- mutate(d, across(c(y1, y2), ~ .x * 2))
-  # across() names don't appear in mutations list — no entry expected
-  # (limitation documented in spec; verify no crash)
-  expect_true(is.list(result@metadata@transformations))
+  # Plain lambda sets no surveytidy_recode attr — no metadata entry expected
+  expect_null(result@metadata@transformations[["y1"]])
+  expect_null(result@metadata@transformations[["y2"]])
   test_invariants(result)
+})
+
+test_that("mutate() syncs metadata for recode columns produced by across()", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    across(c(y1, y2), \(x) recode_values(x, 1 ~ "low", .label = "Y recoded"))
+  )
+  test_invariants(result)
+  expect_identical(result@metadata@variable_labels[["y1"]], "Y recoded")
+  expect_identical(result@metadata@variable_labels[["y2"]], "Y recoded")
+})
+
+test_that("mutate() records transformation log for recode columns produced by across()", {
+  d <- make_all_designs()$taylor
+  result <- mutate(
+    d,
+    across(
+      c(y1, y2),
+      \(x) recode_values(x, 1 ~ "low", .description = "Recoded low")
+    )
+  )
+  test_invariants(result)
+  expect_identical(result@metadata@transformations[["y1"]]$fn, "recode_values")
+  expect_identical(result@metadata@transformations[["y1"]]$description, "Recoded low")
+  expect_identical(result@metadata@transformations[["y2"]]$fn, "recode_values")
 })
 
 # ── mutate() — domain and @groups preservation ───────────────────────────────

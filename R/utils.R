@@ -184,9 +184,9 @@ dplyr_reconstruct.survey_base <- function(data, template) {
 #      extract into metadata (haven::labelled / structure(, label =) path)
 #   3. Column has no metadata attrs and previously had metadata → clear stale
 #
-# changed_cols : character vector — names of explicitly-named LHS expressions
-#                from rlang::quos(...). Unnamed mutate expressions (e.g.,
-#                across()) are not covered — accepted limitation for Phase 0.6.
+# changed_cols : character vector — column names to inspect for metadata attrs.
+#                Includes explicit LHS names from rlang::quos(...) plus any
+#                across() output columns that received a surveytidy_recode attr.
 # Returns updated metadata object (does NOT assign internally).
 .extract_metadata_attrs <- function(data, metadata, changed_cols) {
   # Batch-read: pull all 6 metadata properties into a plain named list so we
