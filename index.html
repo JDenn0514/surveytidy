@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="index.html">surveytidy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +76,10 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jdenn0514.github.io/surveytidy/">surveytidy</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'surveytidy'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:dplyr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     bind_cols, bind_rows, case_when, if_else, na_if, recode_values,</span></span>
+<span><span class="co">#&gt;     replace_values, replace_when</span></span>
 <span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     filter</span></span>
@@ -213,10 +217,9 @@
 <span></span>
 <span><span class="co"># Modifying a design variable warns you</span></span>
 <span><span class="va">d</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/mutate.html">mutate</a></span><span class="op">(</span>weight <span class="op">=</span> <span class="va">weight</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: ! mutate() modified design variable(s): weight.</span></span>
-<span><span class="co">#&gt; ℹ The survey design has been updated to reflect the new values.</span></span>
-<span><span class="co">#&gt; ✔ Use `update_design()` if you intend to modify design variables. Modifying</span></span>
-<span><span class="co">#&gt;   them via `mutate()` may produce unexpected variance estimates.</span></span>
+<span><span class="co">#&gt; Warning: ! mutate() modified weight column weight.</span></span>
+<span><span class="co">#&gt; ℹ Effective sample size may be affected.</span></span>
+<span><span class="co">#&gt; ✔ Use `update_design()` to intentionally change design variables.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Survey Design ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; &lt;survey_taylor&gt; (Taylor series linearization)</span></span>
@@ -323,6 +326,7 @@
 <span><span class="co">#&gt; ── Survey Design ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; &lt;survey_taylor&gt; (Taylor series linearization)</span></span>
 <span><span class="co">#&gt; Sample size: 5022</span></span>
+<span><span class="co">#&gt; Domain: 2234 of 5022 rows</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # A tibble: 5,022 × 66</span></span>
 <span><span class="co">#&gt;    respid  mode language languageinitial stratum interview_start interview_end</span></span>
@@ -511,6 +515,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=surveytidy" class="external-link"><img src="https://www.r-pkg.org/badges/version/surveytidy" alt="CRAN status"></a></li>
 <li><a href="https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/JDenn0514/surveytidy" class="external-link"><img src="https://app.codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://jdenn0514.github.io/surveytidy/"><img src="https://github.com/JDenn0514/surveytidy/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>

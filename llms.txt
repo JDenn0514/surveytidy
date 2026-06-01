@@ -20,6 +20,10 @@ library(dplyr)
 library(surveytidy)
 #> 
 #> Attaching package: 'surveytidy'
+#> The following objects are masked from 'package:dplyr':
+#> 
+#>     bind_cols, bind_rows, case_when, if_else, na_if, recode_values,
+#>     replace_values, replace_when
 #> The following object is masked from 'package:stats':
 #> 
 #>     filter
@@ -175,10 +179,9 @@ d |>
 
 # Modifying a design variable warns you
 d |> mutate(weight = weight * 0.5)
-#> Warning: ! mutate() modified design variable(s): weight.
-#> ℹ The survey design has been updated to reflect the new values.
-#> ✔ Use `update_design()` if you intend to modify design variables. Modifying
-#>   them via `mutate()` may produce unexpected variance estimates.
+#> Warning: ! mutate() modified weight column weight.
+#> ℹ Effective sample size may be affected.
+#> ✔ Use `update_design()` to intentionally change design variables.
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
@@ -287,6 +290,7 @@ d |>
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_taylor> (Taylor series linearization)
 #> Sample size: 5022
+#> Domain: 2234 of 5022 rows
 #> 
 #> # A tibble: 5,022 × 66
 #>    respid  mode language languageinitial stratum interview_start interview_end

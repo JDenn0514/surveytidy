@@ -1,5 +1,18 @@
 # Changelog
 
+## surveytidy 0.6.1
+
+### Bug fixes
+
+- [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md)
+  now syncs `@metadata` (variable labels, value labels, and
+  transformation log) for recode columns produced by
+  [`dplyr::across()`](https://dplyr.tidyverse.org/reference/across.html).
+  Previously, only explicitly-named left-hand-side mutations were
+  tracked ([\#41](https://github.com/JDenn0514/surveytidy/issues/41)).
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.6.0
 
 CRAN release: 2026-05-19
