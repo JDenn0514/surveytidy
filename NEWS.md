@@ -1,3 +1,13 @@
+# surveytidy 0.6.1
+
+## Bug fixes
+
+* `mutate()` now syncs `@metadata` (variable labels, value labels, and
+  transformation log) for recode columns produced by `dplyr::across()`.
+  Previously, only explicitly-named left-hand-side mutations were tracked (#41).
+
+---
+
 # surveytidy 0.6.0
 
 ## New features
