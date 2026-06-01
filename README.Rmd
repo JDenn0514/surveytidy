@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # surveytidy <a href="https://jdenn0514.github.io/surveytidy/index.html"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/surveytidy)](https://CRAN.R-project.org/package=surveytidy)
 [![R-CMD-check](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JDenn0514/surveytidy/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://app.codecov.io/gh/JDenn0514/surveytidy/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JDenn0514/surveytidy)
 [![pkgdown](https://github.com/JDenn0514/surveytidy/actions/workflows/pkgdown.yaml/badge.svg)](https://jdenn0514.github.io/surveytidy/)
