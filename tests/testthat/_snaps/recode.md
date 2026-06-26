@@ -21,17 +21,6 @@
       i Got an unnamed <integer>.
       v Use `c("Label" = value, ...)` to name the entries.
 
-# case_when() error: .factor = TRUE + .label -> surveytidy_error_recode_factor_with_label
-
-    Code
-      mutate(d, cat = case_when(y1 > 50 ~ "high", .factor = TRUE, .label = "bad"))
-    Condition
-      Error in `dplyr::mutate()`:
-      i In argument: `cat = case_when(y1 > 50 ~ "high", .factor = TRUE, .label = "bad")`.
-      Caused by error in `case_when()`:
-      x `.label` cannot be used with `.factor = TRUE`.
-      i Factor levels carry their own labels.
-
 # na_if() error: .update_labels not logical -> surveytidy_error_na_if_update_labels_not_scalar
 
     Code
@@ -77,17 +66,6 @@
       x `.value_labels` must be a named vector.
       i Got an unnamed <integer>.
       v Use `c("Label" = value, ...)` to name the entries.
-
----
-
-    Code
-      mutate(d, cat = case_when(y1 > 50 ~ "hi", .factor = TRUE, .label = "x"))
-    Condition
-      Error in `dplyr::mutate()`:
-      i In argument: `cat = case_when(y1 > 50 ~ "hi", .factor = TRUE, .label = "x")`.
-      Caused by error in `case_when()`:
-      x `.label` cannot be used with `.factor = TRUE`.
-      i Factor levels carry their own labels.
 
 ---
 
