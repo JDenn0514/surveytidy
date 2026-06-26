@@ -48,15 +48,13 @@
 #'   `surveytidy_error_recode_unmatched_values` error.
 #' @param ptype An optional prototype declaring the desired output type.
 #' @param .label `character(1)` or `NULL`. Variable label stored in
-#'   `@metadata@variable_labels` after [mutate()]. Cannot be combined with
-#'   `.factor = TRUE`.
+#'   `@metadata@variable_labels` after [mutate()].
 #' @param .value_labels Named vector or `NULL`. Value labels stored in
 #'   `@metadata@value_labels`. Names are the label strings; values are the
 #'   data values.
 #' @param .factor `logical(1)`. If `TRUE`, returns a factor. Levels are taken
 #'   from `.value_labels` names if supplied, otherwise from `to` in lookup
 #'   mode or from the right-hand sides of the `...` formulas in formula mode.
-#'   Cannot be combined with `.label`.
 #' @param .use_labels `logical(1)`. If `TRUE`, reads `attr(x, "labels")` to
 #'   build the `from`/`to` map automatically: values become `from`, label
 #'   strings become `to`. `x` must carry value labels; errors if not. Cannot
@@ -227,15 +225,6 @@ recode_values <- function(
     error = function(e) rlang::as_label(rlang::enquo(x))
   )
   .validate_label_args(.label, .value_labels, .description)
-  if (isTRUE(.factor) && !is.null(.label)) {
-    cli::cli_abort(
-      c(
-        "x" = "{.arg .label} cannot be used with {.code .factor = TRUE}.",
-        "i" = "Factor levels carry their own labels."
-      ),
-      class = "surveytidy_error_recode_factor_with_label"
-    )
-  }
 
   has_formulas <- ...length() > 0L
 
@@ -317,6 +306,7 @@ recode_values <- function(
       .formula_rhs_values(...)
     }
     result <- .factor_from_result(result, .value_labels, factor_source)
+    attr(result, "label") <- .label
     attr(result, "surveytidy_recode") <- list(
       fn = "recode_values",
       var = var_name,

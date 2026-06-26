@@ -44,8 +44,7 @@ any value in \code{x} not present in \code{from} triggers a
 \item{ptype}{An optional prototype declaring the desired output type.}
 
 \item{.label}{\code{character(1)} or \code{NULL}. Variable label stored in
-\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}. Cannot be combined with
-\code{.factor = TRUE}.}
+\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}.}
 
 \item{.value_labels}{Named vector or \code{NULL}. Value labels stored in
 \verb{@metadata@value_labels}. Names are the label strings; values are the
@@ -53,8 +52,7 @@ data values.}
 
 \item{.factor}{\code{logical(1)}. If \code{TRUE}, returns a factor. Levels are taken
 from \code{.value_labels} names if supplied, otherwise from \code{to} in lookup
-mode or from the right-hand sides of the \code{...} formulas in formula mode.
-Cannot be combined with \code{.label}.}
+mode or from the right-hand sides of the \code{...} formulas in formula mode.}
 
 \item{.use_labels}{\code{logical(1)}. If \code{TRUE}, reads \code{attr(x, "labels")} to
 build the \code{from}/\code{to} map automatically: values become \code{from}, label

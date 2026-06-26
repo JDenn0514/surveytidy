@@ -36,8 +36,7 @@ Overrides the common type of the RHS inputs.}
 Overrides the common size computed from the LHS inputs.}
 
 \item{.label}{\code{character(1)} or \code{NULL}. Variable label stored in
-\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}. Cannot be combined with
-\code{.factor = TRUE}.}
+\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}.}
 
 \item{.value_labels}{Named vector or \code{NULL}. Value labels stored in
 \verb{@metadata@value_labels}. Names are the label strings; values are the
@@ -45,7 +44,7 @@ data values.}
 
 \item{.factor}{\code{logical(1)}. If \code{TRUE}, returns a factor. Levels are
 ordered by the RHS values in formula order, or by \code{.value_labels} names
-if supplied. Cannot be combined with \code{.label}.}
+if supplied.}
 
 \item{.description}{\code{character(1)} or \code{NULL}. Plain-language description
 of how the variable was created. Stored in
