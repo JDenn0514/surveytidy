@@ -24,8 +24,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{dplyr}{\code{\link[dplyr:filter]{filter_out}}, \code{\link[dplyr:group_data]{group_vars}}, \code{\link[dplyr:rename]{rename_with}}, \code{\link[dplyr:slice]{slice_head}}, \code{\link[dplyr:slice]{slice_max}}, \code{\link[dplyr:slice]{slice_min}}, \code{\link[dplyr:slice]{slice_sample}}, \code{\link[dplyr:slice]{slice_tail}}, \code{\link[dplyr:group_by]{ungroup}}}
+  \item{dplyr}{\code{\link[dplyr:filter_out]{filter_out()}}, \code{\link[dplyr:group_vars]{group_vars()}}, \code{\link[dplyr:rename_with]{rename_with()}}, \code{\link[dplyr:slice_head]{slice_head()}}, \code{\link[dplyr:slice_max]{slice_max()}}, \code{\link[dplyr:slice_min]{slice_min()}}, \code{\link[dplyr:slice_sample]{slice_sample()}}, \code{\link[dplyr:slice_tail]{slice_tail()}}, \code{\link[dplyr:ungroup]{ungroup()}}}
 
-  \item{surveycore}{\code{\link[surveycore]{add_survey}}, \code{\link[surveycore]{as_survey_collection}}, \code{\link[surveycore]{remove_survey}}, \code{\link[surveycore]{set_collection_id}}, \code{\link[surveycore]{set_collection_if_missing_var}}}
+  \item{surveycore}{\code{\link[surveycore:add_survey]{add_survey()}}, \code{\link[surveycore:as_survey_collection]{as_survey_collection()}}, \code{\link[surveycore:remove_survey]{remove_survey()}}, \code{\link[surveycore:set_collection_id]{set_collection_id()}}, \code{\link[surveycore:set_collection_if_missing_var]{set_collection_if_missing_var()}}}
 }}
 

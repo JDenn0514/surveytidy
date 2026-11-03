@@ -126,9 +126,9 @@ inner_join(d, lookup, by = "y1", .domain_aware = FALSE)
 
 }
 \seealso{
-Other joins: 
-\code{\link{bind_cols}()},
-\code{\link{bind_rows}()},
+Other joins:
+\code{\link[=bind_cols]{bind_cols()}},
+\code{\link[=bind_rows]{bind_rows()}},
 \code{\link{left_join}},
 \code{\link{right_join}},
 \code{\link{semi_join}}

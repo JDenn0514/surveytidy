@@ -71,8 +71,8 @@ surveycore::as_survey(combined, weights = wt)
 
 }
 \seealso{
-Other joins: 
-\code{\link{bind_cols}()},
+Other joins:
+\code{\link[=bind_cols]{bind_cols()}},
 \code{\link{inner_join}},
 \code{\link{left_join}},
 \code{\link{right_join}},

@@ -20,14 +20,14 @@ arrange(.data, ..., .by_group = FALSE)
 \code{survey_result} object returned by a surveycore estimation function.}
 
 \item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variables, or
-functions of variables. Use \code{\link[dplyr:desc]{dplyr::desc()}} to sort a variable in descending
+functions of variables. Use \code{\link[dplyr:desc]{desc()}} to sort a variable in descending
 order.}
 
 \item{.by_group}{If \code{TRUE}, sorts first by the grouping variables set by
 \code{\link[=group_by]{group_by()}}.}
 
 \item{.locale}{The locale to use for ordering strings. If \code{NULL}, uses the
-\code{"C"} locale. See \code{\link[stringi:about_locale]{stringi::locale()}} for available locales.}
+\code{"C"} locale. See \code{\link[stringi:locale]{stringi::locale()}} for available locales.}
 
 \item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
 One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
@@ -54,7 +54,7 @@ Unlike most other verbs, \code{arrange()} largely ignores grouping — use
 \subsection{Missing values}{
 
 Unlike base \code{\link[=sort]{sort()}}, \code{NA} values are always sorted to the end, even when
-using \code{\link[dplyr:desc]{dplyr::desc()}}.
+using \code{\link[dplyr:desc]{desc()}}.
 }
 
 \subsection{Domain column}{

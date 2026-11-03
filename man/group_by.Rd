@@ -141,9 +141,9 @@ d |>
 
 }
 \seealso{
-Other grouping: 
-\code{\link{is_grouped}()},
-\code{\link{is_rowwise}()},
+Other grouping:
+\code{\link[=is_grouped]{is_grouped()}},
+\code{\link[=is_rowwise]{is_rowwise()}},
 \code{\link{rowwise}}
 }
 \concept{grouping}

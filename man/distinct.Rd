@@ -121,7 +121,7 @@ distinct(d, dplyr::pick(tidyselect::all_of("cregion")))
 \code{\link[=filter]{filter()}} for domain-aware row marking (preferred for
 subpopulation analyses)
 
-Other row operations: 
+Other row operations:
 \code{\link{drop_na}},
 \code{\link{slice}}
 }

@@ -100,11 +100,11 @@ than \code{NA}.
 \item \code{\link[=replace_when]{replace_when()}} for condition-based in-place replacement.
 }
 
-Other recoding: 
-\code{\link{case_when}()},
-\code{\link{if_else}()},
-\code{\link{recode_values}()},
-\code{\link{replace_values}()},
-\code{\link{replace_when}()}
+Other recoding:
+\code{\link[=case_when]{case_when()}},
+\code{\link[=if_else]{if_else()}},
+\code{\link[=recode_values]{recode_values()}},
+\code{\link[=replace_values]{replace_values()}},
+\code{\link[=replace_when]{replace_when()}}
 }
 \concept{recoding}

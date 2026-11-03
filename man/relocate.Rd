@@ -89,9 +89,9 @@ d |>
 \seealso{
 \code{\link[=select]{select()}} to keep or drop columns, \code{\link[=rename]{rename()}} to rename them
 
-Other selecting: 
-\code{\link{glimpse.survey_collection}()},
-\code{\link{pull.survey_collection}()},
+Other selecting:
+\code{\link[=glimpse.survey_collection]{glimpse.survey_collection()}},
+\code{\link[=pull.survey_collection]{pull.survey_collection()}},
 \code{\link{select}}
 }
 \concept{selecting}
