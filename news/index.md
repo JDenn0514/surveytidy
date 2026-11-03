@@ -1,5 +1,43 @@
 # Changelog
 
+## surveytidy 0.6.2
+
+### Bug fixes
+
+- surveytidy now requires surveycore 1.2.0 or later. surveycore 1.2.0
+  refuses a survey design with fewer than 2 rows, so
+  [`distinct()`](https://jdenn0514.github.io/surveytidy/reference/distinct.md),
+  [`slice()`](https://jdenn0514.github.io/surveytidy/reference/slice.md),
+  [`slice_head()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_tail()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_min()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_max()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`slice_sample()`](https://dplyr.tidyverse.org/reference/slice.html),
+  [`subset()`](https://rdrr.io/r/base/subset.html), and
+  `inner_join(.domain_aware = FALSE)` now raise
+  `surveycore_error_single_row` when their result has 1 row
+  ([\#44](https://github.com/JDenn0514/surveytidy/issues/44)).
+
+- [`distinct()`](https://jdenn0514.github.io/surveytidy/reference/distinct.md)
+  on a survey object now evaluates `...` with data-masking for both the
+  design-variable check and the de-duplication, as
+  [`dplyr::distinct()`](https://dplyr.tidyverse.org/reference/distinct.html)
+  does. A computed key such as `distinct(d, y1 > 50)` no longer adds a
+  column to the survey data. A selection helper passed directly, such as
+  `distinct(d, all_of(cols))`, now raises
+  `surveytidy_error_distinct_select_helper`; use
+  `distinct(d, pick(all_of(cols)))` instead
+  ([\#45](https://github.com/JDenn0514/surveytidy/issues/45)).
+
+- [`case_when()`](https://jdenn0514.github.io/surveytidy/reference/case_when.md)
+  and
+  [`recode_values()`](https://jdenn0514.github.io/surveytidy/reference/recode_values.md)
+  accept `.label` together with `.factor = TRUE`. The variable label is
+  stored on the factor result. Before, this combination raised an error
+  ([\#43](https://github.com/JDenn0514/surveytidy/issues/43)).
+
+------------------------------------------------------------------------
+
 ## surveytidy 0.6.1
 
 ### Bug fixes

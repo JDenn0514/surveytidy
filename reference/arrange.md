@@ -35,8 +35,8 @@ arrange(.data, ..., .by_group = FALSE)
 
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
   Variables, or functions of variables. Use
-  [`dplyr::desc()`](https://dplyr.tidyverse.org/reference/desc.html) to
-  sort a variable in descending order.
+  [`desc()`](https://dplyr.tidyverse.org/reference/desc.html) to sort a
+  variable in descending order.
 
 - .by_group:
 
@@ -75,7 +75,7 @@ An object of the same type as `.data` with the following properties:
 
 Unlike base [`sort()`](https://rdrr.io/r/base/sort.html), `NA` values
 are always sorted to the end, even when using
-[`dplyr::desc()`](https://dplyr.tidyverse.org/reference/desc.html).
+[`desc()`](https://dplyr.tidyverse.org/reference/desc.html).
 
 ### Domain column
 

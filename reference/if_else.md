@@ -123,6 +123,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -150,12 +151,16 @@ new@metadata
 #>  @ value_labels     : Named list()
 #>  @ question_prefaces: Named list()
 #>  @ notes            : list()
+#>  @ var_extra        : list()
 #>  @ universe         : list()
 #>  @ missing_codes    : list()
 #>  @ sata             : list()
+#>  @ higher_is        : list()
+#>  @ reverse_coded    : list()
 #>  @ transformations  :List of 1
 #>  .. $ senior: chr "if_else(age >= 65, \"Senior (65+)\", \"Non-senior\")"
 #>  @ weighting_history: list()
+#>  @ dataset_metadata : list()
 
 # use missing = to specify the output value when condition is NA
 new <- ns_wave1_svy |>
@@ -173,6 +178,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2

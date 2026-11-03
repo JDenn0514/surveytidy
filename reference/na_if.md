@@ -94,6 +94,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -123,6 +124,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2

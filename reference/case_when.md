@@ -68,7 +68,6 @@ case_when(
   `character(1)` or `NULL`. Variable label stored in
   `@metadata@variable_labels` after
   [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md).
-  Cannot be combined with `.factor = TRUE`.
 
 - .value_labels:
 
@@ -80,7 +79,6 @@ case_when(
 
   `logical(1)`. If `TRUE`, returns a factor. Levels are ordered by the
   RHS values in formula order, or by `.value_labels` names if supplied.
-  Cannot be combined with `.label`.
 
 - .description:
 
@@ -151,6 +149,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3
@@ -181,12 +180,16 @@ new@metadata
 #>  ..  ..- attr(*, "names")= chr [1:4] "Democrat" "Republican" "Independent" "Something else"
 #>  @ question_prefaces: Named list()
 #>  @ notes            : list()
+#>  @ var_extra        : list()
 #>  @ universe         : list()
 #>  @ missing_codes    : list()
 #>  @ sata             : list()
+#>  @ higher_is        : list()
+#>  @ reverse_coded    : list()
 #>  @ transformations  :List of 1
 #>  .. $ age_pid: chr "case_when(age < 30 & pid3 == 1 ~ \"18-29 Democrats\", age < 30 & \n    pid3 == 2 ~ \"18-29 Republicans\", age <"| __truncated__
 #>  @ weighting_history: list()
+#>  @ dataset_metadata : list()
 
 # attach a variable label via .label
 new <- ns_wave1_svy |>
@@ -307,6 +310,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 3

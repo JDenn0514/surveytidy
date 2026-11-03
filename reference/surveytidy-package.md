@@ -62,3 +62,8 @@ Useful links:
 
 **Maintainer**: Jacob Dennen <jdenn0514@gmail.com>
 ([ORCID](https://orcid.org/0000-0003-3006-7364)) \[copyright holder\]
+
+Authors:
+
+- Jacob Dennen <jdenn0514@gmail.com>
+  ([ORCID](https://orcid.org/0000-0003-3006-7364)) \[copyright holder\]

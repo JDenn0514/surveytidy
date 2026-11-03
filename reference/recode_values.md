@@ -91,7 +91,6 @@ recode_values(
   `character(1)` or `NULL`. Variable label stored in
   `@metadata@variable_labels` after
   [`mutate()`](https://jdenn0514.github.io/surveytidy/reference/mutate.md).
-  Cannot be combined with `.factor = TRUE`.
 
 - .value_labels:
 
@@ -104,7 +103,6 @@ recode_values(
   `logical(1)`. If `TRUE`, returns a factor. Levels are taken from
   `.value_labels` names if supplied, otherwise from `to` in lookup mode
   or from the right-hand sides of the `...` formulas in formula mode.
-  Cannot be combined with `.label`.
 
 - .use_labels:
 
@@ -176,6 +174,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -207,6 +206,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -242,6 +242,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -278,6 +279,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -307,6 +309,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2
@@ -393,6 +396,7 @@ new
 #> 
 #> ── Survey Design ───────────────────────────────────────────────────────────────
 #> <survey_nonprob> (non-probability) [experimental]
+#> • Variance: SRS approximation (no bootstrap replicate weights)
 #> Sample size: 6422
 #> 
 #> # A tibble: 6,422 × 2

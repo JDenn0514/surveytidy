@@ -134,7 +134,7 @@ directly.
 - Cumulative: [`cumsum()`](https://rdrr.io/r/base/cumsum.html),
   [`cummax()`](https://rdrr.io/r/base/cumsum.html),
   [`cummin()`](https://rdrr.io/r/base/cumsum.html),
-  [`dplyr::cummean()`](https://dplyr.tidyverse.org/reference/cumall.html)
+  [`cummean()`](https://dplyr.tidyverse.org/reference/cumall.html)
 
 - Conditional:
   [`dplyr::if_else()`](https://dplyr.tidyverse.org/reference/if_else.html),

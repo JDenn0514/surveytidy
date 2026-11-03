@@ -35,9 +35,11 @@ distinct(.data, ..., .keep_all = FALSE)
 - ...:
 
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Optional columns used to determine uniqueness. If empty, all
-  non-design columns are used. Note: `.keep_all` is always `TRUE`
-  regardless of what is specified here.
+  Optional columns or expressions used to determine uniqueness. If
+  empty, all non-design columns are used. Wrap selection helpers in
+  [`dplyr::pick()`](https://dplyr.tidyverse.org/reference/pick.html).
+  Note: `.keep_all` is always `TRUE` regardless of what is specified
+  here.
 
 - .keep_all:
 
@@ -84,6 +86,21 @@ When `...` is empty, deduplication uses all non-design columns. Design
 variables (strata, PSU, weights, FPC) are excluded from the uniqueness
 check — deduplicating on them would produce meaningless or
 survey-corrupting results.
+
+### Data-masking, not tidyselect
+
+`...` uses data-masking, as in
+[`dplyr::distinct()`](https://dplyr.tidyverse.org/reference/distinct.html).
+Bare names and computed expressions (such as `y1 > 50` or
+`band = round(y1 / 10)`) are both accepted. A computed expression is
+used only to find duplicates; it is not added to `@data`. To use a
+selection helper such as
+[`tidyselect::all_of()`](https://tidyselect.r-lib.org/reference/all_of.html),
+wrap it in
+[`dplyr::pick()`](https://dplyr.tidyverse.org/reference/pick.html) or
+[`dplyr::across()`](https://dplyr.tidyverse.org/reference/across.html):
+`distinct(d, pick(all_of(cols)))`. A selection helper passed directly in
+`...` raises `surveytidy_error_distinct_select_helper`.
 
 ### Design variable warning
 
@@ -160,6 +177,32 @@ distinct(d)
 
 # deduplicate by one column (all other columns still retained)
 distinct(d, cregion)
+#> Warning: ! `distinct()` physically removes rows from the survey data.
+#> ℹ This is different from `filter()`, which preserves all rows for correct
+#>   variance estimation.
+#> ✔ Use `filter()` for subpopulation analyses instead.
+#> 
+#> ── Survey Design ───────────────────────────────────────────────────────────────
+#> <survey_taylor> (Taylor series linearization)
+#> Sample size: 4
+#> 
+#> # A tibble: 4 × 65
+#>   respid  mode language languageinitial stratum interview_start interview_end
+#>    <dbl> <dbl>    <dbl>           <dbl>   <dbl> <date>          <date>       
+#> 1   1470     2        1              NA      10 2025-05-27      2025-05-27   
+#> 2  15459     2        1              NA      10 2025-05-05      2025-05-05   
+#> 3   9849     1        1               9       9 2025-02-22      2025-02-22   
+#> 4   3682     1        1               9       4 2025-02-27      2025-02-27   
+#> # ℹ 58 more variables: econ1mod <dbl>, econ1bmod <dbl>, comtype2 <dbl>,
+#> #   unity <dbl>, crimesafe <dbl>, govprotct <dbl>, moregunimpact <dbl>,
+#> #   fin_sit <dbl>, vet1 <dbl>, vol12_cps <dbl>, eminuse <dbl>, intmob <dbl>,
+#> #   intfreq <dbl>, intfreq_collapsed <dbl>, home4nw2 <dbl>, bbhome <dbl>,
+#> #   smuse_fb <dbl>, smuse_yt <dbl>, smuse_x <dbl>, smuse_ig <dbl>,
+#> #   smuse_sc <dbl>, smuse_wa <dbl>, smuse_tt <dbl>, smuse_rd <dbl>,
+#> #   smuse_bsk <dbl>, smuse_th <dbl>, smuse_ts <dbl>, radio <dbl>, …
+
+# use a selection helper inside pick()
+distinct(d, dplyr::pick(tidyselect::all_of("cregion")))
 #> Warning: ! `distinct()` physically removes rows from the survey data.
 #> ℹ This is different from `filter()`, which preserves all rows for correct
 #>   variance estimation.
