@@ -69,8 +69,8 @@ bind_cols(d, extra)
 
 }
 \seealso{
-Other joins: 
-\code{\link{bind_rows}()},
+Other joins:
+\code{\link[=bind_rows]{bind_rows()}},
 \code{\link{inner_join}},
 \code{\link{left_join}},
 \code{\link{right_join}},

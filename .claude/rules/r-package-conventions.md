@@ -331,7 +331,7 @@ Description: [1-2 sentence description of what the package does]
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.x.x
+Config/roxygen2/version: 8.x.x
 Config/testthat/edition: 3
 ```
 

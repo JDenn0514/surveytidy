@@ -106,9 +106,9 @@ select(d, !tidyselect::starts_with("smuse_"))
 \code{\link[=relocate]{relocate()}} to reorder columns, \code{\link[=rename]{rename()}} to rename them,
 \code{\link[=mutate]{mutate()}} to add new ones
 
-Other selecting: 
-\code{\link{glimpse.survey_collection}()},
-\code{\link{pull.survey_collection}()},
+Other selecting:
+\code{\link[=glimpse.survey_collection]{glimpse.survey_collection()}},
+\code{\link[=pull.survey_collection]{pull.survey_collection()}},
 \code{\link{relocate}}
 }
 \concept{selecting}

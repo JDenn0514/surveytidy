@@ -100,8 +100,8 @@ pull(d, agecat, name = respid)
 \seealso{
 \code{\link[=select]{select()}} to keep columns in the survey object
 
-Other selecting: 
-\code{\link{glimpse.survey_collection}()},
+Other selecting:
+\code{\link[=glimpse.survey_collection]{glimpse.survey_collection()}},
 \code{\link{relocate}},
 \code{\link{select}}
 }

@@ -108,9 +108,9 @@ left_join(d, lookup, by = "y1")
 
 }
 \seealso{
-Other joins: 
-\code{\link{bind_cols}()},
-\code{\link{bind_rows}()},
+Other joins:
+\code{\link[=bind_cols]{bind_cols()}},
+\code{\link[=bind_rows]{bind_rows()}},
 \code{\link{inner_join}},
 \code{\link{left_join}},
 \code{\link{semi_join}}

@@ -139,11 +139,11 @@ vectors; does not inherit labels from \code{x} automatically.
 \item \code{\link[=na_if]{na_if()}} to replace specific values with \code{NA}.
 }
 
-Other recoding: 
-\code{\link{case_when}()},
-\code{\link{if_else}()},
-\code{\link{na_if}()},
-\code{\link{recode_values}()},
-\code{\link{replace_when}()}
+Other recoding:
+\code{\link[=case_when]{case_when()}},
+\code{\link[=if_else]{if_else()}},
+\code{\link[=na_if]{na_if()}},
+\code{\link[=recode_values]{recode_values()}},
+\code{\link[=replace_when]{replace_when()}}
 }
 \concept{recoding}

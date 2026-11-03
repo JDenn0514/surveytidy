@@ -19,7 +19,7 @@ the result is \code{NaN} (matching base R \code{rowMeans()} behavior). Default
 
 \item{.label}{\code{character(1)} or \code{NULL}. Variable label stored in
 \verb{@metadata@variable_labels[[col]]} after \code{mutate()}. If \code{NULL}, falls back
-to the output column name from \code{\link[dplyr:context]{dplyr::cur_column()}}.}
+to the output column name from \code{\link[dplyr:cur_column]{dplyr::cur_column()}}.}
 
 \item{.description}{\code{character(1)} or \code{NULL}. Plain-language description of
 the transformation stored in \verb{@metadata@transformations[[col]]$description}
@@ -61,12 +61,12 @@ d |>
 
 }
 \seealso{
-Other transformation: 
-\code{\link{make_binary}()},
-\code{\link{make_dicho}()},
-\code{\link{make_factor}()},
-\code{\link{make_flip}()},
-\code{\link{make_rev}()},
-\code{\link{row_sums}()}
+Other transformation:
+\code{\link[=make_binary]{make_binary()}},
+\code{\link[=make_dicho]{make_dicho()}},
+\code{\link[=make_factor]{make_factor()}},
+\code{\link[=make_flip]{make_flip()}},
+\code{\link[=make_rev]{make_rev()}},
+\code{\link[=row_sums]{row_sums()}}
 }
 \concept{transformation}

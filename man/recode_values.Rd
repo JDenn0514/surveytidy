@@ -234,11 +234,11 @@ retains existing value labels from \code{x}).
 \item \code{\link[=case_when]{case_when()}} for condition-based remapping.
 }
 
-Other recoding: 
-\code{\link{case_when}()},
-\code{\link{if_else}()},
-\code{\link{na_if}()},
-\code{\link{replace_values}()},
-\code{\link{replace_when}()}
+Other recoding:
+\code{\link[=case_when]{case_when()}},
+\code{\link[=if_else]{if_else()}},
+\code{\link[=na_if]{na_if()}},
+\code{\link[=replace_values]{replace_values()}},
+\code{\link[=replace_when]{replace_when()}}
 }
 \concept{recoding}

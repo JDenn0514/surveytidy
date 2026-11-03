@@ -77,8 +77,8 @@ d |>
 \seealso{
 \code{\link[=select]{select()}} to control which columns are visible
 
-Other selecting: 
-\code{\link{pull.survey_collection}()},
+Other selecting:
+\code{\link[=pull.survey_collection]{pull.survey_collection()}},
 \code{\link{relocate}},
 \code{\link{select}}
 }
