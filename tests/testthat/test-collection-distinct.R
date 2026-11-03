@@ -3,8 +3,9 @@
 # distinct.survey_collection — PR 2b.
 #
 # Spec sections: §III.1 (template), §IV.11 (distinct contract — per-survey
-# only, no cross-survey collapse, class-catch detection), §V.5 (V9 — V9
-# is documented in §IX.3.
+# only, no cross-survey collapse), §V.5 (V9 — V9 is documented in §IX.3.
+# distinct() data-masks `...`, so missing columns are found by the
+# dispatcher's pre-check (bare names and `.data$` pronouns).
 
 # ── happy path ───────────────────────────────────────────────────────────────
 
@@ -39,6 +40,22 @@ test_that("distinct.survey_collection accepts column expressions", {
     expect_true(all(c("y1", "y2", "wt", "group") %in% names(member@data)))
     # Group should now have unique values within the member
     expect_false(anyDuplicated(member@data$group) > 0L)
+  }
+})
+
+test_that("distinct.survey_collection accepts all_of() inside pick()", {
+  coll <- make_test_collection(seed = 42)
+
+  out <- suppressWarnings(
+    dplyr::distinct(coll, dplyr::pick(tidyselect::all_of("group")))
+  )
+
+  test_collection_invariants(out)
+  for (nm in names(coll@surveys)) {
+    test_invariants(out@surveys[[nm]])
+    # Same result as the bare name on each member; no extra column
+    expected <- suppressWarnings(dplyr::distinct(coll@surveys[[nm]], group))
+    expect_identical(out@surveys[[nm]]@data, expected@data)
   }
 })
 
@@ -100,8 +117,38 @@ test_that("distinct.survey_collection fires per-member physical-subset warning",
 test_that("distinct.survey_collection .if_missing_var = 'error' raises typed", {
   coll <- make_heterogeneous_collection(seed = 42)
 
+  # distinct() data-masks `...`, so the pre-check finds the bare name
+  # `region` missing from m1 and m2
   expect_error(
-    suppressWarnings(dplyr::distinct(coll, tidyselect::all_of("region"))),
+    suppressWarnings(dplyr::distinct(coll, region)),
+    class = "surveytidy_error_collection_verb_failed"
+  )
+})
+
+test_that("distinct.survey_collection rejects a bare selection helper", {
+  coll <- make_test_collection(seed = 42)
+
+  # The per-member error passes through the dispatcher unchanged
+  expect_error(
+    dplyr::distinct(coll, tidyselect::all_of("y1")),
+    class = "surveytidy_error_distinct_select_helper"
+  )
+  expect_snapshot(error = TRUE, dplyr::distinct(coll, tidyselect::all_of("y1")))
+
+  # The helper error comes before the missing-column check, so a helper
+  # that names a missing column gives the same error
+  het <- make_heterogeneous_collection(seed = 42)
+  expect_error(
+    dplyr::distinct(het, tidyselect::all_of("region")),
+    class = "surveytidy_error_distinct_select_helper"
+  )
+})
+
+test_that("distinct.survey_collection .if_missing_var = 'error' catches a missing .data$ column", {
+  coll <- make_heterogeneous_collection(seed = 42)
+
+  expect_error(
+    suppressWarnings(dplyr::distinct(coll, .data$region)),
     class = "surveytidy_error_collection_verb_failed"
   )
 })
@@ -110,8 +157,7 @@ test_that("distinct.survey_collection .if_missing_var = 'skip' drops bad members
   coll <- make_heterogeneous_collection(seed = 42)
   coll_skip <- surveycore::set_collection_if_missing_var(coll, "skip")
 
-  # Bare `y3`: distinct() data-masks `...`, so `all_of("y3")` would add a
-  # constant column and collapse each member to 1 row
+  # Bare `y3`: m2 has no y3 column, so the pre-check skips it
   expect_message(
     out <- suppressWarnings(dplyr::distinct(coll_skip, y3)),
     class = "surveytidy_message_collection_skipped_surveys"
@@ -125,9 +171,7 @@ test_that("distinct.survey_collection raises emptied error when all members skip
   coll_skip <- surveycore::set_collection_if_missing_var(coll, "skip")
 
   expect_error(
-    suppressWarnings(
-      dplyr::distinct(coll_skip, tidyselect::all_of("ghost_col_xyz"))
-    ),
+    suppressWarnings(dplyr::distinct(coll_skip, ghost_col_xyz)),
     class = "surveytidy_error_collection_verb_emptied"
   )
 })
