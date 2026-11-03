@@ -204,6 +204,70 @@ test_that("slice_tail(n=0) errors with surveytidy_error_subset_empty_result", {
   )
 })
 
+# ── slice_*() — 1-row result raises surveycore_error_single_row ──────────────
+# surveycore (>= 1.2.0) rejects a 1-row @data; surveytidy lets the error
+# through unchanged.
+
+test_that("slice() to 1 row raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice(d, 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
+test_that("slice_head(n = 1) raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice_head(d, n = 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
+test_that("slice_tail(n = 1) raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice_tail(d, n = 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
+test_that("slice_min(n = 1) on a column with no ties raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice_min(d, order_by = y1, n = 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
+test_that("slice_max(n = 1) on a column with no ties raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice_max(d, order_by = y1, n = 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
+test_that("slice_sample(n = 1) raises surveycore_error_single_row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    expect_error(
+      suppressWarnings(slice_sample(d, n = 1L)),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
 # ── slice_*() — all three design types ───────────────────────────────────────
 
 test_that("slice_head() works for all design types", {

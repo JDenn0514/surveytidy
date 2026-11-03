@@ -276,10 +276,10 @@ test_that("distinct() on an ungrouped design leaves @groups as character(0) (all
 
 # ── Section 6: Edge cases ─────────────────────────────────────────────────────
 
-test_that("distinct() on duplicate-row data collapses to 1 row and issues the physical-subset warning", {
-  # Use 2 identical rows so as_survey() accepts (>=2 rows required), then
-
-  # distinct() collapses them to 1 row.
+test_that("distinct() that collapses data to 1 row warns, then raises surveycore_error_single_row", {
+  # 2 identical rows: as_survey() accepts them, and distinct() collapses
+  # them to 1 row. surveycore (>= 1.2.0) rejects a 1-row @data, and
+  # surveytidy lets that error through unchanged.
   df_dup <- data.frame(
     psu = c("psu_1", "psu_1"),
     strata = c("s1", "s1"),
@@ -302,15 +302,17 @@ test_that("distinct() on duplicate-row data collapses to 1 row and issues the ph
     )
   )
 
+  # The physical-subset warning fires before the 1-row error
   expect_warning(
-    result <- distinct(d_dup),
+    expect_error(
+      distinct(d_dup),
+      class = "surveycore_error_single_row"
+    ),
     class = "surveycore_warning_physical_subset"
   )
-  test_invariants(result)
-  expect_equal(nrow(result@data), 1L)
 })
 
-test_that("distinct() on all-identical non-design rows returns exactly 1 row", {
+test_that("distinct() ignores design columns, so all-identical non-design rows raise surveycore_error_single_row", {
   df_dup <- data.frame(
     psu = paste0("psu_", 1:5),
     strata = rep("s1", 5),
@@ -334,7 +336,10 @@ test_that("distinct() on all-identical non-design rows returns exactly 1 row", {
     )
   )
 
-  result <- suppressWarnings(distinct(d_dup))
-  test_invariants(result)
-  expect_equal(nrow(result@data), 1L)
+  # psu differs on every row, but distinct() compares non-design columns
+  # only, so the 5 rows collapse to 1
+  expect_error(
+    suppressWarnings(distinct(d_dup)),
+    class = "surveycore_error_single_row"
+  )
 })
