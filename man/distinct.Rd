@@ -16,7 +16,8 @@ distinct(.data, ..., .keep_all = FALSE)
 \item{.data}{A \code{\link[surveycore:survey_base]{survey_base}} object.}
 
 \item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> Optional columns
-used to determine uniqueness. If empty, all non-design columns are used.
+or expressions used to determine uniqueness. If empty, all non-design
+columns are used. Wrap selection helpers in \code{\link[dplyr:pick]{dplyr::pick()}}.
 Note: \code{.keep_all} is always \code{TRUE} regardless of what is specified here.}
 
 \item{.keep_all}{Accepted for interface compatibility; \strong{has no effect}.
@@ -66,6 +67,17 @@ check — deduplicating on them would produce meaningless or
 survey-corrupting results.
 }
 
+\subsection{Data-masking, not tidyselect}{
+
+\code{...} uses data-masking, as in \code{\link[dplyr:distinct]{dplyr::distinct()}}. Bare names and
+computed expressions (such as \code{y1 > 50} or \code{band = round(y1 / 10)}) are
+both accepted. A computed expression is used only to find duplicates; it
+is not added to \verb{@data}. To use a selection helper such as
+\code{\link[tidyselect:all_of]{tidyselect::all_of()}}, wrap it in \code{\link[dplyr:pick]{dplyr::pick()}} or \code{\link[dplyr:across]{dplyr::across()}}:
+\code{distinct(d, pick(all_of(cols)))}. A selection helper passed directly in
+\code{...} raises \code{surveytidy_error_distinct_select_helper}.
+}
+
 \subsection{Design variable warning}{
 
 If \code{...} includes a design variable, \code{surveytidy_warning_distinct_design_var}
@@ -100,6 +112,9 @@ distinct(d)
 
 # deduplicate by one column (all other columns still retained)
 distinct(d, cregion)
+
+# use a selection helper inside pick()
+distinct(d, dplyr::pick(tidyselect::all_of("cregion")))
 
 }
 \seealso{

@@ -338,3 +338,135 @@ test_that("distinct() on all-identical non-design rows returns exactly 1 row", {
   test_invariants(result)
   expect_equal(nrow(result@data), 1L)
 })
+
+# ── Section 7: Data-masking arguments ─────────────────────────────────────────
+
+test_that("distinct() with bare names keeps the first row of each key (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- suppressWarnings(distinct(d, group, y3))
+    test_invariants(result)
+
+    keep <- !duplicated(d@data[c("group", "y3")])
+    expect_identical(
+      result@data,
+      vctrs::vec_slice(d@data, keep),
+      label = paste0(nm, ": first row of each (group, y3) kept")
+    )
+  }
+})
+
+test_that("distinct() accepts all_of() inside pick() or across() (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  cols <- c("group", "y3")
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    via_pick <- suppressWarnings(
+      distinct(d, dplyr::pick(tidyselect::all_of(cols)))
+    )
+    via_across <- suppressWarnings(
+      distinct(d, dplyr::across(tidyselect::all_of(cols)))
+    )
+    test_invariants(via_pick)
+    test_invariants(via_across)
+
+    # Same rows and columns as the bare-name call; no extra column
+    expected <- suppressWarnings(distinct(d, group, y3))
+    expect_identical(
+      via_pick@data,
+      expected@data,
+      label = paste0(nm, ": pick(all_of()) matches bare names")
+    )
+    expect_identical(
+      via_across@data,
+      expected@data,
+      label = paste0(nm, ": across(all_of()) matches bare names")
+    )
+  }
+})
+
+test_that("distinct() rejects a bare selection helper in ... (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    # The error comes before the physical-subset warning
+    expect_no_warning(
+      expect_error(
+        distinct(d, tidyselect::all_of("y1")),
+        class = "surveytidy_error_distinct_select_helper"
+      )
+    )
+    expect_error(
+      distinct(d, y1, starts_with("y")),
+      class = "surveytidy_error_distinct_select_helper"
+    )
+    expect_snapshot(error = TRUE, distinct(d, tidyselect::all_of("y1")))
+  }
+})
+
+test_that("distinct() dedups on a computed expression without adding it to @data (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    threshold <- stats::median(d@data$y1)
+
+    # No design variable in the key, so only the physical-subset warning
+    expect_no_warning(
+      result <- suppressWarnings(
+        distinct(d, y1 > threshold),
+        classes = "surveycore_warning_physical_subset"
+      )
+    )
+    test_invariants(result)
+
+    keep <- !duplicated(d@data$y1 > threshold)
+    expect_identical(
+      result@data,
+      vctrs::vec_slice(d@data, keep),
+      label = paste0(nm, ": first row of each y1 > threshold value kept")
+    )
+    expect_identical(nrow(result@data), 2L)
+  }
+})
+
+test_that("distinct() does not add a named computed key to @data (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    result <- suppressWarnings(distinct(d, band = round(y1 / 10)))
+    test_invariants(result)
+
+    expect_identical(
+      names(result@data),
+      names(d@data),
+      label = paste0(nm, ": no band column in @data")
+    )
+    expect_identical(
+      nrow(result@data),
+      length(unique(round(d@data$y1 / 10))),
+      label = paste0(nm, ": one row per band")
+    )
+  }
+})
+
+test_that("distinct() warns when pick() or .data$ names a design variable (all three designs)", {
+  designs <- make_all_designs(seed = 42)
+  for (nm in names(designs)) {
+    d <- designs[[nm]]
+    expect_warning(
+      expect_warning(
+        distinct(d, dplyr::pick(wt)),
+        class = "surveycore_warning_physical_subset"
+      ),
+      class = "surveytidy_warning_distinct_design_var"
+    )
+    expect_warning(
+      expect_warning(
+        distinct(d, .data$wt),
+        class = "surveycore_warning_physical_subset"
+      ),
+      class = "surveytidy_warning_distinct_design_var"
+    )
+  }
+})
