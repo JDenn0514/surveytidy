@@ -24,7 +24,7 @@ left_join(
 object. Must not have column names matching any design variable in \code{x}
 (those are dropped with a warning).}
 
-\item{...}{Additional arguments forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
+\item{...}{Additional arguments forwarded to \code{\link[dplyr:left_join]{dplyr::left_join()}}.}
 
 \item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
 One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
@@ -34,12 +34,12 @@ collection's stored value. See
 \item{by}{A character vector of column names or a \code{\link[dplyr:join_by]{dplyr::join_by()}}
 specification. \code{NULL} uses all common column names.}
 
-\item{copy}{Forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
+\item{copy}{Forwarded to \code{\link[dplyr:left_join]{dplyr::left_join()}}.}
 
 \item{suffix}{A character vector of length 2 appended to deduplicate column
-names shared between \code{x} and \code{y}. Forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
+names shared between \code{x} and \code{y}. Forwarded to \code{\link[dplyr:left_join]{dplyr::left_join()}}.}
 
-\item{keep}{Forwarded to \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}.}
+\item{keep}{Forwarded to \code{\link[dplyr:left_join]{dplyr::left_join()}}.}
 }
 \value{
 A survey design object of the same type as \code{x} with new columns from \code{y}
@@ -110,9 +110,9 @@ left_join(d, lookup, by = "y1")
 
 }
 \seealso{
-Other joins: 
-\code{\link{bind_cols}()},
-\code{\link{bind_rows}()},
+Other joins:
+\code{\link[=bind_cols]{bind_cols()}},
+\code{\link[=bind_rows]{bind_rows()}},
 \code{\link{inner_join}},
 \code{\link{right_join}},
 \code{\link{semi_join}}

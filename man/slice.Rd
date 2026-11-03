@@ -104,14 +104,14 @@ methods.}
 \item{.preserve}{Accepted for interface compatibility; not used by survey
 methods.}
 
-\item{n}{Number of rows to keep. See \code{\link[dplyr:slice]{dplyr::slice_head()}}.}
+\item{n}{Number of rows to keep. See \code{\link[dplyr:slice_head]{dplyr::slice_head()}}.}
 
 \item{prop}{Fraction of rows to keep (between 0 and 1). See
-\code{\link[dplyr:slice]{dplyr::slice_head()}}.}
+\code{\link[dplyr:slice_head]{dplyr::slice_head()}}.}
 
 \item{order_by}{<\code{\link[rlang:args_data_masking]{data-masking}}> Variable to
 order by, used by \code{slice_min()} and \code{slice_max()}. See
-\code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+\code{\link[dplyr:slice_min]{dplyr::slice_min()}}.}
 
 \item{by}{Per-call grouping override accepted by \code{slice_min()},
 \code{slice_max()}, and \code{slice_sample()}. Not supported on
@@ -120,11 +120,11 @@ order by, used by \code{slice_min()} and \code{slice_max()}. See
 collection (or set \code{coll@groups}) instead.}
 
 \item{with_ties}{Should ties be kept together? Used by \code{slice_min()} and
-\code{slice_max()}. See \code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+\code{slice_max()}. See \code{\link[dplyr:slice_min]{dplyr::slice_min()}}.}
 
 \item{na_rm}{Should missing values in \code{order_by} be removed before
 slicing? Used by \code{slice_min()} and \code{slice_max()}. See
-\code{\link[dplyr:slice]{dplyr::slice_min()}}.}
+\code{\link[dplyr:slice_min]{dplyr::slice_min()}}.}
 
 \item{.if_missing_var}{Per-call override of \code{collection@if_missing_var}.
 One of \code{"error"} or \code{"skip"}, or \code{NULL} (the default) to inherit the
@@ -132,12 +132,12 @@ collection's stored value. See
 \code{\link[surveycore:set_collection_if_missing_var]{surveycore::set_collection_if_missing_var()}}.}
 
 \item{weight_by}{<\code{\link[rlang:args_data_masking]{data-masking}}> Sampling
-weights for \code{slice_sample()}. See \code{\link[dplyr:slice]{dplyr::slice_sample()}}. Independent
+weights for \code{slice_sample()}. See \code{\link[dplyr:slice_sample]{dplyr::slice_sample()}}. Independent
 of the survey design weights — issues
 \code{surveytidy_warning_slice_sample_weight_by} as a reminder.}
 
 \item{replace}{Should sampling be performed with replacement? Used by
-\code{slice_sample()}. See \code{\link[dplyr:slice]{dplyr::slice_sample()}}.}
+\code{slice_sample()}. See \code{\link[dplyr:slice_sample]{dplyr::slice_sample()}}.}
 
 \item{seed}{Used by \code{slice_sample.survey_collection} only. \code{NULL} (the
 default) leaves the ambient RNG state alone; an integer seed makes
@@ -244,7 +244,7 @@ slice_sample(d, n = 50)
 \code{\link[=filter]{filter()}} for domain-aware row marking (preferred for
 subpopulation analyses), \code{\link[=arrange]{arrange()}} for row sorting
 
-Other row operations: 
+Other row operations:
 \code{\link{distinct}},
 \code{\link{drop_na}}
 }

@@ -455,6 +455,17 @@ test_that("subset() errors when condition matches 0 rows", {
   )
 })
 
+test_that("subset() raises surveycore_error_single_row when condition matches 1 row", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    # y1 is continuous, so exactly one row holds the maximum
+    expect_error(
+      suppressWarnings(subset(d, y1 == max(y1))),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
 
 # ── coverage closers: row_id_col collision ──────────────────────────────────
 

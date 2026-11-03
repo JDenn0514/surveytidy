@@ -35,14 +35,13 @@
 #' @param .size An optional size declaring the desired output length.
 #'   Overrides the common size computed from the LHS inputs.
 #' @param .label `character(1)` or `NULL`. Variable label stored in
-#'   `@metadata@variable_labels` after [mutate()]. Cannot be combined with
-#'   `.factor = TRUE`.
+#'   `@metadata@variable_labels` after [mutate()].
 #' @param .value_labels Named vector or `NULL`. Value labels stored in
 #'   `@metadata@value_labels`. Names are the label strings; values are the
 #'   data values.
 #' @param .factor `logical(1)`. If `TRUE`, returns a factor. Levels are
 #'   ordered by the RHS values in formula order, or by `.value_labels` names
-#'   if supplied. Cannot be combined with `.label`.
+#'   if supplied.
 #' @param .description `character(1)` or `NULL`. Plain-language description
 #'   of how the variable was created. Stored in
 #'   `@metadata@transformations[[col]]$description` after [mutate()].
@@ -170,15 +169,6 @@ case_when <- function(
   .description = NULL
 ) {
   .validate_label_args(.label, .value_labels, .description)
-  if (isTRUE(.factor) && !is.null(.label)) {
-    cli::cli_abort(
-      c(
-        "x" = "{.arg .label} cannot be used with {.code .factor = TRUE}.",
-        "i" = "Factor levels carry their own labels."
-      ),
-      class = "surveytidy_error_recode_factor_with_label"
-    )
-  }
 
   result <- dplyr::case_when(
     ...,
@@ -207,6 +197,7 @@ case_when <- function(
       formula_values <- unique(as.character(result[!is.na(result)]))
     }
     result <- .factor_from_result(result, .value_labels, formula_values)
+    attr(result, "label") <- .label
     attr(result, "surveytidy_recode") <- list(
       fn = "case_when",
       var = NULL,

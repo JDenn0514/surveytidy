@@ -36,12 +36,12 @@ make_rev(x)
 
 }
 \seealso{
-Other transformation: 
-\code{\link{make_binary}()},
-\code{\link{make_dicho}()},
-\code{\link{make_factor}()},
-\code{\link{make_flip}()},
-\code{\link{row_means}()},
-\code{\link{row_sums}()}
+Other transformation:
+\code{\link[=make_binary]{make_binary()}},
+\code{\link[=make_dicho]{make_dicho()}},
+\code{\link[=make_factor]{make_factor()}},
+\code{\link[=make_flip]{make_flip()}},
+\code{\link[=row_means]{row_means()}},
+\code{\link[=row_sums]{row_sums()}}
 }
 \concept{transformation}

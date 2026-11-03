@@ -36,8 +36,7 @@ Overrides the common type of the RHS inputs.}
 Overrides the common size computed from the LHS inputs.}
 
 \item{.label}{\code{character(1)} or \code{NULL}. Variable label stored in
-\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}. Cannot be combined with
-\code{.factor = TRUE}.}
+\verb{@metadata@variable_labels} after \code{\link[=mutate]{mutate()}}.}
 
 \item{.value_labels}{Named vector or \code{NULL}. Value labels stored in
 \verb{@metadata@value_labels}. Names are the label strings; values are the
@@ -45,7 +44,7 @@ data values.}
 
 \item{.factor}{\code{logical(1)}. If \code{TRUE}, returns a factor. Levels are
 ordered by the RHS values in formula order, or by \code{.value_labels} names
-if supplied. Cannot be combined with \code{.label}.}
+if supplied.}
 
 \item{.description}{\code{character(1)} or \code{NULL}. Plain-language description
 of how the variable was created. Stored in
@@ -54,13 +53,13 @@ of how the variable was created. Stored in
 \value{
 A vector, factor, or \code{haven_labelled} vector:
 \itemize{
-\item No surveytidy args — same output as \code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}}.
+\item No surveytidy args — same output as \code{\link[dplyr:case_when]{dplyr::case_when()}}.
 \item \code{.factor = TRUE} — a factor with levels in RHS formula order.
 \item \code{.label} or \code{.value_labels} supplied — a \code{haven_labelled} vector.
 }
 }
 \description{
-\code{case_when()} is a survey-aware version of \code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}} that
+\code{case_when()} is a survey-aware version of \code{\link[dplyr:case_when]{dplyr::case_when()}} that
 evaluates each formula case sequentially and uses the first match for each
 element to determine the output value.
 
@@ -72,7 +71,7 @@ value labels from the input automatically.
 When any of \code{.label}, \code{.value_labels}, \code{.factor}, or \code{.description} are
 supplied, output label metadata is written to \verb{@metadata} after \code{\link[=mutate]{mutate()}}.
 When none of these arguments are used, the output is identical to
-\code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}}.
+\code{\link[dplyr:case_when]{dplyr::case_when()}}.
 }
 \examples{
 library(surveycore)
@@ -174,18 +173,18 @@ new
 }
 \seealso{
 \itemize{
-\item \code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}} for the base implementation.
+\item \code{\link[dplyr:case_when]{dplyr::case_when()}} for the base implementation.
 \item \code{\link[=replace_when]{replace_when()}} to partially update an existing vector; also inherits
 existing value labels from the input automatically.
 \item \code{\link[=if_else]{if_else()}} for the two-condition case.
 \item \code{\link[=recode_values]{recode_values()}} for value-mapping with explicit \code{from}/\code{to} vectors.
 }
 
-Other recoding: 
-\code{\link{if_else}()},
-\code{\link{na_if}()},
-\code{\link{recode_values}()},
-\code{\link{replace_values}()},
-\code{\link{replace_when}()}
+Other recoding:
+\code{\link[=if_else]{if_else()}},
+\code{\link[=na_if]{na_if()}},
+\code{\link[=recode_values]{recode_values()}},
+\code{\link[=replace_values]{replace_values()}},
+\code{\link[=replace_when]{replace_when()}}
 }
 \concept{recoding}

@@ -98,9 +98,9 @@ The \code{.by} argument is not used directly.
 \itemize{
 \item Arithmetic: \code{+}, \code{-}, \code{*}, \code{/}, \code{^}, \code{\%\%}, \code{\%/\%}
 \item Rounding: \code{\link[=round]{round()}}, \code{\link[=floor]{floor()}}, \code{\link[=ceiling]{ceiling()}}, \code{\link[=trunc]{trunc()}}
-\item Ranking: \code{\link[dplyr:row_number]{dplyr::dense_rank()}}, \code{\link[dplyr:row_number]{dplyr::min_rank()}}, \code{\link[dplyr:row_number]{dplyr::row_number()}}
-\item Cumulative: \code{\link[=cumsum]{cumsum()}}, \code{\link[=cummax]{cummax()}}, \code{\link[=cummin]{cummin()}}, \code{\link[dplyr:cumall]{dplyr::cummean()}}
-\item Conditional: \code{\link[dplyr:if_else]{dplyr::if_else()}}, \code{\link[dplyr:case-and-replace-when]{dplyr::case_when()}}, \code{\link[dplyr:case_match]{dplyr::case_match()}}
+\item Ranking: \code{\link[dplyr:dense_rank]{dplyr::dense_rank()}}, \code{\link[dplyr:min_rank]{dplyr::min_rank()}}, \code{\link[dplyr:row_number]{dplyr::row_number()}}
+\item Cumulative: \code{\link[=cumsum]{cumsum()}}, \code{\link[=cummax]{cummax()}}, \code{\link[=cummin]{cummin()}}, \code{\link[dplyr:cummean]{cummean()}}
+\item Conditional: \code{\link[dplyr:if_else]{dplyr::if_else()}}, \code{\link[dplyr:case_when]{dplyr::case_when()}}, \code{\link[dplyr:case_match]{dplyr::case_match()}}
 \item Missing values: \code{\link[dplyr:na_if]{dplyr::na_if()}}, \code{\link[dplyr:coalesce]{dplyr::coalesce()}}
 }
 }
@@ -155,7 +155,7 @@ mutate(
 \seealso{
 \code{\link[=rename]{rename()}} to rename columns, \code{\link[=select]{select()}} to drop columns
 
-Other modification: 
+Other modification:
 \code{\link{rename}}
 }
 \concept{modification}

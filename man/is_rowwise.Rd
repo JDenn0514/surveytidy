@@ -31,9 +31,9 @@ is_rowwise(rowwise(d))
 
 }
 \seealso{
-Other grouping: 
+Other grouping:
 \code{\link{group_by}},
-\code{\link{is_grouped}()},
+\code{\link[=is_grouped]{is_grouped()}},
 \code{\link{rowwise}}
 }
 \concept{grouping}

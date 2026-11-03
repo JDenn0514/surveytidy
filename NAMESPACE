@@ -51,38 +51,42 @@ export(slice_min)
 export(slice_sample)
 export(slice_tail)
 export(ungroup)
-importFrom(dplyr,anti_join)
-importFrom(dplyr,arrange)
-importFrom(dplyr,distinct)
-importFrom(dplyr,dplyr_reconstruct)
-importFrom(dplyr,filter)
-importFrom(dplyr,filter_out)
-importFrom(dplyr,full_join)
-importFrom(dplyr,glimpse)
-importFrom(dplyr,group_by)
-importFrom(dplyr,group_vars)
-importFrom(dplyr,inner_join)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,pull)
-importFrom(dplyr,relocate)
-importFrom(dplyr,rename)
-importFrom(dplyr,rename_with)
-importFrom(dplyr,right_join)
-importFrom(dplyr,rowwise)
-importFrom(dplyr,select)
-importFrom(dplyr,semi_join)
-importFrom(dplyr,slice)
-importFrom(dplyr,slice_head)
-importFrom(dplyr,slice_max)
-importFrom(dplyr,slice_min)
-importFrom(dplyr,slice_sample)
-importFrom(dplyr,slice_tail)
-importFrom(dplyr,ungroup)
-importFrom(surveycore,add_survey)
-importFrom(surveycore,as_survey_collection)
-importFrom(surveycore,remove_survey)
-importFrom(surveycore,set_collection_id)
-importFrom(surveycore,set_collection_if_missing_var)
+importFrom(dplyr,
+  anti_join,
+  arrange,
+  distinct,
+  dplyr_reconstruct,
+  filter,
+  filter_out,
+  full_join,
+  glimpse,
+  group_by,
+  group_vars,
+  inner_join,
+  left_join,
+  mutate,
+  pull,
+  relocate,
+  rename,
+  rename_with,
+  right_join,
+  rowwise,
+  select,
+  semi_join,
+  slice,
+  slice_head,
+  slice_max,
+  slice_min,
+  slice_sample,
+  slice_tail,
+  ungroup
+)
+importFrom(surveycore,
+  add_survey,
+  as_survey_collection,
+  remove_survey,
+  set_collection_id,
+  set_collection_if_missing_var
+)
 importFrom(tidyr,drop_na)
 importFrom(tidyselect,eval_select)

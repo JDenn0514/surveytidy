@@ -232,19 +232,22 @@ test_that("case_when() error: .value_labels unnamed -> surveytidy_error_recode_v
   )
 })
 
-test_that("case_when() error: .factor = TRUE + .label -> surveytidy_error_recode_factor_with_label", {
-  d <- make_all_designs(seed = 42)$taylor
-  expect_error(
-    mutate(
+test_that("case_when() .factor = TRUE + .label stores variable label [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
       d,
-      cat = case_when(y1 > 50 ~ "high", .factor = TRUE, .label = "bad")
-    ),
-    class = "surveytidy_error_recode_factor_with_label"
-  )
-  expect_snapshot(
-    error = TRUE,
-    mutate(d, cat = case_when(y1 > 50 ~ "high", .factor = TRUE, .label = "bad"))
-  )
+      cat = case_when(
+        y1 > 50 ~ "high",
+        .default = "low",
+        .factor = TRUE,
+        .label = "Category"
+      )
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$cat))
+    expect_identical(result@metadata@variable_labels[["cat"]], "Category")
+  }
 })
 
 test_that("case_when() domain column preserved through mutate [all designs]", {
@@ -623,21 +626,23 @@ test_that("recode_values() .factor = TRUE returns factor with correct levels [al
   }
 })
 
-test_that("recode_values() .factor = TRUE + .label -> surveytidy_error_recode_factor_with_label", {
-  d <- make_all_designs(seed = 42)$taylor
-  expect_error(
-    mutate(
+test_that("recode_values() .factor = TRUE + .label stores variable label [all designs]", {
+  designs <- make_all_designs(seed = 42)
+  for (d in designs) {
+    result <- mutate(
       d,
       y3_f = recode_values(
         y3,
         from = c(0L, 1L),
         to = c("no", "yes"),
         .factor = TRUE,
-        .label = "bad"
+        .label = "Yes/No"
       )
-    ),
-    class = "surveytidy_error_recode_factor_with_label"
-  )
+    )
+    test_invariants(result)
+    expect_true(is.factor(result@data$y3_f))
+    expect_identical(result@metadata@variable_labels[["y3_f"]], "Yes/No")
+  }
 })
 
 test_that("recode_values() no formulas + from = NULL + .use_labels = FALSE -> surveytidy_error_recode_from_to_missing", {
@@ -1115,10 +1120,6 @@ test_that("error snapshots for all recode error classes", {
   expect_snapshot(
     error = TRUE,
     mutate(d, cat = case_when(y1 > 50 ~ 1L, .value_labels = c(1L, 0L)))
-  )
-  expect_snapshot(
-    error = TRUE,
-    mutate(d, cat = case_when(y1 > 50 ~ "hi", .factor = TRUE, .label = "x"))
   )
   expect_snapshot(
     error = TRUE,

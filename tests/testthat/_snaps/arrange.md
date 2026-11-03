@@ -5,6 +5,6 @@
     Condition
       Error in `slice()`:
       x `slice()` produced 0 rows.
-      i Survey objects require at least 1 row.
+      i Survey objects require at least 2 rows.
       v Use `filter()` for domain estimation (keeps all rows).
 

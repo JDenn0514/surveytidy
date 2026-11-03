@@ -22,7 +22,6 @@ Naming convention:
 | `surveytidy_error_rename_fn_bad_output` | `R/rename.R`, `R/verbs-survey-result.R` | `.fn` in `rename_with()` returns a vector of the wrong length, duplicate names, or non-character output |
 | `surveytidy_error_recode_label_not_scalar` | `R/recode.R` | `.label` is not NULL and not a character(1) |
 | `surveytidy_error_recode_value_labels_unnamed` | `R/recode.R` | `.value_labels` is not NULL and has no names |
-| `surveytidy_error_recode_factor_with_label` | `R/recode.R` | `.factor = TRUE` and `.label` is non-NULL |
 | `surveytidy_error_recode_use_labels_no_attrs` | `R/recode.R` | `.use_labels = TRUE` but `attr(x, "labels")` is NULL |
 | `surveytidy_error_recode_unmatched_values` | `R/recode.R` | `.unmatched = "error"` and unmatched values exist in `recode_values()` |
 | `surveytidy_error_recode_from_to_missing` | `R/recode-values.R` | No formulas in `...`, `from = NULL`, and `.use_labels = FALSE` in `recode_values()` |
@@ -56,6 +55,7 @@ Naming convention:
 | `surveytidy_pre_check_missing_var` | `R/collection-dispatch.R` | **Internal — not part of public condition API.** Typed condition synthesized by the dispatcher's pre-check path when a data-masking quosure references a name unresolved in both the quosure's enclosing env and the survey's `@data`. Class chain: `c("surveytidy_pre_check_missing_var", "error", "condition")` (deliberately omits `"rlang_error"`). Fields: `$missing_vars` (chr), `$survey_name` (chr), `$quosure`. Stable for `parent`-chain testing; not exported. |
 | `surveytidy_error_collection_pull_incompatible_types` | `R/collection-pull-glimpse.R` | `pull.survey_collection` combined per-survey vectors via `vctrs::vec_c()` and the call raised `vctrs_error_incompatible_type`. Re-raised with `parent = cnd` so the original vctrs error chain is preserved. Names the column and the surveys whose types disagreed. No auto-coercion (contrast with `glimpse`'s footer-renderer behaviour). |
 | `surveytidy_error_collection_glimpse_id_collision` | `R/collection-pull-glimpse.R` | `glimpse.survey_collection` (default mode) detected that `coll@id` matches a column name in at least one member's `@data`. Raised BEFORE `bind_rows()` because the prepended id column would collide with the existing column. Names the colliding column and the members where it occurs. Mirrors `surveycore_error_collection_id_collision` for verb-side collisions introduced after construction (e.g., user calling `mutate(coll, .survey = ...)`). |
+| `surveytidy_error_distinct_select_helper` | `R/distinct.R` | `distinct()` received a tidyselect helper (`all_of()`, `any_of()`, `starts_with()`, etc.) as a top-level argument in `...`. `distinct()` uses data-masking, so the helper would give one constant key for every row. Raised before the physical-subset warning; points users to `pick()`. |
 
 ---
 

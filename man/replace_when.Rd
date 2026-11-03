@@ -35,7 +35,7 @@ carries labels or any surveytidy args are supplied, returns a
 \code{haven_labelled} vector; otherwise returns the same type as \code{x}.
 }
 \description{
-\code{replace_when()} is a survey-aware version of \code{\link[dplyr:case-and-replace-when]{dplyr::replace_when()}} that
+\code{replace_when()} is a survey-aware version of \code{\link[dplyr:replace_when]{dplyr::replace_when()}} that
 evaluates each formula case sequentially and replaces matching elements of
 \code{x} with the corresponding RHS value. Elements where no case matches retain
 their original value from \code{x}.
@@ -51,7 +51,7 @@ values.
 When any of \code{.label}, \code{.value_labels}, or \code{.description} are supplied, or
 when \code{x} carries existing labels, output label metadata is written to
 \verb{@metadata} after \code{\link[=mutate]{mutate()}}. When none apply, the output is identical to
-\code{\link[dplyr:case-and-replace-when]{dplyr::replace_when()}}.
+\code{\link[dplyr:replace_when]{dplyr::replace_when()}}.
 }
 \examples{
 library(surveycore)
@@ -121,17 +121,17 @@ new@metadata@transformations
 }
 \seealso{
 \itemize{
-\item \code{\link[dplyr:case-and-replace-when]{dplyr::replace_when()}} for the base implementation.
+\item \code{\link[dplyr:replace_when]{dplyr::replace_when()}} for the base implementation.
 \item \code{\link[=case_when]{case_when()}} to create an entirely new vector from conditions.
 \item \code{\link[=replace_values]{replace_values()}} for in-place replacement using an explicit \code{from}/\code{to}
 mapping rather than conditions.
 }
 
-Other recoding: 
-\code{\link{case_when}()},
-\code{\link{if_else}()},
-\code{\link{na_if}()},
-\code{\link{recode_values}()},
-\code{\link{replace_values}()}
+Other recoding:
+\code{\link[=case_when]{case_when()}},
+\code{\link[=if_else]{if_else()}},
+\code{\link[=na_if]{na_if()}},
+\code{\link[=recode_values]{recode_values()}},
+\code{\link[=replace_values]{replace_values()}}
 }
 \concept{recoding}

@@ -187,7 +187,7 @@ rename_with(d, ~ paste0(., "_v2"), .cols = tidyselect::starts_with("econ"))
 \code{\link[=mutate]{mutate()}} to add or modify column values, \code{\link[=select]{select()}} to drop
 columns
 
-Other modification: 
+Other modification:
 \code{\link{mutate}}
 }
 \concept{modification}

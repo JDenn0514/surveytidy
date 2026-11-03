@@ -84,7 +84,7 @@ condition evaluates to \code{NA} are treated as out-of-domain.
 \item Logical: \code{&}, \code{|}, \code{!}, \code{\link[=xor]{xor()}}
 \item Missing values: \code{\link[=is.na]{is.na()}}
 \item Range: \code{\link[dplyr:between]{dplyr::between()}}, \code{\link[dplyr:near]{dplyr::near()}}
-\item Multi-column: \code{\link[dplyr:across]{dplyr::if_any()}}, \code{\link[dplyr:across]{dplyr::if_all()}}
+\item Multi-column: \code{\link[dplyr:if_any]{dplyr::if_any()}}, \code{\link[dplyr:if_all]{dplyr::if_all()}}
 }
 }
 

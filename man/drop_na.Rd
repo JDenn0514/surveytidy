@@ -89,7 +89,7 @@ drop_na(d)
 \seealso{
 \code{\link[=filter]{filter()}} for domain-aware row marking
 
-Other row operations: 
+Other row operations:
 \code{\link{distinct}},
 \code{\link{slice}}
 }
