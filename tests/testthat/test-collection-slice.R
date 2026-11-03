@@ -371,7 +371,7 @@ test_that("slice_sample.survey_collection seed = NULL + weight_by missing + skip
 
   expect_message(
     out <- suppressWarnings(
-      dplyr::slice_sample(coll_skip, n = 1L, weight_by = y3)
+      dplyr::slice_sample(coll_skip, n = 2L, weight_by = y3)
     ),
     class = "surveytidy_message_collection_skipped_surveys"
   )
@@ -400,7 +400,7 @@ test_that("slice_sample.survey_collection seed = int + weight_by missing raises 
 
   expect_error(
     suppressWarnings(
-      dplyr::slice_sample(coll, n = 1L, weight_by = y3, seed = 99L)
+      dplyr::slice_sample(coll, n = 2L, weight_by = y3, seed = 99L)
     ),
     class = "surveytidy_error_collection_verb_failed"
   )
@@ -412,7 +412,7 @@ test_that("slice_sample.survey_collection seed = int + weight_by missing + skip 
 
   expect_message(
     out <- suppressWarnings(
-      dplyr::slice_sample(coll_skip, n = 1L, weight_by = y3, seed = 99L)
+      dplyr::slice_sample(coll_skip, n = 2L, weight_by = y3, seed = 99L)
     ),
     class = "surveytidy_message_collection_skipped_surveys"
   )

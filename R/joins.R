@@ -940,7 +940,7 @@ inner_join.survey_base <- function(
       cli::cli_abort(
         c(
           "x" = "inner_join() condition matched 0 rows.",
-          "i" = "Survey objects require at least 1 row.",
+          "i" = "Survey objects require at least 2 rows.",
           "v" = "Use {.fn semi_join} for domain estimation (keeps all rows)."
         ),
         class = "surveytidy_error_subset_empty_result"

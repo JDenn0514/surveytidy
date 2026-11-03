@@ -115,7 +115,7 @@
     Condition
       Error in `dplyr::inner_join()`:
       x inner_join() condition matched 0 rows.
-      i Survey objects require at least 1 row.
+      i Survey objects require at least 2 rows.
       v Use `semi_join()` for domain estimation (keeps all rows).
 
 # inner_join(.domain_aware=FALSE) errors on duplicate keys in y
