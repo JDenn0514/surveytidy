@@ -80,7 +80,7 @@ utils::globalVariables("check_fn")
   cli::cli_abort(
     c(
       "x" = "{.fn {verb_name}} arguments would produce 0 rows on every member of the collection.",
-      "i" = "Survey objects require at least 1 row, so the operation cannot proceed.",
+      "i" = "Survey objects require at least 2 rows, so the operation cannot proceed.",
       "v" = "Pass a non-zero {.arg n} or {.arg prop}, or use {.fn filter} for domain estimation (keeps all rows)."
     ),
     class = "surveytidy_error_collection_slice_zero"
@@ -158,7 +158,7 @@ utils::globalVariables("check_fn")
       cli::cli_abort(
         c(
           "x" = "{.fn {fn_name}} produced 0 rows.",
-          "i" = "Survey objects require at least 1 row.",
+          "i" = "Survey objects require at least 2 rows.",
           "v" = "Use {.fn filter} for domain estimation (keeps all rows)."
         ),
         class = "surveytidy_error_subset_empty_result"

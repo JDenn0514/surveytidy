@@ -85,6 +85,6 @@
       v Use `filter()` for subpopulation analyses instead.
       Error in `subset()`:
       x subset() condition matched 0 rows.
-      i Survey objects require at least 1 row.
+      i Survey objects require at least 2 rows.
       v Use `filter()` for domain estimation (keeps all rows).
 

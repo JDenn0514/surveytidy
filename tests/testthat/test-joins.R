@@ -739,6 +739,22 @@ test_that("inner_join(.domain_aware=FALSE) errors when all rows are removed", {
   )
 })
 
+# 24c-bis. inner_join(.domain_aware=FALSE) — 1 row kept → surveycore_error_single_row
+test_that("inner_join(.domain_aware=FALSE) raises surveycore_error_single_row when 1 row matches (taylor, replicate)", {
+  designs <- make_all_designs(seed = 42)
+  for (design_name in c("taylor", "replicate")) {
+    d <- designs[[design_name]]
+    # y1 is continuous, so this key matches exactly one row of x
+    y_one_match <- data.frame(y1 = d@data$y1[[1]], label = "one")
+    expect_error(
+      suppressWarnings(
+        dplyr::inner_join(d, y_one_match, by = "y1", .domain_aware = FALSE)
+      ),
+      class = "surveycore_error_single_row"
+    )
+  }
+})
+
 # 24d. inner_join(.domain_aware=FALSE) — duplicate keys → surveytidy_error_join_row_expansion
 test_that("inner_join(.domain_aware=FALSE) errors on duplicate keys in y", {
   d <- make_all_designs(seed = 42)$taylor

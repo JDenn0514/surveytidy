@@ -110,10 +110,10 @@ test_that("distinct.survey_collection .if_missing_var = 'skip' drops bad members
   coll <- make_heterogeneous_collection(seed = 42)
   coll_skip <- surveycore::set_collection_if_missing_var(coll, "skip")
 
+  # Bare `y3`: distinct() data-masks `...`, so `all_of("y3")` would add a
+  # constant column and collapse each member to 1 row
   expect_message(
-    out <- suppressWarnings(
-      dplyr::distinct(coll_skip, tidyselect::all_of("y3"))
-    ),
+    out <- suppressWarnings(dplyr::distinct(coll_skip, y3)),
     class = "surveytidy_message_collection_skipped_surveys"
   )
   expect_identical(names(out@surveys), c("m1", "m3"))
