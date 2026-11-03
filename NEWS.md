@@ -1,3 +1,27 @@
+# surveytidy 0.6.2
+
+## Bug fixes
+
+* surveytidy now requires surveycore 1.2.0 or later. surveycore 1.2.0
+  refuses a survey design with fewer than 2 rows, so `distinct()`,
+  `slice()`, `slice_head()`, `slice_tail()`, `slice_min()`, `slice_max()`,
+  `slice_sample()`, `subset()`, and `inner_join(.domain_aware = FALSE)` now
+  raise `surveycore_error_single_row` when their result has 1 row (#44).
+
+* `distinct()` on a survey object now evaluates `...` with data-masking for
+  both the design-variable check and the de-duplication, as
+  `dplyr::distinct()` does. A computed key such as `distinct(d, y1 > 50)` no
+  longer adds a column to the survey data. A selection helper passed
+  directly, such as `distinct(d, all_of(cols))`, now raises
+  `surveytidy_error_distinct_select_helper`; use
+  `distinct(d, pick(all_of(cols)))` instead (#45).
+
+* `case_when()` and `recode_values()` accept `.label` together with
+  `.factor = TRUE`. The variable label is stored on the factor result.
+  Before, this combination raised an error (#43).
+
+---
+
 # surveytidy 0.6.1
 
 ## Bug fixes
