@@ -261,7 +261,7 @@ These two notes are acceptable and do not block merging:
 | Note | Why it appears | Why it's accepted |
 |------|----------------|-------------------|
 | `no visible binding for global variable 'X'` | Tidy-select bare names | Universal in tidy packages |
-| `checking CRAN incoming feasibility` | Package not on CRAN yet | Informational only |
+| `checking CRAN incoming feasibility` | Always shown under `--as-cran` (maintainer, new submission, archived status) | Informational only |
 
 Any other note is treated as a bug and blocks the PR.
 
@@ -307,7 +307,7 @@ Imports:
     cli (>= 3.6.0),        # cli_abort() with class= argument
     dplyr (>= 1.1.0),      # .by= argument
     rlang (>= 1.1.0),      # rlang::check_required()
-    surveycore (>= 0.0.0.9000)
+    surveycore (>= 1.2.0)  # first CRAN release after archival
 Suggests:
     testthat (>= 3.0.0)
 ```

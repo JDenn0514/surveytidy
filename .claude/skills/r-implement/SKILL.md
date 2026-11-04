@@ -69,18 +69,17 @@ git branch --show-current
 
 ### Step 2 — surveycore version
 
-surveycore is a co-developed GitHub-only dependency. A stale install means
-you'd implement against the wrong API:
+surveycore is a co-developed dependency, installed from CRAN. A stale install
+means you'd implement against the wrong API:
 
 ```bash
-gh release view --repo JDenn0514/surveycore --json tagName \
-  --template '{{.tagName}}'
+Rscript -e "cat(utils::available.packages(repos = 'https://cloud.r-project.org')['surveycore', 'Version'])"
 Rscript -e "cat(as.character(packageVersion('surveycore')))"
 ```
 
-If installed < latest tag, stop and tell the user to run
-`pak::pak('JDenn0514/surveycore')` and re-invoke `/r-implement`. If `gh`
-fails (no auth/network), warn and ask whether to proceed.
+If installed < CRAN version, stop and tell the user to run
+`pak::pak('surveycore')` and re-invoke `/r-implement`. If the CRAN lookup
+fails (no network), warn and ask whether to proceed.
 
 ### Step 3 — Locate the plan section (do NOT read the full plan)
 

@@ -46,14 +46,13 @@ If all sections are `[x]`: report "Plan complete — nothing to ship." and stop.
 ## Step 2: Baseline Check
 
 ```bash
-# Check surveycore version
-gh release view --repo JDenn0514/surveycore --json tagName,publishedAt \
-  --template '{{.tagName}} ({{.publishedAt}})'
+# Check surveycore version (CRAN vs installed)
+Rscript -e "cat(utils::available.packages(repos = 'https://cloud.r-project.org')['surveycore', 'Version'], '\n')"
 Rscript -e "cat(as.character(packageVersion('surveycore')), '\n')"
 ```
 
-If installed surveycore is behind the latest release: stop and tell the user to
-update before proceeding (`pak::pak('JDenn0514/surveycore')`).
+If installed surveycore is behind the CRAN version: stop and tell the user to
+update before proceeding (`pak::pak('surveycore')`).
 
 Then run the test/check baseline:
 
